@@ -3,6 +3,7 @@
 
     <!--    Permissions are from NetGuard, reduce to what is actually necessary...-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<!--    <uses-permission android:name="android.permission.NETWORK_STACK" />-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!--    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
@@ -11,7 +12,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!--    <uses-permission android:name="android.permission.VIBRATE" />-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!--    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />-->
+        <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <!-- http://developer.android.com/guide/topics/security/permissions.html#normal-dangerous -->
 

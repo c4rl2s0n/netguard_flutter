@@ -77,125 +77,469 @@ public class NativeBridge {
    *
    * Generated class from Pigeon that represents data sent in messages.
    */
-  public static final class VpnSettings {
-    private @NonNull Boolean blockTraffic;
+  public static final class VpnConfig {
+    /** List of PackageNames that are filtered by the firewall */
+    private @NonNull List<String> filteredPackages;
 
-    public @NonNull Boolean getBlockTraffic() {
-      return blockTraffic;
+    public @NonNull List<String> getFilteredPackages() {
+      return filteredPackages;
     }
 
-    public void setBlockTraffic(@NonNull Boolean setterArg) {
+    public void setFilteredPackages(@NonNull List<String> setterArg) {
       if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"blockTraffic\" is null.");
+        throw new IllegalStateException("Nonnull field \"filteredPackages\" is null.");
       }
-      this.blockTraffic = setterArg;
+      this.filteredPackages = setterArg;
+    }
+
+    /** List of PackageNames that are completely blocked by the firewall */
+    private @NonNull List<String> blockedPackages;
+
+    public @NonNull List<String> getBlockedPackages() {
+      return blockedPackages;
+    }
+
+    public void setBlockedPackages(@NonNull List<String> setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"blockedPackages\" is null.");
+      }
+      this.blockedPackages = setterArg;
+    }
+
+    /** List of rules that apply for individual packages */
+    private @NonNull List<Rule> packageRules;
+
+    public @NonNull List<Rule> getPackageRules() {
+      return packageRules;
+    }
+
+    public void setPackageRules(@NonNull List<Rule> setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"packageRules\" is null.");
+      }
+      this.packageRules = setterArg;
+    }
+
+    /** Rule that applies for all applications */
+    private @Nullable Rule globalRule;
+
+    public @Nullable Rule getGlobalRule() {
+      return globalRule;
+    }
+
+    public void setGlobalRule(@Nullable Rule setterArg) {
+      this.globalRule = setterArg;
+    }
+
+    private @NonNull Boolean filterUdp;
+
+    public @NonNull Boolean getFilterUdp() {
+      return filterUdp;
+    }
+
+    public void setFilterUdp(@NonNull Boolean setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"filterUdp\" is null.");
+      }
+      this.filterUdp = setterArg;
+    }
+
+    private @NonNull Long logLevel;
+
+    public @NonNull Long getLogLevel() {
+      return logLevel;
+    }
+
+    public void setLogLevel(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"logLevel\" is null.");
+      }
+      this.logLevel = setterArg;
     }
 
     /** Constructor is non-public to enforce null safety; use Builder. */
-    VpnSettings() {}
+    VpnConfig() {}
 
     @Override
     public boolean equals(Object o) {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
-      VpnSettings that = (VpnSettings) o;
-      return blockTraffic.equals(that.blockTraffic);
+      VpnConfig that = (VpnConfig) o;
+      return filteredPackages.equals(that.filteredPackages) && blockedPackages.equals(that.blockedPackages) && packageRules.equals(that.packageRules) && Objects.equals(globalRule, that.globalRule) && filterUdp.equals(that.filterUdp) && logLevel.equals(that.logLevel);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(blockTraffic);
+      return Objects.hash(filteredPackages, blockedPackages, packageRules, globalRule, filterUdp, logLevel);
     }
 
     public static final class Builder {
 
-      private @Nullable Boolean blockTraffic;
+      private @Nullable List<String> filteredPackages;
 
       @CanIgnoreReturnValue
-      public @NonNull Builder setBlockTraffic(@NonNull Boolean setterArg) {
-        this.blockTraffic = setterArg;
+      public @NonNull Builder setFilteredPackages(@NonNull List<String> setterArg) {
+        this.filteredPackages = setterArg;
         return this;
       }
 
-      public @NonNull VpnSettings build() {
-        VpnSettings pigeonReturn = new VpnSettings();
-        pigeonReturn.setBlockTraffic(blockTraffic);
+      private @Nullable List<String> blockedPackages;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setBlockedPackages(@NonNull List<String> setterArg) {
+        this.blockedPackages = setterArg;
+        return this;
+      }
+
+      private @Nullable List<Rule> packageRules;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPackageRules(@NonNull List<Rule> setterArg) {
+        this.packageRules = setterArg;
+        return this;
+      }
+
+      private @Nullable Rule globalRule;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setGlobalRule(@Nullable Rule setterArg) {
+        this.globalRule = setterArg;
+        return this;
+      }
+
+      private @Nullable Boolean filterUdp;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setFilterUdp(@NonNull Boolean setterArg) {
+        this.filterUdp = setterArg;
+        return this;
+      }
+
+      private @Nullable Long logLevel;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setLogLevel(@NonNull Long setterArg) {
+        this.logLevel = setterArg;
+        return this;
+      }
+
+      public @NonNull VpnConfig build() {
+        VpnConfig pigeonReturn = new VpnConfig();
+        pigeonReturn.setFilteredPackages(filteredPackages);
+        pigeonReturn.setBlockedPackages(blockedPackages);
+        pigeonReturn.setPackageRules(packageRules);
+        pigeonReturn.setGlobalRule(globalRule);
+        pigeonReturn.setFilterUdp(filterUdp);
+        pigeonReturn.setLogLevel(logLevel);
         return pigeonReturn;
       }
     }
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(1);
-      toListResult.add(blockTraffic);
+      ArrayList<Object> toListResult = new ArrayList<>(6);
+      toListResult.add(filteredPackages);
+      toListResult.add(blockedPackages);
+      toListResult.add(packageRules);
+      toListResult.add(globalRule);
+      toListResult.add(filterUdp);
+      toListResult.add(logLevel);
       return toListResult;
     }
 
-    static @NonNull VpnSettings fromList(@NonNull ArrayList<Object> pigeonVar_list) {
-      VpnSettings pigeonResult = new VpnSettings();
-      Object blockTraffic = pigeonVar_list.get(0);
-      pigeonResult.setBlockTraffic((Boolean) blockTraffic);
+    static @NonNull VpnConfig fromList(@NonNull ArrayList<Object> pigeonVar_list) {
+      VpnConfig pigeonResult = new VpnConfig();
+      Object filteredPackages = pigeonVar_list.get(0);
+      pigeonResult.setFilteredPackages((List<String>) filteredPackages);
+      Object blockedPackages = pigeonVar_list.get(1);
+      pigeonResult.setBlockedPackages((List<String>) blockedPackages);
+      Object packageRules = pigeonVar_list.get(2);
+      pigeonResult.setPackageRules((List<Rule>) packageRules);
+      Object globalRule = pigeonVar_list.get(3);
+      pigeonResult.setGlobalRule((Rule) globalRule);
+      Object filterUdp = pigeonVar_list.get(4);
+      pigeonResult.setFilterUdp((Boolean) filterUdp);
+      Object logLevel = pigeonVar_list.get(5);
+      pigeonResult.setLogLevel((Long) logLevel);
       return pigeonResult;
     }
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
-  public static final class Allowed {
-    private @Nullable String raddr;
+  public static final class Application {
+    private @NonNull Long uid;
 
-    public @Nullable String getRaddr() {
-      return raddr;
+    public @NonNull Long getUid() {
+      return uid;
     }
 
-    public void setRaddr(@Nullable String setterArg) {
-      this.raddr = setterArg;
+    public void setUid(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"uid\" is null.");
+      }
+      this.uid = setterArg;
     }
 
-    private @Nullable Long rport;
+    private @NonNull String packageName;
 
-    public @Nullable Long getRport() {
-      return rport;
+    public @NonNull String getPackageName() {
+      return packageName;
     }
 
-    public void setRport(@Nullable Long setterArg) {
-      this.rport = setterArg;
+    public void setPackageName(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"packageName\" is null.");
+      }
+      this.packageName = setterArg;
     }
+
+    private @NonNull String label;
+
+    public @NonNull String getLabel() {
+      return label;
+    }
+
+    public void setLabel(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"label\" is null.");
+      }
+      this.label = setterArg;
+    }
+
+    private @NonNull String version;
+
+    public @NonNull String getVersion() {
+      return version;
+    }
+
+    public void setVersion(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"version\" is null.");
+      }
+      this.version = setterArg;
+    }
+
+    private @Nullable byte[] icon;
+
+    public @Nullable byte[] getIcon() {
+      return icon;
+    }
+
+    public void setIcon(@Nullable byte[] setterArg) {
+      this.icon = setterArg;
+    }
+
+    private @NonNull Boolean system;
+
+    public @NonNull Boolean getSystem() {
+      return system;
+    }
+
+    public void setSystem(@NonNull Boolean setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"system\" is null.");
+      }
+      this.system = setterArg;
+    }
+
+    private @Nullable ApplicationSetting setting;
+
+    public @Nullable ApplicationSetting getSetting() {
+      return setting;
+    }
+
+    public void setSetting(@Nullable ApplicationSetting setterArg) {
+      this.setting = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    Application() {}
 
     @Override
     public boolean equals(Object o) {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
-      Allowed that = (Allowed) o;
-      return Objects.equals(raddr, that.raddr) && Objects.equals(rport, that.rport);
+      Application that = (Application) o;
+      return uid.equals(that.uid) && packageName.equals(that.packageName) && label.equals(that.label) && version.equals(that.version) && Arrays.equals(icon, that.icon) && system.equals(that.system) && Objects.equals(setting, that.setting);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(raddr, rport);
+      int pigeonVar_result = Objects.hash(uid, packageName, label, version, system, setting);
+      pigeonVar_result = 31 * pigeonVar_result + Arrays.hashCode(icon);
+      return pigeonVar_result;
     }
 
     public static final class Builder {
 
-      private @Nullable String raddr;
+      private @Nullable Long uid;
 
       @CanIgnoreReturnValue
-      public @NonNull Builder setRaddr(@Nullable String setterArg) {
-        this.raddr = setterArg;
+      public @NonNull Builder setUid(@NonNull Long setterArg) {
+        this.uid = setterArg;
         return this;
       }
 
-      private @Nullable Long rport;
+      private @Nullable String packageName;
 
       @CanIgnoreReturnValue
-      public @NonNull Builder setRport(@Nullable Long setterArg) {
-        this.rport = setterArg;
+      public @NonNull Builder setPackageName(@NonNull String setterArg) {
+        this.packageName = setterArg;
         return this;
       }
 
-      public @NonNull Allowed build() {
-        Allowed pigeonReturn = new Allowed();
-        pigeonReturn.setRaddr(raddr);
-        pigeonReturn.setRport(rport);
+      private @Nullable String label;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setLabel(@NonNull String setterArg) {
+        this.label = setterArg;
+        return this;
+      }
+
+      private @Nullable String version;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setVersion(@NonNull String setterArg) {
+        this.version = setterArg;
+        return this;
+      }
+
+      private @Nullable byte[] icon;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setIcon(@Nullable byte[] setterArg) {
+        this.icon = setterArg;
+        return this;
+      }
+
+      private @Nullable Boolean system;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setSystem(@NonNull Boolean setterArg) {
+        this.system = setterArg;
+        return this;
+      }
+
+      private @Nullable ApplicationSetting setting;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setSetting(@Nullable ApplicationSetting setterArg) {
+        this.setting = setterArg;
+        return this;
+      }
+
+      public @NonNull Application build() {
+        Application pigeonReturn = new Application();
+        pigeonReturn.setUid(uid);
+        pigeonReturn.setPackageName(packageName);
+        pigeonReturn.setLabel(label);
+        pigeonReturn.setVersion(version);
+        pigeonReturn.setIcon(icon);
+        pigeonReturn.setSystem(system);
+        pigeonReturn.setSetting(setting);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<>(7);
+      toListResult.add(uid);
+      toListResult.add(packageName);
+      toListResult.add(label);
+      toListResult.add(version);
+      toListResult.add(icon);
+      toListResult.add(system);
+      toListResult.add(setting);
+      return toListResult;
+    }
+
+    static @NonNull Application fromList(@NonNull ArrayList<Object> pigeonVar_list) {
+      Application pigeonResult = new Application();
+      Object uid = pigeonVar_list.get(0);
+      pigeonResult.setUid((Long) uid);
+      Object packageName = pigeonVar_list.get(1);
+      pigeonResult.setPackageName((String) packageName);
+      Object label = pigeonVar_list.get(2);
+      pigeonResult.setLabel((String) label);
+      Object version = pigeonVar_list.get(3);
+      pigeonResult.setVersion((String) version);
+      Object icon = pigeonVar_list.get(4);
+      pigeonResult.setIcon((byte[]) icon);
+      Object system = pigeonVar_list.get(5);
+      pigeonResult.setSystem((Boolean) system);
+      Object setting = pigeonVar_list.get(6);
+      pigeonResult.setSetting((ApplicationSetting) setting);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class ApplicationSetting {
+    private @NonNull String packageName;
+
+    public @NonNull String getPackageName() {
+      return packageName;
+    }
+
+    public void setPackageName(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"packageName\" is null.");
+      }
+      this.packageName = setterArg;
+    }
+
+    private @NonNull Boolean filter;
+
+    public @NonNull Boolean getFilter() {
+      return filter;
+    }
+
+    public void setFilter(@NonNull Boolean setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"filter\" is null.");
+      }
+      this.filter = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    ApplicationSetting() {}
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      if (o == null || getClass() != o.getClass()) { return false; }
+      ApplicationSetting that = (ApplicationSetting) o;
+      return packageName.equals(that.packageName) && filter.equals(that.filter);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(packageName, filter);
+    }
+
+    public static final class Builder {
+
+      private @Nullable String packageName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPackageName(@NonNull String setterArg) {
+        this.packageName = setterArg;
+        return this;
+      }
+
+      private @Nullable Boolean filter;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setFilter(@NonNull Boolean setterArg) {
+        this.filter = setterArg;
+        return this;
+      }
+
+      public @NonNull ApplicationSetting build() {
+        ApplicationSetting pigeonReturn = new ApplicationSetting();
+        pigeonReturn.setPackageName(packageName);
+        pigeonReturn.setFilter(filter);
         return pigeonReturn;
       }
     }
@@ -203,17 +547,17 @@ public class NativeBridge {
     @NonNull
     ArrayList<Object> toList() {
       ArrayList<Object> toListResult = new ArrayList<>(2);
-      toListResult.add(raddr);
-      toListResult.add(rport);
+      toListResult.add(packageName);
+      toListResult.add(filter);
       return toListResult;
     }
 
-    static @NonNull Allowed fromList(@NonNull ArrayList<Object> pigeonVar_list) {
-      Allowed pigeonResult = new Allowed();
-      Object raddr = pigeonVar_list.get(0);
-      pigeonResult.setRaddr((String) raddr);
-      Object rport = pigeonVar_list.get(1);
-      pigeonResult.setRport((Long) rport);
+    static @NonNull ApplicationSetting fromList(@NonNull ArrayList<Object> pigeonVar_list) {
+      ApplicationSetting pigeonResult = new ApplicationSetting();
+      Object packageName = pigeonVar_list.get(0);
+      pigeonResult.setPackageName((String) packageName);
+      Object filter = pigeonVar_list.get(1);
+      pigeonResult.setFilter((Boolean) filter);
       return pigeonResult;
     }
   }
@@ -513,6 +857,16 @@ public class NativeBridge {
       this.uid = setterArg;
     }
 
+    private @Nullable String packageName;
+
+    public @Nullable String getPackageName() {
+      return packageName;
+    }
+
+    public void setPackageName(@Nullable String setterArg) {
+      this.packageName = setterArg;
+    }
+
     private @NonNull Boolean allowed;
 
     public @NonNull Boolean getAllowed() {
@@ -534,12 +888,12 @@ public class NativeBridge {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
       Packet that = (Packet) o;
-      return time.equals(that.time) && version.equals(that.version) && protocol.equals(that.protocol) && flags.equals(that.flags) && saddr.equals(that.saddr) && sport.equals(that.sport) && daddr.equals(that.daddr) && dport.equals(that.dport) && data.equals(that.data) && uid.equals(that.uid) && allowed.equals(that.allowed);
+      return time.equals(that.time) && version.equals(that.version) && protocol.equals(that.protocol) && flags.equals(that.flags) && saddr.equals(that.saddr) && sport.equals(that.sport) && daddr.equals(that.daddr) && dport.equals(that.dport) && data.equals(that.data) && uid.equals(that.uid) && Objects.equals(packageName, that.packageName) && allowed.equals(that.allowed);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(time, version, protocol, flags, saddr, sport, daddr, dport, data, uid, allowed);
+      return Objects.hash(time, version, protocol, flags, saddr, sport, daddr, dport, data, uid, packageName, allowed);
     }
 
     public static final class Builder {
@@ -624,6 +978,14 @@ public class NativeBridge {
         return this;
       }
 
+      private @Nullable String packageName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPackageName(@Nullable String setterArg) {
+        this.packageName = setterArg;
+        return this;
+      }
+
       private @Nullable Boolean allowed;
 
       @CanIgnoreReturnValue
@@ -644,6 +1006,7 @@ public class NativeBridge {
         pigeonReturn.setDport(dport);
         pigeonReturn.setData(data);
         pigeonReturn.setUid(uid);
+        pigeonReturn.setPackageName(packageName);
         pigeonReturn.setAllowed(allowed);
         return pigeonReturn;
       }
@@ -651,7 +1014,7 @@ public class NativeBridge {
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(11);
+      ArrayList<Object> toListResult = new ArrayList<>(12);
       toListResult.add(time);
       toListResult.add(version);
       toListResult.add(protocol);
@@ -662,6 +1025,7 @@ public class NativeBridge {
       toListResult.add(dport);
       toListResult.add(data);
       toListResult.add(uid);
+      toListResult.add(packageName);
       toListResult.add(allowed);
       return toListResult;
     }
@@ -688,7 +1052,9 @@ public class NativeBridge {
       pigeonResult.setData((String) data);
       Object uid = pigeonVar_list.get(9);
       pigeonResult.setUid((Long) uid);
-      Object allowed = pigeonVar_list.get(10);
+      Object packageName = pigeonVar_list.get(10);
+      pigeonResult.setPackageName((String) packageName);
+      Object allowed = pigeonVar_list.get(11);
       pigeonResult.setAllowed((Boolean) allowed);
       return pigeonResult;
     }
@@ -748,30 +1114,34 @@ public class NativeBridge {
       this.resource = setterArg;
     }
 
-    private @NonNull Long ttl;
+    private @Nullable Long ttl;
 
-    public @NonNull Long getTtl() {
+    public @Nullable Long getTtl() {
       return ttl;
     }
 
-    public void setTtl(@NonNull Long setterArg) {
-      if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"ttl\" is null.");
-      }
+    public void setTtl(@Nullable Long setterArg) {
       this.ttl = setterArg;
     }
 
-    private @NonNull Long uid;
+    private @Nullable Long uid;
 
-    public @NonNull Long getUid() {
+    public @Nullable Long getUid() {
       return uid;
     }
 
-    public void setUid(@NonNull Long setterArg) {
-      if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"uid\" is null.");
-      }
+    public void setUid(@Nullable Long setterArg) {
       this.uid = setterArg;
+    }
+
+    private @Nullable String packageName;
+
+    public @Nullable String getPackageName() {
+      return packageName;
+    }
+
+    public void setPackageName(@Nullable String setterArg) {
+      this.packageName = setterArg;
     }
 
     /** Constructor is non-public to enforce null safety; use Builder. */
@@ -782,12 +1152,12 @@ public class NativeBridge {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
       ResourceRecord that = (ResourceRecord) o;
-      return time.equals(that.time) && qName.equals(that.qName) && aName.equals(that.aName) && resource.equals(that.resource) && ttl.equals(that.ttl) && uid.equals(that.uid);
+      return time.equals(that.time) && qName.equals(that.qName) && aName.equals(that.aName) && resource.equals(that.resource) && Objects.equals(ttl, that.ttl) && Objects.equals(uid, that.uid) && Objects.equals(packageName, that.packageName);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(time, qName, aName, resource, ttl, uid);
+      return Objects.hash(time, qName, aName, resource, ttl, uid, packageName);
     }
 
     public static final class Builder {
@@ -827,7 +1197,7 @@ public class NativeBridge {
       private @Nullable Long ttl;
 
       @CanIgnoreReturnValue
-      public @NonNull Builder setTtl(@NonNull Long setterArg) {
+      public @NonNull Builder setTtl(@Nullable Long setterArg) {
         this.ttl = setterArg;
         return this;
       }
@@ -835,8 +1205,16 @@ public class NativeBridge {
       private @Nullable Long uid;
 
       @CanIgnoreReturnValue
-      public @NonNull Builder setUid(@NonNull Long setterArg) {
+      public @NonNull Builder setUid(@Nullable Long setterArg) {
         this.uid = setterArg;
+        return this;
+      }
+
+      private @Nullable String packageName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPackageName(@Nullable String setterArg) {
+        this.packageName = setterArg;
         return this;
       }
 
@@ -848,19 +1226,21 @@ public class NativeBridge {
         pigeonReturn.setResource(resource);
         pigeonReturn.setTtl(ttl);
         pigeonReturn.setUid(uid);
+        pigeonReturn.setPackageName(packageName);
         return pigeonReturn;
       }
     }
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(6);
+      ArrayList<Object> toListResult = new ArrayList<>(7);
       toListResult.add(time);
       toListResult.add(qName);
       toListResult.add(aName);
       toListResult.add(resource);
       toListResult.add(ttl);
       toListResult.add(uid);
+      toListResult.add(packageName);
       return toListResult;
     }
 
@@ -878,6 +1258,118 @@ public class NativeBridge {
       pigeonResult.setTtl((Long) ttl);
       Object uid = pigeonVar_list.get(5);
       pigeonResult.setUid((Long) uid);
+      Object packageName = pigeonVar_list.get(6);
+      pigeonResult.setPackageName((String) packageName);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class Rule {
+    private @Nullable String packageName;
+
+    public @Nullable String getPackageName() {
+      return packageName;
+    }
+
+    public void setPackageName(@Nullable String setterArg) {
+      this.packageName = setterArg;
+    }
+
+    private @NonNull List<String> blockedHosts;
+
+    public @NonNull List<String> getBlockedHosts() {
+      return blockedHosts;
+    }
+
+    public void setBlockedHosts(@NonNull List<String> setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"blockedHosts\" is null.");
+      }
+      this.blockedHosts = setterArg;
+    }
+
+    private @NonNull List<String> blockedIPs;
+
+    public @NonNull List<String> getBlockedIPs() {
+      return blockedIPs;
+    }
+
+    public void setBlockedIPs(@NonNull List<String> setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"blockedIPs\" is null.");
+      }
+      this.blockedIPs = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    Rule() {}
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      if (o == null || getClass() != o.getClass()) { return false; }
+      Rule that = (Rule) o;
+      return Objects.equals(packageName, that.packageName) && blockedHosts.equals(that.blockedHosts) && blockedIPs.equals(that.blockedIPs);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(packageName, blockedHosts, blockedIPs);
+    }
+
+    public static final class Builder {
+
+      private @Nullable String packageName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPackageName(@Nullable String setterArg) {
+        this.packageName = setterArg;
+        return this;
+      }
+
+      private @Nullable List<String> blockedHosts;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setBlockedHosts(@NonNull List<String> setterArg) {
+        this.blockedHosts = setterArg;
+        return this;
+      }
+
+      private @Nullable List<String> blockedIPs;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setBlockedIPs(@NonNull List<String> setterArg) {
+        this.blockedIPs = setterArg;
+        return this;
+      }
+
+      public @NonNull Rule build() {
+        Rule pigeonReturn = new Rule();
+        pigeonReturn.setPackageName(packageName);
+        pigeonReturn.setBlockedHosts(blockedHosts);
+        pigeonReturn.setBlockedIPs(blockedIPs);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<>(3);
+      toListResult.add(packageName);
+      toListResult.add(blockedHosts);
+      toListResult.add(blockedIPs);
+      return toListResult;
+    }
+
+    static @NonNull Rule fromList(@NonNull ArrayList<Object> pigeonVar_list) {
+      Rule pigeonResult = new Rule();
+      Object packageName = pigeonVar_list.get(0);
+      pigeonResult.setPackageName((String) packageName);
+      Object blockedHosts = pigeonVar_list.get(1);
+      pigeonResult.setBlockedHosts((List<String>) blockedHosts);
+      Object blockedIPs = pigeonVar_list.get(2);
+      pigeonResult.setBlockedIPs((List<String>) blockedIPs);
       return pigeonResult;
     }
   }
@@ -1192,18 +1684,22 @@ public class NativeBridge {
     protected Object readValueOfType(byte type, @NonNull ByteBuffer buffer) {
       switch (type) {
         case (byte) 129:
-          return VpnSettings.fromList((ArrayList<Object>) readValue(buffer));
+          return VpnConfig.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 130:
-          return Allowed.fromList((ArrayList<Object>) readValue(buffer));
+          return Application.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 131:
-          return Forward.fromList((ArrayList<Object>) readValue(buffer));
+          return ApplicationSetting.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 132:
-          return Packet.fromList((ArrayList<Object>) readValue(buffer));
+          return Forward.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 133:
-          return ResourceRecord.fromList((ArrayList<Object>) readValue(buffer));
+          return Packet.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 134:
-          return Usage.fromList((ArrayList<Object>) readValue(buffer));
+          return ResourceRecord.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 135:
+          return Rule.fromList((ArrayList<Object>) readValue(buffer));
+        case (byte) 136:
+          return Usage.fromList((ArrayList<Object>) readValue(buffer));
+        case (byte) 137:
           return Version.fromList((ArrayList<Object>) readValue(buffer));
         default:
           return super.readValueOfType(type, buffer);
@@ -1212,26 +1708,32 @@ public class NativeBridge {
 
     @Override
     protected void writeValue(@NonNull ByteArrayOutputStream stream, Object value) {
-      if (value instanceof VpnSettings) {
+      if (value instanceof VpnConfig) {
         stream.write(129);
-        writeValue(stream, ((VpnSettings) value).toList());
-      } else if (value instanceof Allowed) {
+        writeValue(stream, ((VpnConfig) value).toList());
+      } else if (value instanceof Application) {
         stream.write(130);
-        writeValue(stream, ((Allowed) value).toList());
-      } else if (value instanceof Forward) {
+        writeValue(stream, ((Application) value).toList());
+      } else if (value instanceof ApplicationSetting) {
         stream.write(131);
+        writeValue(stream, ((ApplicationSetting) value).toList());
+      } else if (value instanceof Forward) {
+        stream.write(132);
         writeValue(stream, ((Forward) value).toList());
       } else if (value instanceof Packet) {
-        stream.write(132);
+        stream.write(133);
         writeValue(stream, ((Packet) value).toList());
       } else if (value instanceof ResourceRecord) {
-        stream.write(133);
-        writeValue(stream, ((ResourceRecord) value).toList());
-      } else if (value instanceof Usage) {
         stream.write(134);
+        writeValue(stream, ((ResourceRecord) value).toList());
+      } else if (value instanceof Rule) {
+        stream.write(135);
+        writeValue(stream, ((Rule) value).toList());
+      } else if (value instanceof Usage) {
+        stream.write(136);
         writeValue(stream, ((Usage) value).toList());
       } else if (value instanceof Version) {
-        stream.write(135);
+        stream.write(137);
         writeValue(stream, ((Version) value).toList());
       } else {
         super.writeValue(stream, value);
@@ -1267,14 +1769,17 @@ public class NativeBridge {
   /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
   public interface VpnController {
 
-    void startVpn(@NonNull VpnSettings settings);
+    void startVpn(@NonNull VpnConfig settings);
 
     void stopVpn();
 
     @NonNull 
     Boolean isRunning();
 
-    void updateSettings(@NonNull VpnSettings settings);
+    void updateSettings(@NonNull VpnConfig settings);
+
+    @NonNull 
+    List<Application> getApplications();
 
     /** The codec used by VpnController. */
     static @NonNull MessageCodec<Object> getCodec() {
@@ -1295,7 +1800,7 @@ public class NativeBridge {
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
-                VpnSettings settingsArg = (VpnSettings) args.get(0);
+                VpnConfig settingsArg = (VpnConfig) args.get(0);
                 try {
                   api.startVpn(settingsArg);
                   wrapped.add(0, null);
@@ -1360,10 +1865,31 @@ public class NativeBridge {
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<>();
                 ArrayList<Object> args = (ArrayList<Object>) message;
-                VpnSettings settingsArg = (VpnSettings) args.get(0);
+                VpnConfig settingsArg = (VpnConfig) args.get(0);
                 try {
                   api.updateSettings(settingsArg);
                   wrapped.add(0, null);
+                }
+ catch (Throwable exception) {
+                  wrapped = wrapError(exception);
+                }
+                reply.reply(wrapped);
+              });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(
+                binaryMessenger, "dev.flutter.pigeon.pigeon_example_package.VpnController.getApplications" + messageChannelSuffix, getCodec());
+        if (api != null) {
+          channel.setMessageHandler(
+              (message, reply) -> {
+                ArrayList<Object> wrapped = new ArrayList<>();
+                try {
+                  List<Application> output = api.getApplications();
+                  wrapped.add(0, output);
                 }
  catch (Throwable exception) {
                   wrapped = wrapError(exception);
@@ -1436,13 +1962,53 @@ public class NativeBridge {
             } 
           });
     }
-    public void sendEvent(@NonNull Packet packetArg, @NonNull VoidResult result) {
-      final String channelName = "dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.sendEvent" + messageChannelSuffix;
+    public void updateVpnState(@NonNull Boolean runningArg, @NonNull VoidResult result) {
+      final String channelName = "dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState" + messageChannelSuffix;
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(
+              binaryMessenger, channelName, getCodec());
+      channel.send(
+          new ArrayList<>(Collections.singletonList(runningArg)),
+          channelReply -> {
+            if (channelReply instanceof List) {
+              List<Object> listReply = (List<Object>) channelReply;
+              if (listReply.size() > 1) {
+                result.error(new FlutterError((String) listReply.get(0), (String) listReply.get(1), listReply.get(2)));
+              } else {
+                result.success();
+              }
+            }  else {
+              result.error(createConnectionError(channelName));
+            } 
+          });
+    }
+    public void logPacket(@NonNull Packet packetArg, @NonNull VoidResult result) {
+      final String channelName = "dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logPacket" + messageChannelSuffix;
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, channelName, getCodec());
       channel.send(
           new ArrayList<>(Collections.singletonList(packetArg)),
+          channelReply -> {
+            if (channelReply instanceof List) {
+              List<Object> listReply = (List<Object>) channelReply;
+              if (listReply.size() > 1) {
+                result.error(new FlutterError((String) listReply.get(0), (String) listReply.get(1), listReply.get(2)));
+              } else {
+                result.success();
+              }
+            }  else {
+              result.error(createConnectionError(channelName));
+            } 
+          });
+    }
+    public void logDns(@NonNull ResourceRecord recordArg, @NonNull VoidResult result) {
+      final String channelName = "dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logDns" + messageChannelSuffix;
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(
+              binaryMessenger, channelName, getCodec());
+      channel.send(
+          new ArrayList<>(Collections.singletonList(recordArg)),
           channelReply -> {
             if (channelReply instanceof List) {
               List<Object> listReply = (List<Object>) channelReply;

@@ -28,6 +28,9 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -43,6 +46,7 @@ import android.util.Log;
 
 import androidx.core.net.ConnectivityManagerCompat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.net.InetAddress;
 import java.security.MessageDigest;
@@ -454,6 +458,27 @@ public class Util {
 
         return inSampleSize;
     }
+    public static byte[] drawableToByteArray(Drawable drawable) {
+        if (drawable == null)
+            return null;
+
+        Bitmap bitmap;
+
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            int width = drawable.getIntrinsicWidth() > 0 ? drawable.getIntrinsicWidth() : 1;
+            int height = drawable.getIntrinsicHeight() > 0 ? drawable.getIntrinsicHeight() : 1;
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
 
     public static Bitmap decodeSampledBitmapFromResource(
             Resources resources, int resourceId, int reqWidth, int reqHeight) {
@@ -564,24 +589,12 @@ public class Util {
         return sb;
     }
 
+    public static long packageNameToUid(Context context, String packageName){
+        long uid = -1;
+        try {
+            uid = context.getPackageManager().getApplicationInfo(packageName, 0).uid;
+        } catch (PackageManager.NameNotFoundException ignored) {}
+        return uid;
+    }
 
-    public static Bundle serializeSettings(VpnSettings settings) {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean("blockTraffic", settings.getBlockTraffic());
-        // add other settings
-        return bundle;
-    }
-    public static VpnSettings deserializeSettings(Bundle settingsBundle) {
-        if (settingsBundle != null) {
-            try {
-                VpnSettings.Builder builder = new VpnSettings.Builder();
-                builder.setBlockTraffic(settingsBundle.getBoolean("blockTraffic"));
-                // read other fields
-                return builder.build();
-            } catch (Exception e) {
-                throw new RuntimeException("Exception when deserializing VpnSettings!", e);
-            }
-        }
-        return null;
-    }
 }

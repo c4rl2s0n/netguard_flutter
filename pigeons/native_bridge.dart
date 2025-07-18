@@ -2,7 +2,7 @@ import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
   PigeonOptions(
-    dartOut: 'lib/native_bridge.g.dart',
+    dartOut: 'lib/common/native/native_bridge.g.dart',
     dartOptions: DartOptions(),
     javaOut: 'android/app/src/main/java/eu/flutter/netguard/NativeBridge.java',
     javaOptions: JavaOptions(package: "eu.flutter.netguard"),
@@ -11,29 +11,74 @@ import 'package:pigeon/pigeon.dart';
 )
 @HostApi()
 abstract class VpnController {
-  void startVpn(VpnSettings settings);
+  void startVpn(VpnConfig settings);
   void stopVpn();
   bool isRunning();
-  void updateSettings(VpnSettings settings);
+  void updateSettings(VpnConfig settings);
+  List<Application> getApplications();
 }
 
 @FlutterApi()
 abstract class VpnEventHandler {
   void logText(String message);
   void logError(String errorCode, String message, Object details);
-  void sendEvent(Packet packet);
+  void updateVpnState(bool running);
+  @async
+  void logPacket(Packet packet);
+  @async
+  void logDns(ResourceRecord record);
 }
 
 /// MODELS
-class VpnSettings {
-  VpnSettings({this.blockTraffic = false});
-  bool blockTraffic;
+class VpnConfig {
+  VpnConfig({
+    this.filteredPackages = const [],
+    this.blockedPackages = const [],
+    this.packageRules = const [],
+    this.globalRule,
+    this.filterUdp = true,
+    this.logLevel = 5,
+  });
+  /// List of PackageNames that are filtered by the firewall
+  List<String> filteredPackages;
+
+  /// List of PackageNames that are completely blocked by the firewall
+  List<String> blockedPackages;
+
+  /// List of rules that apply for individual packages
+  List<Rule> packageRules;
+
+  /// Rule that applies for all applications
+  Rule? globalRule;
+
+  bool filterUdp;
+
+  int logLevel;
 }
 
-class Allowed {
-  Allowed({this.raddr = null, this.rport = null});
-  String? raddr;
-  int? rport;
+class Application{
+  Application({
+    this.uid = -1,
+    this.packageName = "",
+    this.label = "",
+    this.version = "",
+    this.icon,
+    this.system = false,
+    this.setting,
+  });
+  int uid;
+  String packageName;
+  String label;
+  String version;
+  Uint8List? icon;
+  bool system;
+  ApplicationSetting? setting;
+}
+
+class ApplicationSetting {
+  ApplicationSetting({required this.packageName, this.filter = false});
+  String packageName;
+  bool filter;
 }
 
 class Forward {
@@ -63,6 +108,7 @@ class Packet {
     this.dport = 0,
     this.data = "",
     this.uid = 0,
+    this.packageName,
     this.allowed = true,
   });
   int time;
@@ -75,6 +121,7 @@ class Packet {
   int dport;
   String data;
   int uid;
+  String? packageName;
   bool allowed;
 }
 
@@ -84,15 +131,27 @@ class ResourceRecord {
     this.qName = "",
     this.aName = "",
     this.resource = "",
-    this.ttl = 0,
-    this.uid = -1,
+    this.ttl,
+    this.uid,
+    this.packageName,
   });
   int time;
   String qName;
   String aName;
   String resource;
-  int ttl;
-  int uid;
+  int? ttl;
+  int? uid;
+  String? packageName;
+}
+
+class Rule {
+  Rule({
+    this.blockedHosts = const [],
+    this.blockedIPs = const [],
+  });
+  String? packageName;
+  List<String> blockedHosts;
+  List<String> blockedIPs;
 }
 
 class Usage {
@@ -116,7 +175,7 @@ class Usage {
   int received;
 }
 
-class Version{
+class Version {
   Version(this.version);
   String version;
 }

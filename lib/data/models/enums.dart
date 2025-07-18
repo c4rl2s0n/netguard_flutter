@@ -1,0 +1,1 @@
+enum BlacklistType { ip, host }

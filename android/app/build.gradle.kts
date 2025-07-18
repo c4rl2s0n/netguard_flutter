@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "eu.flutter.netguard"
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -19,9 +19,9 @@ android {
         applicationId = "eu.flutter.netguard"
 
         minSdk = 22
-        targetSdk = 34
+        targetSdk = 35
         versionName = "0.1"
-        versionCode = 2025070901
+        versionCode = 1
 
 
         externalNativeBuild {
@@ -32,7 +32,8 @@ android {
             }
         }
 
-        ndkVersion = "25.2.9519653"
+        //ndkVersion = "25.2.9519653"
+        ndkVersion = "27.0.12077973"
         ndk {
             // https://developer.android.com/ndk/guides/abis.html#sa
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
@@ -61,6 +62,7 @@ android {
             path("CMakeLists.txt")
         }
     }
+
 }
 
 dependencies{

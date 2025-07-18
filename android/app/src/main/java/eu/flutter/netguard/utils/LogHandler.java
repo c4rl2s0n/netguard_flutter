@@ -25,6 +25,7 @@ public final class LogHandler extends Handler {
     private static final int MSG_STATS_UPDATE = 3;
     private static final int MSG_PACKET = 4;
     private static final int MSG_USAGE = 5;
+    private static final int MSG_DNS = 6;
     public int queue = 0;
 
     private static final int MAX_QUEUE = 250;
@@ -36,40 +37,41 @@ public final class LogHandler extends Handler {
         this.context = context;
     }
 
-    public void queue(Packet packet) {
-        Message msg = obtainMessage();
-        msg.obj = packet;
-        msg.what = MSG_PACKET;
-//        msg.arg1 = (last_connected ? (last_metered ? 2 : 1) : 0);
-//        msg.arg2 = (last_interactive ? 1 : 0);
-
+    public void queue(Message msg) {
         synchronized (this) {
             if (queue > MAX_QUEUE) {
                 Log.w(TAG, "Log queue full");
                 return;
             }
-
             sendMessage(msg);
-
             queue++;
         }
     }
 
+    public void packet(Packet packet){
+        Message msg = obtainMessage();
+        msg.obj = packet;
+        msg.what = MSG_PACKET;
+        queue(msg);
+    }
+    public void dns(ResourceRecord record){
+        Message msg = obtainMessage();
+        msg.obj = record;
+        msg.what = MSG_DNS;
+        queue(msg);
+    }
+    public void domain(String name){
+        Message msg = obtainMessage();
+        msg.obj = name;
+        msg.what = MSG_DNS;
+        queue(msg);
+    }
     public void account(Usage usage) {
         Message msg = obtainMessage();
         msg.obj = usage;
         msg.what = MSG_USAGE;
 
-        synchronized (this) {
-            if (queue > MAX_QUEUE) {
-                Log.w(TAG, "Log queue full");
-                return;
-            }
-
-            sendMessage(msg);
-
-            queue++;
-        }
+        queue(msg);
     }
 
     @Override
@@ -77,7 +79,11 @@ public final class LogHandler extends Handler {
         try {
             switch (msg.what) {
                 case MSG_PACKET:
-                    log((Packet) msg.obj, msg.arg1, msg.arg2 > 0);
+                    VpnEventChannel.logPacket((Packet) msg.obj);
+                    break;
+
+                case MSG_DNS:
+                    VpnEventChannel.logDns((ResourceRecord) msg.obj);
                     break;
 
                 case MSG_USAGE:
@@ -104,10 +110,12 @@ public final class LogHandler extends Handler {
         VpnEventChannel.logError(errorCode, text, details);
     }
 
-    private void log(Packet packet, int connection, boolean interactive) {
-        // Get settings
-        VpnEventChannel.sendEvent(packet);
+
+    public void vpnStopped(){
+        VpnEventChannel.updateVpnState(false);
+        logText("VPN stopped!");
     }
+
 
     private void usage(Usage usage) {
         if (usage.getUid() >= 0 && !(usage.getUid() == 0 && usage.getProtocol() == Protocols.UDP && usage.getDport() == 53)) {

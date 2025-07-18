@@ -19,6 +19,7 @@
 -keep class com.fasterxml.jackson.** { *; }
 -keepattributes *Annotation*
 
+
 #Line numbers
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
@@ -35,20 +36,14 @@
     native <methods>;
 }
 
-
-
 #JNI callbacks
--keep class eu.flutter.netguard.data.models.Allowed { *; }
--keep class eu.flutter.netguard.data.models.Packet { *; }
--keep class eu.flutter.netguard.data.models.ResourceRecord { *; }
--keep class eu.flutter.netguard.data.models.Usage { *; }
--keep class eu.flutter.netguard.ServiceSinkhole {
+-keep class eu.flutter.netguard.MyVpnService {
     void nativeExit(java.lang.String);
     void nativeError(int, java.lang.String);
-    void logPacket(eu.flutter.netguard.data.models.Packet);
-    void dnsResolved(eu.flutter.netguard.data.models.ResourceRecord);
-    boolean isDomainBlocked(java.lang.String);
+    void logPacket(eu.flutter.netguard.NativeBridge$Packet);
+    void dnsResolved(eu.flutter.netguard.NativeBridge$ResourceRecord);
+    boolean isDomainBlocked(int, java.lang.String);
     int getUidQ(int, int, java.lang.String, int, java.lang.String, int);
-    eu.flutter.netguard.data.models.Allowed isAddressAllowed(eu.flutter.netguard.data.models.Packet);
-    void accountUsage(eu.flutter.netguard.data.models.Usage);
+    boolean isAddressAllowed(eu.flutter.netguard.NativeBridge$Packet);
+    void accountUsage(eu.flutter.netguard.NativeBridge$Usage);
 }

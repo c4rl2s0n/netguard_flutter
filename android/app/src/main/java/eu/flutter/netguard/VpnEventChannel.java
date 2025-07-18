@@ -14,8 +14,7 @@ public class VpnEventChannel {
     }
 
     private static boolean isInitialized(){
-        if(_vpnEventHandler == null) return false;
-        return true;
+        return _vpnEventHandler != null;
     }
 
 
@@ -28,9 +27,17 @@ public class VpnEventChannel {
         _vpnEventHandler.logError(errorCode, message, details, _voidResult);
     }
 
-    public static void sendEvent(Packet packet){
+    public static  void updateVpnState(boolean running){
+        _vpnEventHandler.updateVpnState(running, _voidResult);
+    }
+
+    public static void logPacket(Packet packet){
         assert(isInitialized());
-        _vpnEventHandler.sendEvent(packet, _voidResult);
+        _vpnEventHandler.logPacket(packet, _voidResult);
+    }
+    public static void logDns(ResourceRecord record){
+        assert(isInitialized());
+        _vpnEventHandler.logDns(record, _voidResult);
     }
 
 

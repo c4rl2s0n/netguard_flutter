@@ -2,16 +2,18 @@ package eu.flutter.netguard.utils;
 
 import androidx.annotation.Nullable;
 
+import eu.flutter.netguard.NativeBridge;
 import eu.flutter.netguard.NativeBridge.*;
 
 public class ModelBuilder {
-    public static Allowed Allowed(String raddr, Long rport){
-        Allowed.Builder builder = new Allowed.Builder();
-        builder.setRaddr(raddr);
-        builder.setRport(rport);
+    public static Application Application(long uid, String packageName, String label, String version, byte[] icon, boolean system){
+        Application.Builder builder = new Application.Builder();
+        builder.setUid(uid);
+        builder.setPackageName(packageName);
+        builder.setLabel(label);
+        builder.setVersion(version);
+        builder.setIcon(icon);
+        builder.setSystem(system);
         return builder.build();
-    }
-    public static Allowed AllowedEmpty(){
-        return new Allowed.Builder().build();
     }
 }

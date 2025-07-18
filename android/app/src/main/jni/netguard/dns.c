@@ -177,8 +177,7 @@ void parse_dns_response(const struct arguments *args, const struct ng_session *s
             }
         }
 
-        if (qcount > 0 &&
-            (svcb || is_domain_blocked(args, qname))) {
+        if (qcount > 0 && (svcb || is_domain_blocked(args, -1, qname))) {
             dns->qr = 1;
             dns->aa = 0;
             dns->tc = 0;

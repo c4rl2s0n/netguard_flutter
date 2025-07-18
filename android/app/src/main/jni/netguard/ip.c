@@ -281,7 +281,6 @@ void handle_ip(const struct arguments *args,
         }
     }
 
-    jint uid = -1;
 
     // Get server name
     char server_name[TLS_SNI_LENGTH + 1];
@@ -294,22 +293,23 @@ void handle_ip(const struct arguments *args,
 
         if (get_sni(data, datalen, server_name)) {
             log_android(ANDROID_LOG_INFO, "TLS server name: %s", server_name);
-            uid = get_uid(version, protocol, saddr, sport, daddr, dport);
-            dns_resolved(args, server_name, server_name, dest, -1, uid);
         }
     }
 
-    if (*server_name != 0)
-        strcpy(data, "sni");
-
     // Get uid
+    jint uid = -1;
     if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6 ||
         (protocol == IPPROTO_UDP && !has_udp_session(args, pkt, payload)) ||
-        (protocol == IPPROTO_TCP && syn)) {
+        (protocol == IPPROTO_TCP && (syn || *server_name))) {
         if (args->ctx->sdk <= 28) // Android 9 Pie
             uid = get_uid(version, protocol, saddr, sport, daddr, dport);
         else
             uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
+    }
+
+    if (*server_name) {
+        strcpy(data, "sni");
+        dns_resolved(args, server_name, server_name, dest, -1, uid);
     }
 
     log_android(ANDROID_LOG_DEBUG,
@@ -318,19 +318,16 @@ void handle_ip(const struct arguments *args,
 
     // Check if allowed
     int allowed = 0;
-    struct allowed *redirect = NULL;
-    if (protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload))
+    if (protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload)) {
         allowed = 1; // could be a lingering/blocked session
-    else if (protocol == IPPROTO_TCP && (!syn || (uid == 0 && dport == 53)) && *server_name == 0)
+    } else if (protocol == IPPROTO_TCP && (!syn || (uid == 0 && dport == 53)) &&
+               *server_name == 0) {
         allowed = 1; // assume existing session
-    else {
+    } else {
         jobject objPacket = create_packet(
                 args, version, protocol, flags, source, sport, dest, dport, data, uid, 0);
-        redirect = is_address_allowed(args, objPacket);
-        allowed = (redirect != NULL);
-        if (redirect != NULL && (*redirect->raddr == 0 || redirect->rport == 0))
-            redirect = NULL;
-        if (allowed && *server_name && is_domain_blocked(args, server_name))
+        allowed = is_address_allowed(args, objPacket);
+        if (allowed && *server_name && is_domain_blocked(args, uid, server_name))
             allowed = 0;
     }
 
@@ -339,14 +336,14 @@ void handle_ip(const struct arguments *args,
         if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6)
             handle_icmp(args, pkt, length, payload, uid, epoll_fd);
         else if (protocol == IPPROTO_UDP)
-            handle_udp(args, pkt, length, payload, uid, redirect, epoll_fd);
+            handle_udp(args, pkt, length, payload, uid, NULL, epoll_fd);
         else if (protocol == IPPROTO_TCP)
-            handle_tcp(args, pkt, length, payload, uid, allowed, redirect, epoll_fd);
+            handle_tcp(args, pkt, length, payload, uid, allowed, NULL, epoll_fd);
     } else {
         if (protocol == IPPROTO_UDP)
             block_udp(args, pkt, length, payload, uid);
         else if (protocol == IPPROTO_TCP && *server_name != 0 && !allowed)
-            handle_tcp(args, pkt, length, payload, uid, allowed, redirect, epoll_fd); // RST
+            handle_tcp(args, pkt, length, payload, uid, allowed, NULL, epoll_fd); // RST
 
         log_android(ANDROID_LOG_WARN, "Address v%d p%d %s/%u syn %d not allowed",
                     version, protocol, dest, dport, syn);

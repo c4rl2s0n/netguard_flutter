@@ -42,7 +42,6 @@ extern struct uid_cache_entry *uid_cache;
 // JNI
 
 jclass clsPacket;
-jclass clsAllowed;
 jclass clsRR;
 jclass clsUsage;
 
@@ -58,10 +57,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     const char *packet = "eu/flutter/netguard/NativeBridge$Packet";
     clsPacket = jniGlobalRef(env, jniFindClass(env, packet));
     ng_add_alloc(clsPacket, "clsPacket");
-
-    const char *allowed = "eu/flutter/netguard/NativeBridge$Allowed";
-    clsAllowed = jniGlobalRef(env, jniFindClass(env, allowed));
-    ng_add_alloc(clsAllowed, "clsAllowed");
 
     const char *rr = "eu/flutter/netguard/NativeBridge$ResourceRecord";
     clsRR = jniGlobalRef(env, jniFindClass(env, rr));
@@ -95,11 +90,9 @@ void JNI_OnUnload(JavaVM *vm, void *reserved) {
         log_android(ANDROID_LOG_INFO, "JNI load GetEnv failed");
     else {
         (*env)->DeleteGlobalRef(env, clsPacket);
-        (*env)->DeleteGlobalRef(env, clsAllowed);
         (*env)->DeleteGlobalRef(env, clsRR);
         (*env)->DeleteGlobalRef(env, clsUsage);
         ng_delete_alloc(clsPacket, __FILE__, __LINE__);
-        ng_delete_alloc(clsAllowed, __FILE__, __LINE__);
         ng_delete_alloc(clsRR, __FILE__, __LINE__);
         ng_delete_alloc(clsUsage, __FILE__, __LINE__);
     }
@@ -617,7 +610,7 @@ void dns_resolved(const struct arguments *args,
 
 static jmethodID midIsDomainBlocked = NULL;
 
-jboolean is_domain_blocked(const struct arguments *args, const char *name) {
+jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *name) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -627,15 +620,14 @@ jboolean is_domain_blocked(const struct arguments *args, const char *name) {
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(Ljava/lang/String;)Z";
+    const char *signature = "(ILjava/lang/String;)Z";
     if (midIsDomainBlocked == NULL)
         midIsDomainBlocked = jniGetMethodID(args->env, clsService, "isDomainBlocked", signature);
 
     jstring jname = (*args->env)->NewStringUTF(args->env, name);
     ng_add_alloc(jname, "jname");
 
-    jboolean jallowed = (*args->env)->CallBooleanMethod(
-            args->env, args->instance, midIsDomainBlocked, jname);
+    jboolean jallowed = (*args->env)->CallBooleanMethod(args->env, args->instance, midIsDomainBlocked, uid, jname);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jname);
@@ -703,14 +695,7 @@ jint get_uid_q(const struct arguments *args,
 
 static jmethodID midIsAddressAllowed = NULL;
 
-jmethodID midSetRaddr = NULL;
-jmethodID midGetRaddr = NULL;
-jmethodID midSetRport = NULL;
-jmethodID midGetRport = NULL;
-
-struct allowed allowed;
-
-struct allowed *is_address_allowed(const struct arguments *args, jobject jpacket) {
+jboolean is_address_allowed(const struct arguments *args, jobject jpacket) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -720,62 +705,18 @@ struct allowed *is_address_allowed(const struct arguments *args, jobject jpacket
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(Leu/flutter/netguard/NativeBridge$Packet;)Leu/flutter/netguard/NativeBridge$Allowed;";
+    const char *signature = "(Leu/flutter/netguard/NativeBridge$Packet;)Z";
     if (midIsAddressAllowed == NULL)
         midIsAddressAllowed = jniGetMethodID(args->env, clsService, "isAddressAllowed", signature);
 
-    jobject jallowed = (*args->env)->CallObjectMethod(args->env, args->instance, midIsAddressAllowed, jpacket);
-    ng_add_alloc(jallowed, "jallowed");
+
+    jboolean jallowed = (*args->env)->CallBooleanMethod(args->env, args->instance, midIsAddressAllowed, jpacket);
     jniCheckException(args->env);
-
-    if (jallowed != NULL) {
-        if (midSetRaddr == NULL) {
-            const char *string = "Ljava/lang/String;";
-            midSetRaddr     = (*args->env)->GetMethodID(args->env, clsAllowed, "setRaddr", "(Ljava/lang/String;)V");
-            midGetRaddr     = (*args->env)->GetMethodID(args->env, clsAllowed, "getRaddr", "()Ljava/lang/String;");
-            midSetRport     = (*args->env)->GetMethodID(args->env, clsAllowed, "setRport", "(Ljava/lang/Long;)V");
-            midGetRport     = (*args->env)->GetMethodID(args->env, clsAllowed, "getRport", "()Ljava/lang/Long;");
-        }
-
-        jclass clsLong = (*args->env)->FindClass(args->env, "java/lang/Long");
-        jmethodID midLongValue = (*args->env)->GetMethodID(args->env, clsLong, "longValue", "()J");
-
-        jstring jraddr = (jstring)(*args->env)->CallObjectMethod(args->env, jallowed, midGetRaddr);
-        ng_add_alloc(jraddr, "jraddr");
-
-        if (jraddr == NULL)
-            *allowed.raddr = 0;
-        else {
-            const char *raddr = (*args->env)->GetStringUTFChars(args->env, jraddr, NULL);
-            ng_add_alloc(raddr, "raddr");
-            strcpy(allowed.raddr, raddr);
-            (*args->env)->ReleaseStringUTFChars(args->env, jraddr, raddr);
-            ng_delete_alloc(raddr, __FILE__, __LINE__);
-        }
-
-        jobject jrport = (*args->env)->CallObjectMethod(args->env, jallowed, midGetRport);
-        ng_add_alloc(jrport, "jrport");
-        //allowed.rport = (uint16_t) (*args->env)->CallObjectMethod(args->env, jallowed, midGetRport);
-        if (jrport != NULL) {
-            jlong longValue = (*args->env)->CallLongMethod(args->env, jrport, midLongValue);
-            allowed.rport = (uint16_t) longValue;
-        } else {
-            allowed.rport = 0;
-        }
-
-        (*args->env)->DeleteLocalRef(args->env, jraddr);
-        (*args->env)->DeleteLocalRef(args->env, jrport);
-        ng_delete_alloc(jraddr, __FILE__, __LINE__);
-        ng_delete_alloc(jrport, __FILE__, __LINE__);
-    }
-
 
     (*args->env)->DeleteLocalRef(args->env, jpacket);
     (*args->env)->DeleteLocalRef(args->env, clsService);
-    (*args->env)->DeleteLocalRef(args->env, jallowed);
     ng_delete_alloc(jpacket, __FILE__, __LINE__);
     ng_delete_alloc(clsService, __FILE__, __LINE__);
-    ng_delete_alloc(jallowed, __FILE__, __LINE__);
 
 #ifdef PROFILE_JNI
     gettimeofday(&end, NULL);
@@ -785,7 +726,7 @@ struct allowed *is_address_allowed(const struct arguments *args, jobject jpacket
         log_android(ANDROID_LOG_WARN, "is_address_allowed %f", mselapsed);
 #endif
 
-    return (jallowed == NULL ? NULL : &allowed);
+    return jallowed;
 }
 
 jmethodID midInitPacket = NULL;

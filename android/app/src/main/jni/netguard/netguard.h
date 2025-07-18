@@ -523,7 +523,7 @@ void log_packet(const struct arguments *args, jobject jpacket);
 void dns_resolved(const struct arguments *args,
                   const char *qname, const char *aname, const char *resource, int ttl, jint uid);
 
-jboolean is_domain_blocked(const struct arguments *args, const char *name);
+jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *name);
 
 jint get_uid_q(const struct arguments *args,
                jint version,
@@ -533,7 +533,7 @@ jint get_uid_q(const struct arguments *args,
                const char *dest,
                jint dport);
 
-struct allowed *is_address_allowed(const struct arguments *args, jobject objPacket);
+jboolean is_address_allowed(const struct arguments *args, jobject objPacket);
 
 jobject create_packet(const struct arguments *args,
                       jint version,
