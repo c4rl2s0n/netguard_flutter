@@ -28,15 +28,29 @@ class SplashScreen extends StatelessWidget {
     SplashScreenState state,
   ) async {
     //SettingsCubit? settingsCubit = state.settingsCubit;
-    PermissionTools.requestNotificationPermission();
-    PermissionTools.requestNotificationPermission();
+    await PermissionTools.requestNotificationPermission();
+    await PermissionTools.requestBatteryOptimizationPermission();
     if (context.mounted) {
       context.read<SplashScreenCubit>().finish();
     }
   }
 
   Widget _main(SplashScreenState state) {
-    return _registerGlobalBlocs(state, child: HomeScreen());
+    return _registerGlobalBlocs(
+      state,
+      child: BlocBuilder<SettingsCubit, SettingsState>(
+        builder: (context, settings) => MaterialApp(
+          title: 'NetGuard',
+          scaffoldMessengerKey: messengerKey,
+          debugShowCheckedModeBanner: false,
+          debugShowMaterialGrid: false,
+          navigatorObservers: [routeObserver],
+
+          theme: getTheme(settings.darkMode, flexScheme: settings.colorScheme),
+          home: HomeScreen(),
+        ),
+      ),
+    );
   }
 
   Widget _waiting() {

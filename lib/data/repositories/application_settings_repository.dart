@@ -3,6 +3,8 @@ import 'package:netguard/common/common.dart';
 import 'package:netguard/data/data.dart';
 
 class ApplicationSettingsRepository extends IApplicationSettingsRepository {
+  ApplicationSettingsRepository(super.db);
+
   List<ApplicationSetting> _getInstalled(List<ApplicationSetting> all) {
     List<Application> installedApplications = sessionCubit.state.applications;
     return all

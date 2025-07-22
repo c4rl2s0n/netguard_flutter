@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsState {
 
- bool get darkMode; FlexScheme get colorScheme; bool get includeSystemApps; DateTime? get lastBlacklistUpdate;
+ bool get darkMode; FlexScheme get colorScheme; bool get includeSystemApps; DateTime? get lastHostlistUpdate;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SettingsStateCopyWith<SettingsState> get copyWith => _$SettingsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.includeSystemApps, includeSystemApps) || other.includeSystemApps == includeSystemApps)&&(identical(other.lastBlacklistUpdate, lastBlacklistUpdate) || other.lastBlacklistUpdate == lastBlacklistUpdate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.includeSystemApps, includeSystemApps) || other.includeSystemApps == includeSystemApps)&&(identical(other.lastHostlistUpdate, lastHostlistUpdate) || other.lastHostlistUpdate == lastHostlistUpdate));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,darkMode,colorScheme,includeSystemApps,lastBlacklistUpdate);
+int get hashCode => Object.hash(runtimeType,darkMode,colorScheme,includeSystemApps,lastHostlistUpdate);
 
 @override
 String toString() {
-  return 'SettingsState(darkMode: $darkMode, colorScheme: $colorScheme, includeSystemApps: $includeSystemApps, lastBlacklistUpdate: $lastBlacklistUpdate)';
+  return 'SettingsState(darkMode: $darkMode, colorScheme: $colorScheme, includeSystemApps: $includeSystemApps, lastHostlistUpdate: $lastHostlistUpdate)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- bool darkMode, FlexScheme colorScheme, bool includeSystemApps, DateTime? lastBlacklistUpdate
+ bool darkMode, FlexScheme colorScheme, bool includeSystemApps, DateTime? lastHostlistUpdate
 });
 
 
@@ -62,12 +62,12 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? darkMode = null,Object? colorScheme = null,Object? includeSystemApps = null,Object? lastBlacklistUpdate = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? darkMode = null,Object? colorScheme = null,Object? includeSystemApps = null,Object? lastHostlistUpdate = freezed,}) {
   return _then(SettingsState(
 darkMode: null == darkMode ? _self.darkMode : darkMode // ignore: cast_nullable_to_non_nullable
 as bool,colorScheme: null == colorScheme ? _self.colorScheme : colorScheme // ignore: cast_nullable_to_non_nullable
 as FlexScheme,includeSystemApps: null == includeSystemApps ? _self.includeSystemApps : includeSystemApps // ignore: cast_nullable_to_non_nullable
-as bool,lastBlacklistUpdate: freezed == lastBlacklistUpdate ? _self.lastBlacklistUpdate : lastBlacklistUpdate // ignore: cast_nullable_to_non_nullable
+as bool,lastHostlistUpdate: freezed == lastHostlistUpdate ? _self.lastHostlistUpdate : lastHostlistUpdate // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }

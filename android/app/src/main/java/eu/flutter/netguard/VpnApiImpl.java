@@ -8,14 +8,13 @@ import android.content.pm.PackageManager;
 import android.net.VpnService;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import eu.flutter.netguard.utils.ModelBuilder;
+import eu.flutter.netguard.data.ModelBuilder;
 import eu.flutter.netguard.utils.Util;
 import eu.flutter.netguard.utils.Values;
 import eu.flutter.netguard.NativeBridge.*;
@@ -52,6 +51,12 @@ public class VpnApiImpl implements VpnController {
         return MyVpnService.isRunning();
     }
 
+    @Nullable
+    @Override
+    public String getSession() {
+        return MyVpnService.getSessionId();
+    }
+
     @Override
     public void updateSettings(@NonNull VpnConfig config) {
         MyVpnService.updateVpnConfig(config);
@@ -84,6 +89,9 @@ public class VpnApiImpl implements VpnController {
         }
         Collections.sort(applications, (application, t1) -> {
             int comparison = application.getSystem().compareTo(t1.getSystem());
+            if (comparison == 0) {
+                comparison = application.getLabel().toLowerCase().compareTo(t1.getLabel().toLowerCase());
+            }
             if (comparison == 0) {
                 comparison = application.getPackageName().compareTo(t1.getPackageName());
             }

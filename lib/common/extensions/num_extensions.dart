@@ -19,4 +19,8 @@ extension FileFormatter on num {
     int digitGroups = (log10(this) / log10(base)).floor();
     return "${NumberFormat("#,##0.#").format(this / pow(base, digitGroups))} ${units[digitGroups]}";
   }
+
+}
+extension IntExtension on int{
+  String nDigit(int n) => toString().padLeft(n, '0');
 }

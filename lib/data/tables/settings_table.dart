@@ -8,7 +8,7 @@ class SettingsTable extends Table {
   BoolColumn get darkMode => boolean()();
   TextColumn get colorScheme => textEnum<FlexScheme>()();
   BoolColumn get includeSystemApps => boolean()();
-  DateTimeColumn get lastBlacklistScan => dateTime().nullable()();
+  DateTimeColumn get lastHostlistUpdate => dateTime().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

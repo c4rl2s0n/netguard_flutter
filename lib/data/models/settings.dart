@@ -6,11 +6,11 @@ class Settings {
     this.darkMode = true,
     this.colorScheme = FlexScheme.green,
     this.includeSystemApps = true,
-    this.lastBlacklistScan,
+    this.lastHostlistUpdate,
   });
   int id;
   bool darkMode;
   FlexScheme colorScheme;
   bool includeSystemApps;
-  DateTime? lastBlacklistScan;
+  DateTime? lastHostlistUpdate;
 }

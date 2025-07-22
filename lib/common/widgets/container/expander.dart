@@ -10,7 +10,7 @@ class Expander extends StatefulWidget {
   const Expander({
     required this.buildTitle,
     this.buildSubtitle,
-    this.leadingIcon,
+    this.buildLeading,
     this.color,
     this.buildTrailing,
     required this.children,
@@ -19,7 +19,7 @@ class Expander extends StatefulWidget {
 
   final ExpanderWidgetBuilder buildTitle;
   final ExpanderOptionalWidgetBuilder? buildSubtitle;
-  final IconData? leadingIcon;
+  final ExpanderOptionalWidgetBuilder? buildLeading;
   final List<Widget> children;
   final Color? color;
   final ExpanderWidgetBuilder? buildTrailing;
@@ -60,7 +60,7 @@ class _ExpanderState extends State<Expander> {
         subtitle: _subtitle(
           context,
         ), //widget.buildSubtitle?.call(context, isExpanded),
-        leading: widget.leadingIcon != null ? Icon(widget.leadingIcon) : null,
+        leading: widget.buildLeading?.call(context, isExpanded),
         trailing: widget.buildTrailing?.call(context, isExpanded),
         shape: RoundedRectangleBorder(
           side: BorderSide(color: color, width: 2),

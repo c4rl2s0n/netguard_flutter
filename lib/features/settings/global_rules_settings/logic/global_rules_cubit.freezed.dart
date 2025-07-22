@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GlobalRulesState {
 
- bool get loading; List<RuleSourceEntryCubit> get sources;
+ bool get loading; List<GlobalRuleSource> get sources;
 /// Create a copy of GlobalRulesState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $GlobalRulesStateCopyWith<$Res>  {
   factory $GlobalRulesStateCopyWith(GlobalRulesState value, $Res Function(GlobalRulesState) _then) = _$GlobalRulesStateCopyWithImpl;
 @useResult
 $Res call({
- bool loading, List<RuleSourceEntryCubit> sources
+ bool loading, List<GlobalRuleSource> sources
 });
 
 
@@ -66,7 +66,7 @@ class _$GlobalRulesStateCopyWithImpl<$Res>
   return _then(GlobalRulesState(
 loading: null == loading ? _self.loading : loading // ignore: cast_nullable_to_non_nullable
 as bool,sources: null == sources ? _self.sources : sources // ignore: cast_nullable_to_non_nullable
-as List<RuleSourceEntryCubit>,
+as List<GlobalRuleSource>,
   ));
 }
 

@@ -13,11 +13,12 @@ part 'database.g.dart';
 @DriftDatabase(
   tables: [
     ApplicationSettingTable,
-    BlacklistTable,
+    HostsTable,
     RulesTable,
     SettingsTable,
     ResourceRecordTable,
     GlobalRuleSourceTable,
+    TrafficLogTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -94,7 +95,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   static QueryExecutor _openConnection() {
-    if (true) {
+    if (false) {
       try {
         File(databaseFilepath).deleteSync();
       } catch (_) {}

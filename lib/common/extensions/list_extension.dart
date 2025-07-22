@@ -29,6 +29,10 @@ extension ListExtensions<T> on List<T> {
       last,
     ];
   }
+
+  Map<T, bool> boolMap(bool Function(T) tMap){
+    return { for (var e in this) e : tMap(e) };
+  }
 }
 
 extension StringListExtensions on List<String> {

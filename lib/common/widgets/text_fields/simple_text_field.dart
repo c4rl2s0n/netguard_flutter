@@ -12,11 +12,12 @@ class SimpleTextField extends StatefulWidget {
     this.validate,
     this.onChanged,
     this.onChangedDelay,
-    this.keyboardType = TextInputType.text,
+    this.keyboardType,
     this.padding,
     this.isPassword = false,
     this.updateWhenInvalid = false,
     this.enabled = true,
+    this.maxLines,
     super.key,
   });
 
@@ -26,11 +27,12 @@ class SimpleTextField extends StatefulWidget {
   final String? Function(String?)? validate;
   final Function(String)? onChanged;
   final Duration? onChangedDelay;
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
   final EdgeInsets? padding;
   final bool isPassword;
   final bool updateWhenInvalid;
   final bool enabled;
+  final int? maxLines;
 
   @override
   State<SimpleTextField> createState() => _SimpleTextFieldState();
@@ -90,6 +92,7 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
         readOnly: !widget.enabled,
         style: theme.textTheme.bodyLarge,
         controller: controller,
+        maxLines: widget.maxLines,
         obscureText: obscured,
         obscuringCharacter: '*',
         decoration: InputDecoration(
@@ -115,7 +118,11 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
                 )
               : null,
         ),
-        keyboardType: widget.keyboardType,
+        keyboardType:
+            widget.keyboardType ??
+            (widget.maxLines != null && widget.maxLines! > 1
+                ? TextInputType.multiline
+                : TextInputType.text),
         onChanged: (val) {
           _validate();
           if (_errorText == null || widget.updateWhenInvalid) {

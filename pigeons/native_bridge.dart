@@ -14,6 +14,7 @@ abstract class VpnController {
   void startVpn(VpnConfig settings);
   void stopVpn();
   bool isRunning();
+  String? getSession();
   void updateSettings(VpnConfig settings);
   List<Application> getApplications();
 }
@@ -22,41 +23,44 @@ abstract class VpnController {
 abstract class VpnEventHandler {
   void logText(String message);
   void logError(String errorCode, String message, Object details);
-  void updateVpnState(bool running);
+  void updateVpnState(String? sessionId);
   @async
   void logPacket(Packet packet);
   @async
   void logDns(ResourceRecord record);
+  @async
+  void logTraffic(TrafficLog log);
 }
 
 /// MODELS
 class VpnConfig {
   VpnConfig({
+    required this.session,
     this.filteredPackages = const [],
     this.blockedPackages = const [],
-    this.packageRules = const [],
-    this.globalRule,
+    required this.dbPath,
     this.filterUdp = true,
     this.logLevel = 5,
   });
+
+  /// Identifier for the session to allow matching traffic log to session
+  String session;
+
   /// List of PackageNames that are filtered by the firewall
   List<String> filteredPackages;
 
   /// List of PackageNames that are completely blocked by the firewall
   List<String> blockedPackages;
 
-  /// List of rules that apply for individual packages
-  List<Rule> packageRules;
-
-  /// Rule that applies for all applications
-  Rule? globalRule;
+  /// path of the sqlite database, so native code can read from it directly
+  String dbPath;
 
   bool filterUdp;
 
   int logLevel;
 }
 
-class Application{
+class Application {
   Application({
     this.uid = -1,
     this.packageName = "",
@@ -64,7 +68,6 @@ class Application{
     this.version = "",
     this.icon,
     this.system = false,
-    this.setting,
   });
   int uid;
   String packageName;
@@ -72,28 +75,6 @@ class Application{
   String version;
   Uint8List? icon;
   bool system;
-  ApplicationSetting? setting;
-}
-
-class ApplicationSetting {
-  ApplicationSetting({required this.packageName, this.filter = false});
-  String packageName;
-  bool filter;
-}
-
-class Forward {
-  Forward({
-    this.protocol = -1,
-    this.dport = -1,
-    this.raddr = "",
-    this.rport = -1,
-    this.ruid = -1,
-  });
-  int protocol;
-  int dport;
-  String raddr;
-  int rport;
-  int ruid;
 }
 
 class Packet {
@@ -144,35 +125,39 @@ class ResourceRecord {
   String? packageName;
 }
 
+enum RuleType { blacklist, whitelist }
+
 class Rule {
   Rule({
-    this.blockedHosts = const [],
-    this.blockedIPs = const [],
+    required this.type,
+    required this.blockQuic,
+    required this.hosts,
+    required this.ips,
   });
   String? packageName;
-  List<String> blockedHosts;
-  List<String> blockedIPs;
+  RuleType type;
+  bool blockQuic;
+  Map<String, bool> hosts;
+  Map<String, bool> ips;
 }
 
-class Usage {
-  Usage({
-    this.time = 0,
-    this.version = 0,
+class TrafficLog {
+  TrafficLog({
+    required this.time,
+    required this.session,
     this.protocol = 0,
-    this.daddr = "",
-    this.dport = 0,
-    this.uid = 0,
-    this.sent = 0,
-    this.received = 0,
+    this.ip = "",
+    this.host,
+    this.packageName,
+    required this.allowed,
   });
   int time;
-  int version;
+  String session;
   int protocol;
-  String daddr;
-  int dport;
-  int uid;
-  int sent;
-  int received;
+  String ip;
+  String? host;
+  String? packageName;
+  bool allowed;
 }
 
 class Version {

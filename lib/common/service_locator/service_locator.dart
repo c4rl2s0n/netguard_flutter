@@ -32,13 +32,15 @@ Future configureDependencies(
   getIt.registerLazySingleton<RouteObserver>(() => IsNavigationRootObserver());
 
   // Database
-  getIt.registerSingleton(AppDatabase());
-  getIt.registerCachedFactory<IApplicationSettingsRepository>(() => ApplicationSettingsRepository());
-  getIt.registerCachedFactory<IBlacklistRepository>(() => BlacklistRepository());
-  getIt.registerCachedFactory<IGlobalRuleSourceRepository>(() => GlobalRuleSourceRepository());
-  getIt.registerCachedFactory<IResourceRecordRepository>(() => ResourceRecordRepository());
-  getIt.registerCachedFactory<IRulesRepository>(() => RulesRepository());
-  getIt.registerCachedFactory<ISettingsRepository>(() => SettingsRepository());
+  var db = AppDatabase();
+  getIt.registerSingleton(db);
+  getIt.registerCachedFactory<IApplicationSettingsRepository>(() => ApplicationSettingsRepository(db));
+  getIt.registerCachedFactory<IHostsRepository>(() => HostsRepository(db));
+  getIt.registerCachedFactory<IGlobalRuleSourceRepository>(() => GlobalRuleSourceRepository(db));
+  getIt.registerCachedFactory<IResourceRecordRepository>(() => ResourceRecordRepository(db));
+  getIt.registerCachedFactory<IRulesRepository>(() => RulesRepository(db));
+  getIt.registerCachedFactory<ISettingsRepository>(() => SettingsRepository(db));
+  getIt.registerCachedFactory<ITrafficLogRepository>(() => TrafficLogRepository(db));
 
   // Global Cubits
   getIt.registerSingleton(SettingsCubit(settingsRepository));
@@ -49,9 +51,9 @@ Future configureDependencies(
 
   // Platform Channels
   getIt.registerSingleton(VpnController());
-  var eventHandler = VpnEventHandlerImpl();
+  VpnEventHandlerImpl eventHandler = VpnEventHandlerImpl();
   VpnEventHandler.setUp(eventHandler);
-
+  getIt.registerSingleton(eventHandler);
 
   // Injectable / MicroPackages
   getIt.init();

@@ -9,6 +9,8 @@ class CustomDialog<T> extends StatelessWidget {
     this.titleTrailing,
     this.icon,
     this.actions,
+    this.titleTextStyle,
+    this.borderColor,
     this.expand = true,
     super.key,
   });
@@ -18,6 +20,8 @@ class CustomDialog<T> extends StatelessWidget {
   final Widget content;
   final Widget? icon;
   final List<Widget>? actions;
+  final TextStyle? titleTextStyle;
+  final Color? borderColor;
   final bool expand;
 
   final double maxTitleWidgetHeight = 28;
@@ -29,7 +33,7 @@ class CustomDialog<T> extends StatelessWidget {
       child: AlertDialog(
         backgroundColor: context.colors.surfaceContainerHighest,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: context.colors.primary, width: 2),
+          side: BorderSide(color: borderColor ?? context.colors.primary, width: 2),
           borderRadius: ThemeConstants.borderRadius,
         ),
         insetPadding: const EdgeInsets.all(ThemeConstants.spacing),
@@ -65,7 +69,9 @@ class CustomDialog<T> extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     Widget icon = this.icon ?? const Icon(CustomIcons.loading);
     TextStyle titleTextStyle =
-        context.textTheme.headlineSmall ?? const TextStyle();
+        this.titleTextStyle ??
+        context.textTheme.headlineSmall ??
+        const TextStyle();
     double titleWidgetHeight =
         (titleTextStyle.fontSize ?? maxTitleWidgetHeight) *
         (titleTextStyle.height ?? 1);

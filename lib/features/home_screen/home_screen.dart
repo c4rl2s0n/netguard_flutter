@@ -1,27 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:netguard/common/common.dart';
+import 'package:netguard/features/home_screen/logs_page/logs_page.dart';
+import 'package:netguard/netguard.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      builder: (context, settings) => MaterialApp(
-        title: 'NetGuard',
-        scaffoldMessengerKey: messengerKey,
-        debugShowCheckedModeBanner: false,
-        debugShowMaterialGrid: false,
-        navigatorObservers: [routeObserver],
-
-        theme: getTheme(settings.darkMode, flexScheme: settings.colorScheme),
-        home: Builder(builder: _home),
-      ),
-    );
-  }
-
-  Widget _home(BuildContext context) {
     return PageComponentFactory.scaffold(
       context,
       appBar: PageComponentFactory.appBar(
@@ -39,19 +25,29 @@ class HomeScreen extends StatelessWidget {
       buildWhen: (oldState, state) => oldState.running != state.running,
       builder: (context, session) => Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: [if (session.running) _stop(context) else _start(context)],
+          children: [
+            if (session.running) _stop(context) else _start(context),
+            const Margin.vertical(ThemeConstants.spacing),
+            _showLogsBtn(context),
+          ],
         ),
       ),
     );
   }
 
   Widget _start(BuildContext context) {
-    Widget icon = Icon(CustomIcons.inactive, size: context.textTheme.displaySmall?.fontSize,color: context.colors.warning,);
+    Widget icon = Icon(
+      CustomIcons.inactive,
+      size: context.textTheme.displaySmall?.fontSize,
+      color: context.colors.warning,
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             icon,
             Text("Firewall disabled", style: context.textTheme.displaySmall),
@@ -60,7 +56,10 @@ class HomeScreen extends StatelessWidget {
         ),
         const Margin.vertical(ThemeConstants.spacing),
         IconButton(
-          onPressed: sessionCubit.startVpn,
+          onPressed: () async {
+            await sessionCubit.startVpn();
+            if (context.mounted) _showLogs(context);
+          },
           style: IconButton.styleFrom(
             backgroundColor: context.colors.onBackground,
             foregroundColor: context.colors.positive,
@@ -72,11 +71,16 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _stop(BuildContext context) {
-    Widget icon = Icon(CustomIcons.active, size: context.textTheme.displaySmall?.fontSize, color: context.colors.positive,);
+    Widget icon = Icon(
+      CustomIcons.active,
+      size: context.textTheme.displaySmall?.fontSize,
+      color: context.colors.positive,
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Transform.flip(flipX: true, child: icon),
             Text("Firewall is active", style: context.textTheme.displaySmall),
@@ -95,4 +99,21 @@ class HomeScreen extends StatelessWidget {
       ],
     );
   }
+
+  Widget _showLogsBtn(BuildContext context) {
+    return BlocBuilder<SessionCubit, SessionState>(
+      buildWhen: (oldState, state) =>
+          oldState.sessionTrafficLog != state.sessionTrafficLog,
+      builder: (context, state) => state.sessionTrafficLog.empty
+          ? SizedBox.shrink()
+          : IconTextButton(
+              icon: Icon(Icons.filter_list),
+              text: "Session Logs",
+              onTap: () => _showLogs(context),
+            ),
+    );
+  }
+
+  void _showLogs(BuildContext context) =>
+      context.navigator.navigateTo(const LogsPage());
 }

@@ -61,7 +61,7 @@ class PageComponentFactory {
     return BlocBuilder<SessionCubit, SessionState>(
       builder: (context, state) => Row(
         children: [
-          Text(title, style: style),
+          Expanded(child: Text(title, style: style)),
           if (state.running)
             IconButton(
               onPressed: () async {

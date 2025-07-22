@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:netguard/data/data.dart';
 
 class SettingsRepository extends ISettingsRepository {
+  SettingsRepository(super.db);
+
   @override
   Future<Settings> get() async {
     List<Settings> settings = await (db.settingsTable.select()..limit(1)).get();

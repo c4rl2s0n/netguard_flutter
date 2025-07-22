@@ -54,6 +54,7 @@ android {
             isJniDebuggable = true
             isMinifyEnabled = true
             proguardFiles.add(file("proguard-rules.pro"))
+            applicationIdSuffix = ".debug"
         }
     }
 
@@ -68,10 +69,6 @@ android {
 dependencies{
     implementation("androidx.preference:preference:1.2.1")
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
-    //implementation("com.squareup.retrofit2:converter-jackson:2.11.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
 }
 
 flutter {

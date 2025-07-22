@@ -101,8 +101,6 @@ int check_tcp_session(const struct arguments *args, struct ng_session *s,
 
     if ((s->tcp.state == TCP_CLOSING || s->tcp.state == TCP_CLOSE) &&
         (s->tcp.sent || s->tcp.received)) {
-        account_usage(args, s->tcp.version, IPPROTO_TCP,
-                      dest, ntohs(s->tcp.dest), s->tcp.uid, s->tcp.sent, s->tcp.received);
         s->tcp.sent = 0;
         s->tcp.received = 0;
     }
@@ -625,6 +623,7 @@ jboolean handle_tcp(const struct arguments *args,
                     const uint8_t *payload,
                     int uid, int allowed, struct allowed *redirect,
                     const int epoll_fd) {
+
     // Get headers
     const uint8_t version = (*pkt) >> 4;
     const struct iphdr *ip4 = (struct iphdr *) pkt;
@@ -822,6 +821,7 @@ jboolean handle_tcp(const struct arguments *args,
             return 0;
         }
     } else {
+        // Session found
         char session[250];
         sprintf(session,
                 "%s %s loc %u rem %u acked %u",
@@ -831,7 +831,11 @@ jboolean handle_tcp(const struct arguments *args,
                 cur->tcp.remote_seq - cur->tcp.remote_start,
                 cur->tcp.acked - cur->tcp.local_start);
 
-        // Session found
+        if (!allowed) {
+            log_android(ANDROID_LOG_WARN, "%s resetting blocked session", packet);
+            write_rst(args, &cur->tcp);
+            return 0;
+        }
         if (cur->tcp.state == TCP_CLOSING || cur->tcp.state == TCP_CLOSE) {
             log_android(ANDROID_LOG_WARN, "%s was closed", session);
             write_rst(args, &cur->tcp);

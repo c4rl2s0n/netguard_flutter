@@ -2,6 +2,8 @@ import 'package:netguard/netguard.dart';
 import 'package:drift/drift.dart';
 
 class ResourceRecordRepository extends IResourceRecordRepository {
+  ResourceRecordRepository(super.db);
+
   @override
   Future<List<ResourceRecord>> getAll() async {
     return await db.resourceRecordTable.select().get();

@@ -8,7 +8,7 @@ extension SnackBarTextTheme on BuildContext {
 }
 
 class SnackBarFactory {
-  static Duration _defaultSnackBarDuration = const Duration(milliseconds: 4000);
+  static const Duration _defaultSnackBarDuration = Duration(milliseconds: 4000);
   static void showSnackBar(
     SnackBar Function(BuildContext context) buildSnackBar,
   ) {

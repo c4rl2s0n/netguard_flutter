@@ -18,44 +18,47 @@ class SimpleSetting extends StatelessWidget {
   Widget build(BuildContext context) {
     bool showWarning = warning.notEmpty;
     TextStyle titleStyle = context.textTheme.titleMedium ?? const TextStyle();
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    name,
-                    style: titleStyle.copyWith(
-                      color: showWarning ? context.colors.warning : null,
-                    ),
-                  ),
-                  if (showWarning) ...[
-                    const Margin.horizontal(ThemeConstants.spacing),
-                    Tooltip(
-                      message: warning,
-                      child: Icon(
-                        CustomIcons.warning,
-                        color: context.colors.warning,
-                        size: titleStyle.fontSize,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.smallSpacing),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      name,
+                      style: titleStyle.copyWith(
+                        color: showWarning ? context.colors.warning : null,
                       ),
                     ),
+                    if (showWarning) ...[
+                      const Margin.horizontal(ThemeConstants.spacing),
+                      Tooltip(
+                        message: warning,
+                        child: Icon(
+                          CustomIcons.warning,
+                          color: context.colors.warning,
+                          size: titleStyle.fontSize,
+                        ),
+                      ),
+                    ],
                   ],
+                ),
+                if (description != null) ...[
+                  Text(description!, style: context.textTheme.labelMedium),
                 ],
-              ),
-              if (description != null) ...[
-                Text(description!, style: context.textTheme.labelMedium),
               ],
-            ],
+            ),
           ),
-        ),
-        if (action != null) ...[Flexible(flex: 1, child: action!)],
-      ],
+          if (action != null) ...[Flexible(flex: 1, child: action!)],
+        ],
+      ),
     );
   }
 }

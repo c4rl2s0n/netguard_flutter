@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/common/common.dart';
+import 'package:netguard/data/data.dart';
+import 'package:netguard/features/applications_view/application_view/application_view.dart';
 import 'package:netguard/features/applications_view/logic/application_entry_cubit.dart';
 
 class ApplicationEntry extends StatelessWidget {
@@ -15,11 +17,10 @@ class ApplicationEntry extends StatelessWidget {
   }
 
   Widget _content(BuildContext context) {
-    return ListTile(
-      title: Text(application.label),
+    return ActionSetting(
+      name: application.label,
       //subtitle: Text(application.packageName),
-      subtitle: Text("${application.packageName}\n${application.version}"),
-      isThreeLine: false,
+      description: "${application.packageName}\n${application.version}",
       leading: SizedBox.square(
         dimension: 42,
         child: application.icon != null
@@ -27,6 +28,7 @@ class ApplicationEntry extends StatelessWidget {
             : null,
       ),
       trailing: _switch(),
+      action: (context) => context.navigator.navigateTo(ApplicationView(applicationCubit)),
     );
   }
 

@@ -78,6 +78,7 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
     _updateOnCubitChange = true;
   }
 
+  // TODO: this is not working reliably, if at all....
   bool _updateOnCubitChange = true;
   void onCubitChanged(ApplicationEntryState state) {
     if(_updateOnCubitChange) updateAllEnabled();

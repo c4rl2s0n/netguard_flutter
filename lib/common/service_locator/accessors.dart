@@ -1,3 +1,4 @@
+import 'package:drift/isolate.dart';
 import 'package:flutter/widgets.dart';
 import 'package:netguard/common/common.dart';
 import 'package:netguard/data/data.dart';
@@ -6,7 +7,7 @@ import 'package:path/path.dart';
 
 
 VpnController get vpnController => getIt<VpnController>();
-VpnEventHandler get vpnEventHandler => getIt<VpnEventHandlerImpl>();
+VpnEventHandlerImpl get vpnEventHandler => getIt<VpnEventHandlerImpl>();
 SnackBarService get snackBarService => getIt<SnackBarService>();
 RouteObserver get routeObserver => getIt<RouteObserver>();
 
@@ -17,9 +18,12 @@ String get databaseFilepath => join(documentsDirectory, databaseFilename);
 SettingsCubit get settingsCubit => getIt<SettingsCubit>();
 SessionCubit get sessionCubit => getIt<SessionCubit>();
 
+AppDatabase get database => getIt<AppDatabase>();
+Future<DriftIsolate> get databaseConnection async => await database.serializableConnection();
 IApplicationSettingsRepository get applicationSettingsRepository => getIt<IApplicationSettingsRepository>();
-IBlacklistRepository get blacklistRepository => getIt<IBlacklistRepository>();
+IHostsRepository get hostsRepository => getIt<IHostsRepository>();
 IGlobalRuleSourceRepository get globalRuleSourceRepository => getIt<IGlobalRuleSourceRepository>();
 IResourceRecordRepository get resourceRecordRepository => getIt<IResourceRecordRepository>();
 IRulesRepository get rulesRepository => getIt<IRulesRepository>();
 ISettingsRepository get settingsRepository => getIt<ISettingsRepository>();
+ITrafficLogRepository get trafficLogRepository => getIt<ITrafficLogRepository>();

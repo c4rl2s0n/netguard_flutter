@@ -8,14 +8,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
-import eu.flutter.netguard.MainActivity;
-import eu.flutter.netguard.MyVpnService;
 import eu.flutter.netguard.NativeBridge.*;
 import eu.flutter.netguard.VpnEventChannel;
-import eu.flutter.netguard.data.DatabaseHelper;
 
 public final class LogHandler extends Handler {
     private static final String TAG = "NetGuard.LogHandler";
@@ -24,7 +20,7 @@ public final class LogHandler extends Handler {
     private static final int MSG_STATS_STOP = 2;
     private static final int MSG_STATS_UPDATE = 3;
     private static final int MSG_PACKET = 4;
-    private static final int MSG_USAGE = 5;
+    private static final int MSG_TRAFFIC = 5;
     private static final int MSG_DNS = 6;
     public int queue = 0;
 
@@ -54,6 +50,12 @@ public final class LogHandler extends Handler {
         msg.what = MSG_PACKET;
         queue(msg);
     }
+    public void traffic(TrafficLog log){
+        Message msg = obtainMessage();
+        msg.obj = log;
+        msg.what = MSG_TRAFFIC;
+        queue(msg);
+    }
     public void dns(ResourceRecord record){
         Message msg = obtainMessage();
         msg.obj = record;
@@ -66,13 +68,6 @@ public final class LogHandler extends Handler {
         msg.what = MSG_DNS;
         queue(msg);
     }
-    public void account(Usage usage) {
-        Message msg = obtainMessage();
-        msg.obj = usage;
-        msg.what = MSG_USAGE;
-
-        queue(msg);
-    }
 
     @Override
     public void handleMessage(Message msg) {
@@ -81,13 +76,11 @@ public final class LogHandler extends Handler {
                 case MSG_PACKET:
                     VpnEventChannel.logPacket((Packet) msg.obj);
                     break;
-
+                case MSG_TRAFFIC:
+                    VpnEventChannel.logTraffic((TrafficLog) msg.obj);
+                    break;
                 case MSG_DNS:
                     VpnEventChannel.logDns((ResourceRecord) msg.obj);
-                    break;
-
-                case MSG_USAGE:
-                    usage((Usage) msg.obj);
                     break;
 
                 default:
@@ -112,23 +105,8 @@ public final class LogHandler extends Handler {
 
 
     public void vpnStopped(){
-        VpnEventChannel.updateVpnState(false);
+        VpnEventChannel.updateVpnState(null);
         logText("VPN stopped!");
     }
 
-
-    private void usage(Usage usage) {
-        if (usage.getUid() >= 0 && !(usage.getUid() == 0 && usage.getProtocol() == Protocols.UDP && usage.getDport() == 53)) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean filter = prefs.getBoolean("filter", false);
-            boolean log_app = prefs.getBoolean("log_app", false);
-            boolean track_usage = prefs.getBoolean("track_usage", false);
-            if (filter && log_app && track_usage) {
-                DatabaseHelper dh = DatabaseHelper.getInstance(this.context);
-                String dname = dh.getQName(usage.getUid(), usage.getDaddr());
-                Log.i(TAG, "Usage account " + usage + " dname=" + dname);
-                dh.updateUsage(usage, dname);
-            }
-        }
-    }
 }

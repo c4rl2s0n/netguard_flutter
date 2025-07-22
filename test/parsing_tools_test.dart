@@ -245,7 +245,7 @@ fe80::1%lo0 localhost
 void main() {
 
   test("Test parsing a hosts file", () {
-    List<String> hosts = ParsingTools.parseHosts(hostsSample).hosts;
+    List<String> hosts = ParsingTools.parseHosts(hostsSample).hosts.toList();
     expect(hosts.length, greaterThan(0));
   });
 }

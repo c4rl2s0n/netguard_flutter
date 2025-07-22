@@ -17,9 +17,12 @@ class ApplicationsView extends StatelessWidget {
         title: "Applications",
         actions: [PageComponentFactory.settingsNavigationButton(context)],
       ),
-      body: BlocProvider(
-        create: (context) => ApplicationsViewCubit(),
-        child: _buildContent(context),
+      body: BlocBuilder<SessionCubit, SessionState>(
+        buildWhen: (oldState, state) => oldState.applications != state.applications,
+        builder: (context, state) =>  BlocProvider(
+          create: (context) => ApplicationsViewCubit(),
+          child: _buildContent(context),
+        ),
       ),
     );
   }

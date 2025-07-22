@@ -7,9 +7,13 @@ class CustomIcons {
   static const IconData appIcon = Icons.fire_extinguisher_sharp;
   static const IconData home = Icons.fire_hydrant_alt_outlined;
   static const IconData applications = Icons.app_registration;
-  static const IconData active = Icons.fire_extinguisher_outlined;
+  static const IconData active = Icons.security;
   static const IconData inactive = Icons.local_fire_department_outlined;
   static const IconData scan = Icons.document_scanner_outlined;
+  static const IconData addFromClipboard = Icons.assignment_add;
+  static const IconData import = Icons.download_for_offline_outlined;
+  static const IconData block = Icons.front_hand; // Icons.gpp_bad_outlined; // alternative: Icons.front_hand_outlined;
+  static const IconData allow = Icons.verified_user_outlined;
 
   static const IconData infoPositive = Icons.verified;
   static const IconData infoNegative = Icons.error_outline;

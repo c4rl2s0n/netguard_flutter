@@ -11,40 +11,11 @@ class VpnTools {
   }
   static Future<VpnConfig> getConfig() async {
     VpnConfig config = VpnConfig(
+      session: IdTools.generateUuid(),
       filteredPackages: await _getFilteredPackages(),
-      packageRules: await _getPackageRules(),
-      globalRule: await _getGlobalRule(),
+      dbPath: databaseFilepath,
     );
     return config;
-  }
-
-  static Future<List<native.Rule>> _getPackageRules() async{
-    // get all the applications that should be ignored by firewall
-    List<String> active = (await applicationSettingsRepository.getActive())
-        .map((a) => a.packageName)
-        .toList();
-    active = getRelevant(active, (a) => a);
-
-    List<native.Rule> rules = [];
-    IRulesRepository rr = rulesRepository;
-    for(var packageName in active){
-      rules.addAll(await rr.getForPackage(packageName));
-    }
-    return rules;
-  }
-  static Future<native.Rule> _getGlobalRule() async {
-    List<BlacklistEntry> blacklist = await blacklistRepository.getGeneric();
-    return native.Rule(
-      packageName: null,
-      blockedHosts: blacklist
-          .where((b) => b.type == BlacklistType.host)
-          .map((b) => b.target)
-          .toList(),
-      blockedIPs: blacklist
-          .where((b) => b.type == BlacklistType.ip)
-          .map((b) => b.target)
-          .toList(),
-    );
   }
 
   static Future<List<String>> _getFilteredPackages() async {

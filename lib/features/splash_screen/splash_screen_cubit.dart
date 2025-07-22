@@ -61,7 +61,7 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
     // initialize filepaths and database
     Directory dir = await getApplicationDocumentsDirectory();
     applicationDocumentsDirectory = path.join(dir.path, 'netguard');
-    databaseFilename = 'netguard.sqlite';
+    databaseFilename = 'netguard.db';
     await _prepareStorage(applicationDocumentsDirectory);
   }
 

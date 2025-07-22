@@ -5,8 +5,9 @@ class ExpanderEdit extends StatelessWidget {
   const ExpanderEdit({
     required this.title,
     this.subtitle,
-    this.leadingIcon,
+    this.buildLeading,
     this.color,
+    this.trailing,
     required this.child,
     this.onTitleChanged,
     this.showSubtitleOnEdit = false,
@@ -15,8 +16,9 @@ class ExpanderEdit extends StatelessWidget {
 
   final String title;
   final String? subtitle;
-  final IconData? leadingIcon;
+  final ExpanderOptionalWidgetBuilder? buildLeading;
   final Widget child;
+  final Widget? trailing;
   final Color? color;
   final Function(String)? onTitleChanged;
   final bool showSubtitleOnEdit;
@@ -26,9 +28,9 @@ class ExpanderEdit extends StatelessWidget {
     return Expander(
       buildTitle: _title,
       buildSubtitle: _subtitle,
-      leadingIcon: leadingIcon,
+      buildLeading: buildLeading,
       buildTrailing: (context, isExpanded) =>
-          Icon(isExpanded ? CustomIcons.edit : CustomIcons.editOff),
+          trailing ?? Icon(isExpanded ? CustomIcons.edit : CustomIcons.editOff),
       color: color,
       children: [child],
     );

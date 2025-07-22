@@ -43,7 +43,6 @@ extern struct uid_cache_entry *uid_cache;
 
 jclass clsPacket;
 jclass clsRR;
-jclass clsUsage;
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     log_android(ANDROID_LOG_INFO, "JNI load");
@@ -61,10 +60,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     const char *rr = "eu/flutter/netguard/NativeBridge$ResourceRecord";
     clsRR = jniGlobalRef(env, jniFindClass(env, rr));
     ng_add_alloc(clsRR, "clsRR");
-
-    const char *usage = "eu/flutter/netguard/NativeBridge$Usage";
-    clsUsage = jniGlobalRef(env, jniFindClass(env, usage));
-    ng_add_alloc(clsUsage, "clsUsage");
 
     // Raise file number limit to maximum
     struct rlimit rlim;
@@ -91,10 +86,8 @@ void JNI_OnUnload(JavaVM *vm, void *reserved) {
     else {
         (*env)->DeleteGlobalRef(env, clsPacket);
         (*env)->DeleteGlobalRef(env, clsRR);
-        (*env)->DeleteGlobalRef(env, clsUsage);
         ng_delete_alloc(clsPacket, __FILE__, __LINE__);
         ng_delete_alloc(clsRR, __FILE__, __LINE__);
-        ng_delete_alloc(clsUsage, __FILE__, __LINE__);
     }
 }
 
@@ -509,6 +502,51 @@ void log_packet(const struct arguments *args, jobject jpacket) {
 #endif
 }
 
+static jmethodID midLogTraffic = NULL;
+
+void log_traffic(const struct arguments *args, jint uid, jint protocol, const char*ip, const char* host, jboolean allowed) {
+#ifdef PROFILE_JNI
+    float mselapsed;
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+
+    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
+    ng_add_alloc(clsService, "clsService");
+
+    const char *signature = "(JIILjava/lang/String;Ljava/lang/String;Z)V";
+    if (midLogTraffic == NULL)
+        midLogTraffic = jniGetMethodID(args->env, clsService, "logTraffic", signature);
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    jlong t = tv.tv_sec * 1000LL + tv.tv_usec / 1000;
+
+    jstring jip = (*args->env)->NewStringUTF(args->env, ip);
+    jstring jhost = (*args->env)->NewStringUTF(args->env, host);
+    ng_add_alloc(jip, "jip");
+    ng_add_alloc(jhost, "jhost");
+
+    (*args->env)->CallVoidMethod(args->env, args->instance, midLogTraffic, t, uid, protocol, jip, jhost, allowed);
+    jniCheckException(args->env);
+
+    (*args->env)->DeleteLocalRef(args->env, jip);
+    (*args->env)->DeleteLocalRef(args->env, jhost);
+    ng_delete_alloc(jip, __FILE__, __LINE__);
+    ng_delete_alloc(jhost, __FILE__, __LINE__);
+
+    (*args->env)->DeleteLocalRef(args->env, clsService);
+    ng_delete_alloc(clsService, __FILE__, __LINE__);
+
+#ifdef PROFILE_JNI
+    gettimeofday(&end, NULL);
+    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
+                (end.tv_usec - start.tv_usec) / 1000.0;
+    if (mselapsed > PROFILE_JNI)
+        log_android(ANDROID_LOG_WARN, "log_traffic %f", mselapsed);
+#endif
+}
+
 static jmethodID midDnsResolved = NULL;
 static jmethodID midInitRR = NULL;
 jmethodID midSetRRQTime = NULL;
@@ -608,6 +646,39 @@ void dns_resolved(const struct arguments *args,
 #endif
 }
 
+static jmethodID midIsQuicBlocked = NULL;
+
+jboolean is_quic_blocked(const struct arguments *args, jint uid) {
+#ifdef PROFILE_JNI
+    float mselapsed;
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+
+    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
+    ng_add_alloc(clsService, "clsService");
+
+    const char *signature = "(I)Z";
+    if (midIsQuicBlocked == NULL)
+        midIsQuicBlocked = jniGetMethodID(args->env, clsService, "isQuicBlocked", signature);
+
+    jboolean jblocked = (*args->env)->CallBooleanMethod(args->env, args->instance, midIsQuicBlocked, uid);
+    jniCheckException(args->env);
+
+    (*args->env)->DeleteLocalRef(args->env, clsService);
+    ng_delete_alloc(clsService, __FILE__, __LINE__);
+
+#ifdef PROFILE_JNI
+    gettimeofday(&end, NULL);
+    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
+                (end.tv_usec - start.tv_usec) / 1000.0;
+    if (mselapsed > PROFILE_JNI)
+        log_android(ANDROID_LOG_WARN, "is_quic_blocked %f", mselapsed);
+#endif
+
+    return jblocked;
+}
+
 static jmethodID midIsDomainBlocked = NULL;
 
 jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *name) {
@@ -627,7 +698,7 @@ jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *n
     jstring jname = (*args->env)->NewStringUTF(args->env, name);
     ng_add_alloc(jname, "jname");
 
-    jboolean jallowed = (*args->env)->CallBooleanMethod(args->env, args->instance, midIsDomainBlocked, uid, jname);
+    jboolean jblocked = (*args->env)->CallBooleanMethod(args->env, args->instance, midIsDomainBlocked, uid, jname);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jname);
@@ -643,7 +714,7 @@ jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *n
         log_android(ANDROID_LOG_WARN, "is_domain_blocked %f", mselapsed);
 #endif
 
-    return jallowed;
+    return jblocked;
 }
 
 static jmethodID midGetUidQ = NULL;
@@ -875,122 +946,6 @@ jobject create_packet(const struct arguments *args,
 #endif
 
     return jpacket;
-}
-
-jmethodID midAccountUsage = NULL;
-jmethodID midInitUsage = NULL;
-
-jmethodID midSetUsageTime = NULL;
-jmethodID midSetUsageVersion = NULL;
-jmethodID midSetUsageProtocol = NULL;
-jmethodID midSetUsageDAddr = NULL;
-jmethodID midSetUsageDPort = NULL;
-jmethodID midSetUsageUid = NULL;
-jmethodID midSetUsageSent = NULL;
-jmethodID midSetUsageReceived = NULL;
-
-void account_usage(const struct arguments *args, jint version, jint protocol,
-                   const char *daddr, jint dport, jint uid, jlong sent, jlong received) {
-#ifdef PROFILE_JNI
-    float mselapsed;
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-#endif
-
-    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
-    ng_add_alloc(clsService, "clsService");
-
-    const char *signature = "(Leu/flutter/netguard/NativeBridge$Usage;)V";
-    if (midAccountUsage == NULL)
-        midAccountUsage = jniGetMethodID(args->env, clsService, "accountUsage", signature);
-
-    const char *usage = "eu/flutter/netguard/NativeBridge$Usage";
-    if (midInitUsage == NULL)
-        midInitUsage = jniGetMethodID(args->env, clsUsage, "<init>", "()V");
-
-    jobject jusage = jniNewObject(args->env, clsUsage, midInitUsage, usage);
-    ng_add_alloc(jusage, "jusage");
-
-    if (midSetUsageTime == NULL) {
-        const char *string = "Ljava/lang/String;";
-        midSetUsageTime = jniGetMethodID(args->env, clsUsage, "setTime", "(Ljava/lang/Long;)V");
-        midSetUsageVersion = jniGetMethodID(args->env, clsUsage, "setVersion", "(Ljava/lang/Long;)V");
-        midSetUsageProtocol = jniGetMethodID(args->env, clsUsage, "setProtocol", "(Ljava/lang/Long;)V");
-        midSetUsageDAddr = jniGetMethodID(args->env, clsUsage, "setDaddr", "(Ljava/lang/String;)V");
-        midSetUsageDPort = jniGetMethodID(args->env, clsUsage, "setDport", "(Ljava/lang/Long;)V");
-        midSetUsageUid = jniGetMethodID(args->env, clsUsage, "setUid", "(Ljava/lang/Long;)V");
-        midSetUsageSent = jniGetMethodID(args->env, clsUsage, "setSent", "(Ljava/lang/Long;)V");
-        midSetUsageReceived = jniGetMethodID(args->env, clsUsage, "setReceived", "(Ljava/lang/Long;)V");
-    }
-
-    jlong t = time(NULL) * 1000LL;
-
-    jclass clsLong = (*args->env)->FindClass(args->env, "java/lang/Long");
-    jmethodID longInit = (*args->env)->GetMethodID(args->env, clsLong, "<init>", "(J)V");
-
-    jobject jtime     = (*args->env)->NewObject(args->env, clsLong, longInit, t);
-    jobject jversion  = (*args->env)->NewObject(args->env, clsLong, longInit, (jlong)version);
-    jobject jprotocol = (*args->env)->NewObject(args->env, clsLong, longInit, (jlong)protocol);
-    jstring jdaddr    = (*args->env)->NewStringUTF(args->env, daddr);
-    jobject jdport    = (*args->env)->NewObject(args->env, clsLong, longInit, (jlong)dport);
-    jobject juid      = (*args->env)->NewObject(args->env, clsLong, longInit, (jlong)uid);
-    jobject jsent     = (*args->env)->NewObject(args->env, clsLong, longInit, sent);
-    jobject jreceived = (*args->env)->NewObject(args->env, clsLong, longInit, received);
-    ng_add_alloc(jtime, "jtime");
-    ng_add_alloc(jversion, "jversion");
-    ng_add_alloc(jprotocol, "jprotocol");
-    ng_add_alloc(jdaddr, "jdaddr");
-    ng_add_alloc(jdport, "jdport");
-    ng_add_alloc(juid, "juid");
-    ng_add_alloc(jsent, "jsent");
-    ng_add_alloc(jreceived, "jreceived");
-
-
-    // Call setters
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageTime, jtime);
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageVersion, jversion);
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageProtocol, jprotocol);
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageDAddr, jdaddr);
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageDPort, jdport);
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageUid, juid);
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageSent, jsent);
-    (*args->env)->CallVoidMethod(args->env, jusage, midSetUsageReceived, jreceived);
-
-
-
-    (*args->env)->CallVoidMethod(args->env, args->instance, midAccountUsage, jusage);
-    jniCheckException(args->env);
-
-    // Clean up local references
-    (*args->env)->DeleteLocalRef(args->env, jtime);
-    (*args->env)->DeleteLocalRef(args->env, jversion);
-    (*args->env)->DeleteLocalRef(args->env, jprotocol);
-    (*args->env)->DeleteLocalRef(args->env, jdaddr);
-    (*args->env)->DeleteLocalRef(args->env, jdport);
-    (*args->env)->DeleteLocalRef(args->env, juid);
-    (*args->env)->DeleteLocalRef(args->env, jsent);
-    (*args->env)->DeleteLocalRef(args->env, jreceived);
-    ng_delete_alloc(jtime, __FILE__, __LINE__);
-    ng_delete_alloc(jversion, __FILE__, __LINE__);
-    ng_delete_alloc(jprotocol, __FILE__, __LINE__);
-    ng_delete_alloc(jdaddr, __FILE__, __LINE__);
-    ng_delete_alloc(jdport, __FILE__, __LINE__);
-    ng_delete_alloc(juid, __FILE__, __LINE__);
-    ng_delete_alloc(jsent, __FILE__, __LINE__);
-    ng_delete_alloc(jreceived, __FILE__, __LINE__);
-
-    (*args->env)->DeleteLocalRef(args->env, jusage);
-    (*args->env)->DeleteLocalRef(args->env, clsService);
-    ng_delete_alloc(jusage, __FILE__, __LINE__);
-    ng_delete_alloc(clsService, __FILE__, __LINE__);
-
-#ifdef PROFILE_JNI
-    gettimeofday(&end, NULL);
-    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
-                (end.tv_usec - start.tv_usec) / 1000.0;
-    if (mselapsed > PROFILE_JNI)
-        log_android(ANDROID_LOG_WARN, "log_packet %f", mselapsed);
-#endif
 }
 
 struct alloc_record {

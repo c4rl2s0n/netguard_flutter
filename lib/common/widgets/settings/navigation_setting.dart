@@ -15,28 +15,12 @@ class NavigationSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle titleStyle = context.textTheme.titleMedium ?? const TextStyle();
-    return TapContainer(
-      onTap: (_) => context.navigator.navigateTo(getDestination(context)),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(name, style: titleStyle),
-                if (description != null) ...[
-                  Text(description!, style: context.textTheme.labelMedium),
-                ],
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right),
-        ],
-      ),
+    return ActionSetting(
+      name: name,
+      description: description,
+      trailing: Icon(Icons.chevron_right),
+      action: (context) =>
+          context.navigator.navigateTo(getDestination(context)),
     );
   }
 }

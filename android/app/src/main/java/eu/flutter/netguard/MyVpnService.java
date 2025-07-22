@@ -30,7 +30,8 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 //import eu.flutter.netguard.data.DatabaseHelper;
-import eu.flutter.netguard.data.models.IPRule;
+import eu.flutter.netguard.data.DatabaseHelper;
+import eu.flutter.netguard.data.ModelBuilder;
 import eu.flutter.netguard.utils.*;
 import eu.flutter.netguard.NativeBridge.*;
 
@@ -66,16 +67,21 @@ public class MyVpnService extends VpnService {
     private LogHandler logHandler;
     private NotificationTools notification;
 
-    private Set<String> setGlobalBlockedHosts = new HashSet<>();
-    private Set<String> setGlobalBlockedIPs = new HashSet<>();
-    private Map<Long, Set<String>> mapUidBlockedHosts = new HashMap<>();
-    private Map<Long, Set<String>> mapUidBlockedIPs = new HashMap<>();
+    private Map<String, Boolean> mapGlobalBlockedHosts = new HashMap<>();
+    private Map<String, Boolean> mapGlobalBlockedIPs = new HashMap<>();
+    private Map<Long, Rule> mapUidRules = new HashMap<>();
     private Set<Long> setUidBlockedFully = new HashSet<>();
     private Map<Long, String> mapUidPackageName = new HashMap<>();
     private static boolean running = false;
 
+    private static DatabaseHelper database;
+
     public static boolean isRunning() {
         return running;
+    }
+    public static String getSessionId() {
+        if(running) return vpnConfig.getSession();
+        return null;
     }
 
 
@@ -139,6 +145,7 @@ public class MyVpnService extends VpnService {
         if(config == null) return;
 
         MyVpnService.vpnConfig = config;
+        database = new DatabaseHelper(config.getDbPath());
         // TODO: if running, probably need to restart service in order to apply new settings
         // TODO: send reload intent (?)
     }
@@ -205,7 +212,7 @@ public class MyVpnService extends VpnService {
         boolean subnet = false; // prefs.getBoolean("subnet", false);
         boolean tethering = false; //prefs.getBoolean("tethering", false);
         boolean lan = false; // prefs.getBoolean("lan", false);
-        boolean ip6 = false; // prefs.getBoolean("ip6", true);
+        boolean ip6 = true; // prefs.getBoolean("ip6", true);
         boolean filter = false; // prefs.getBoolean("filter", false);
         boolean system = false; // prefs.getBoolean("manage_system", false);
 
@@ -229,6 +236,7 @@ public class MyVpnService extends VpnService {
 
         // DNS address
         // (WHITELIST MODE) original: if (filter)
+        // TODO: custom DNS servers
         for (InetAddress dns : DNS.getDns(MyVpnService.this)) {
             if (ip6 || dns instanceof Inet4Address) {
                 Log.i(TAG, "Using DNS=" + dns);
@@ -236,6 +244,7 @@ public class MyVpnService extends VpnService {
             }
         }
 
+        // TODO: what is this?!
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             try {
                 ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -250,6 +259,7 @@ public class MyVpnService extends VpnService {
                 Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
             }
 
+        // TODO: Subnet routing needed?
         // Subnet routing
         if (subnet) {
             // Exclude IP ranges
@@ -370,10 +380,6 @@ public class MyVpnService extends VpnService {
         Log.i(TAG, "MTU=" + mtu);
         builder.setMtu(mtu);
 
-        // TODO: This is doing some VpnService setup to configure filtering (allow/disallow) of applications
-        // TODO: addDisallowed adds applications to a list of apps that are NOT handled by the VPNService and therfore bypass it completely!
-        // TODO: addAllowed adds applications to list of apps that ARE handled by VPNService
-
         // Add list of allowed applications
         // Whitelist
         for (String packageName : filteredPackages) {
@@ -385,43 +391,12 @@ public class MyVpnService extends VpnService {
             }
         }
 
-        // Build configure intent // TODO: What is that?!
-//        Intent configure = new Intent(this, ActivityMain.class);
-//        PendingIntent pi = PendingIntentCompat.getActivity(this, 0, configure, PendingIntent.FLAG_UPDATE_CURRENT);
-//        builder.setConfigureIntent(pi);
-
         return builder;
     }
     private void startNative(final ParcelFileDescriptor vpn) {
-
         prepareGlobalRules();
         preparePackageRules();
         prepareBlockedPackages();
-        // Prepare rules
-//        if (filter) {
-//            prepareUidAllowed(listAllowed, listRule);
-//            prepareHostsBlocked();
-//            prepareMalwareList();
-//            prepareUidIPFilters(null);
-//            prepareForwarding();
-//        } else {
-//            lock.writeLock().lock();
-//            mapUidAllowed.clear();
-//            mapUidKnown.clear();
-//            mapHostsBlocked.clear();
-//            mapMalware.clear();
-//            mapUidIPFilters.clear();
-//            mapForward.clear();
-//            lock.writeLock().unlock();
-//        }
-//
-//        if (log_app)
-//            prepareNotify(listRule);
-//        else {
-//            lock.writeLock().lock();
-//            mapNotify.clear();
-//            lock.writeLock().unlock();
-//        }
 
         int prio = vpnConfig.getLogLevel().intValue();
         final int rcode = 3; // TODO: not sure if this is necessary, related to DNS... original: Integer.parseInt(prefs.getString("rcode", "3"));
@@ -434,7 +409,7 @@ public class MyVpnService extends VpnService {
                 @Override
                 public void run() {
                     Log.i(TAG, "Running tunnel context=" + jni_context);
-                    jni_run(jni_context, vpn.getFd(), false /* TODO: mapForward.containsKey(53)*/, rcode);
+                    jni_run(jni_context, vpn.getFd(), true /* TODO: mapForward.containsKey(53)*/, rcode);
                     Log.i(TAG, "Tunnel exited");
                     tunnelThread = null;
                 }
@@ -474,65 +449,29 @@ public class MyVpnService extends VpnService {
     }
 
 
-    private void unprepare() {
-        lock.writeLock().lock();
-        setGlobalBlockedHosts.clear();
-        setGlobalBlockedIPs.clear();
-        mapUidBlockedHosts.clear();
-        mapUidBlockedIPs.clear();
-        mapUidPackageName.clear();
-        lock.writeLock().unlock();
-    }
-    private void prepareRule(Rule rule) {
-        lock.writeLock().lock();
-
-        Set<String> setBlockedHosts = null;
-        Set<String> setBlockedIPs = null;
-
-        // get the correct maps for either a packages map or the global map
-        String packageName = rule.getPackageName();
-        if(packageName == null || packageName.isBlank()){
-            setBlockedHosts = setGlobalBlockedHosts;
-            setBlockedIPs = setGlobalBlockedIPs;
-        }else{
-            // lookup the uid of a packageName
-            long uid = Util.packageNameToUid(this, rule.getPackageName());
-            if(uid > 0) {
-                // store packageName in lookup table
-                mapUidPackageName.put(uid, rule.getPackageName());
-
-                // initialize maps for package-blacklists
-                setBlockedHosts = new HashSet<>();
-                setBlockedIPs = new HashSet<>();
-                mapUidBlockedHosts.put(uid, setBlockedHosts);
-                mapUidBlockedIPs.put(uid, setBlockedIPs);
-            }
-        }
-        if(setBlockedHosts == null || setBlockedIPs == null) {
-            lock.writeLock().unlock();
-            return;
-        }
-
-        // clear current lists
-        setBlockedHosts.clear();
-        setBlockedIPs.clear();
-
-        // populate sets with blacklists
-        setBlockedHosts.addAll(rule.getBlockedHosts());
-        setBlockedIPs.addAll(rule.getBlockedIPs());
-
-        lock.writeLock().unlock();
-    }
     private void prepareGlobalRules() {
-        Rule rule = vpnConfig.getGlobalRule();
-        if(rule != null){
-            prepareRule(rule);
-        }
+        mapGlobalBlockedHosts.clear();
+        mapGlobalBlockedIPs.clear();
     }
     private void preparePackageRules() {
-        for(var rule : vpnConfig.getPackageRules()){
-            prepareRule(rule);
+        lock.writeLock().lock();
+        mapUidRules.clear();
+        mapUidPackageName.clear();
+        for(var packageName : vpnConfig.getFilteredPackages()){
+            Rule rule = database.getPackageRule(packageName);
+            if(rule == null) continue;
+
+            // lookup the uid of a packageName
+            long uid = Util.packageNameToUid(this, packageName);
+            if(uid < 0) {
+                continue;
+            }
+
+            mapUidRules.put(uid, rule);
+            mapUidPackageName.put(uid, packageName);
         }
+
+        lock.writeLock().unlock();
     }
     private void prepareBlockedPackages() {
         setUidBlockedFully.clear();
@@ -568,8 +507,18 @@ public class MyVpnService extends VpnService {
         logHandler.packet(packet);
     }
     // Called from native code
-    private void accountUsage(Usage usage) {
-        logHandler.account(usage);
+    private void logTraffic(long time, int uid, int protocol, String ip, String host, boolean allowed) {
+        // TODO: make logging optional
+        if(uid > 0){
+            Log.wtf(TAG, "LogTraffic: uid is "+uid+"!!!!!");
+            Log.wtf(TAG, "Mapped packages:"+String.join(",", mapUidPackageName.values()));
+        }
+        if (uid != Process.myUid()) {
+            String packageName = mapUidPackageName.get((long)uid);
+            Log.wtf(TAG, "LogTraffic: uid is "+uid+", packageName is "+packageName);
+            TrafficLog log = ModelBuilder.TrafficLog(time, vpnConfig.getSession(), packageName, protocol, ip, host, allowed);
+            logHandler.traffic(log);
+        }
     }
 
     // Called from native code
@@ -581,20 +530,43 @@ public class MyVpnService extends VpnService {
     }
 
     // Called from native code
+    private boolean isQuicBlocked(int uid) {
+        return mapUidRules.containsKey((long)uid) && mapUidRules.get((long)uid).getBlockQuic();
+    }
     private boolean isDomainBlocked(int uid, String name) {
         lock.readLock().lock();
-        // check if the domain is blocked globally
-        boolean blocked = setGlobalBlockedHosts.contains(name);
 
         // check if the uid is fully blocked
-        if(!blocked)
-            blocked = setUidBlockedFully.contains((long)uid);
+        boolean blocked = setUidBlockedFully.contains((long) uid);
+
+
+        // check if the domain is blocked globally
+        if(!blocked) {
+            if (mapGlobalBlockedHosts.containsKey(name)) {
+                // if domain was checked before, look up if it is globally blocked
+                blocked = mapGlobalBlockedHosts.get(name);
+            } else {
+                // otherwise, lookup the domain in the database; store it in the lookup table for future lookups
+                if (database.genericBlacklistContainsHost(name)) {
+                    mapGlobalBlockedHosts.put(name, true);
+                } else {
+                    mapGlobalBlockedHosts.put(name, false);
+                }
+            }
+        }
 
         // if not, check if the domain is blocked for the given application
-        if(!blocked && uid > 0 && mapUidBlockedHosts.containsKey((long)uid)){
-            Set<String> set = mapUidBlockedHosts.get((long)uid);
-            if(set != null && set.contains(name)){
-                blocked = true;
+        if(!blocked && uid > 0 && mapUidRules.containsKey((long) uid)){
+            Rule rule = mapUidRules.get((long) uid);
+            boolean domainListed = rule.getHosts().containsKey(name);
+            switch (rule.getType()){
+                case BLACKLIST:
+                    blocked = domainListed;
+                    break;
+                case WHITELIST:
+                    // the whitelist only applies, when values are provided! otherwise, the application can still be fully blocked
+                    blocked = !rule.getHosts().isEmpty() && !domainListed;
+                    break;
             }
         }
 
@@ -631,32 +603,47 @@ public class MyVpnService extends VpnService {
             // https://android.googlesource.com/platform/system/core/+/master/include/private/android_filesystem_config.h
             // Allow unfiltered UDP
             packet.setAllowed(true);
-            Log.i(TAG, "Allowing UDP " + packet);
+            // Log.i(TAG, "Allowing UDP " + packet);
         } else if (packet.getUid() == android.os.Process.myUid()) {
             // Allow self
             packet.setAllowed(true);
-            Log.w(TAG, "Allowing self " + packet);
+            // Log.w(TAG, "Allowing self " + packet);
         } else {
-            // IP is globally blocked
-            boolean blocked = setGlobalBlockedIPs.contains(packet.getDaddr());
-            long uid = packet.getUid();
-            if (!blocked && mapUidBlockedIPs.containsKey(uid)) {
-                // TODO: eventually convert to InetAddress
-                // IP is blocked for the given uid
-                Set<String> set = mapUidBlockedIPs.get(uid);
-                if (set != null && set.contains(packet.getDaddr())) {
-                    blocked = true;
+            String ip = packet.getDaddr();
+            boolean blocked = false;
+
+            // IP is already cached?
+            if(mapGlobalBlockedIPs.containsKey(ip)){
+                // check if IP is globally blocked
+                blocked = mapGlobalBlockedIPs.get(ip);
+            } else {
+                // otherwise, lookup the ip in the database; store it in the lookup table for future lookups
+                if (database.genericBlacklistContainsIp(ip)) {
+                    mapGlobalBlockedIPs.put(ip, true);
+                } else {
+                    mapGlobalBlockedIPs.put(ip, false);
                 }
             }
-            packet.setAllowed(blocked);
+
+            // check if IP is blocked for given package
+            long uid = packet.getUid();
+            if (!blocked && mapUidRules.containsKey(uid)) {
+               Rule rule = mapUidRules.get(uid);
+               boolean ipListed = rule.getIps().containsKey(ip);
+               switch (rule.getType()){
+                   case BLACKLIST:
+                       blocked = ipListed;
+                       break;
+                   case WHITELIST:
+                       // the whitelist only applies, when values are provided! otherwise, the application can still be fully blocked
+                       blocked = !rule.getIps().isEmpty() && !ipListed;
+                       break;
+               }
+            }
+            packet.setAllowed(!blocked);
         }
 
         lock.readLock().unlock();
-
-        // TODO: make logging optional
-        if (packet.getUid() != Process.myUid()) {
-            logPacket(packet);
-        }
 
         return packet.getAllowed();
     }

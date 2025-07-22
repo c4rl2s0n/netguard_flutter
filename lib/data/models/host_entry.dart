@@ -1,7 +1,7 @@
-import 'package:netguard/data/data.dart';
+enum HostType { host, ip }
 
-class BlacklistEntry {
-  BlacklistEntry({
+class HostEntry {
+  HostEntry({
     this.ruleId,
     required this.target,
     required this.type,
@@ -9,6 +9,6 @@ class BlacklistEntry {
   });
   String? ruleId;
   String target;
-  BlacklistType type;
+  HostType type;
   String? source;
 }

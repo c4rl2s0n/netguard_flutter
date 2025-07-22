@@ -22,7 +22,7 @@ class ExpanderSimple extends StatelessWidget {
     return Expander(
       buildTitle: (context, _) => Text(title), //_title(context),
       buildSubtitle: (_, __) => subtitle.notEmpty ? Text(subtitle!) : null,
-      leadingIcon: leadingIcon,
+      buildLeading: (_,__) => Icon(leadingIcon),
       color: color,
       children: children,
     );

@@ -5,6 +5,7 @@ import 'package:netguard/data/models/models.dart';
 class ApplicationSettingTable extends Table {
   TextColumn get packageName => text()();
   BoolColumn get filter => boolean()();
+  BoolColumn get blockAll => boolean()();
 
   @override
   Set<Column<Object>>? get primaryKey => {packageName};

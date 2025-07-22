@@ -36,7 +36,7 @@ void run(HookContext context) {
     File file = File('lib/data/database.dart');
     text = file.readAsStringSync();
     pattern = r"(tables:\s*\[[^\]]*?,\s*)()(\])";
-    text = text.replaceAllMapped(RegExp(pattern), (match) => "${match.group(1)}\n${name.pascalCase}Table,${match.group(3)}");
+    text = text.replaceAllMapped(RegExp(pattern), (match) => "${match.group(1)}${name.pascalCase}Table,${match.group(3)}");
     file.writeAsStringSync(text);
   }
 

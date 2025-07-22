@@ -1,6 +1,8 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/features/settings/global_rules_settings/global_rules_settings.dart';
+import 'package:netguard/features/settings/global_rules_settings/logic/rule_import_task.dart';
 import 'package:netguard/netguard.dart';
 
 class VpnSettings extends StatelessWidget {
@@ -12,7 +14,7 @@ class VpnSettings extends StatelessWidget {
       buildWhen: (oldState, state) => oldState.running != state.running,
       builder: (context, session) => SettingsGroup(
         title: "VPN Settings",
-        settings: [_systemApps(), _globalRules()],
+        settings: [_systemApps(), _globalRules(), _ruleImport()],
         info: session.running
             ? Text(
                 "These settings will only be affective after restarting the VPN.",
@@ -41,11 +43,44 @@ class VpnSettings extends StatelessWidget {
       ),
     );
   }
+
   Widget _globalRules() {
     return NavigationSetting(
       name: "Configure global rules",
       description: "Define rules that are applied for all applications",
       getDestination: (context) => GlobalRulesSettings(),
+    );
+  }
+
+  Widget _ruleImport() {
+    return ActionSetting(
+      name: "Import Rules",
+      description: "Import firewall rules from a JSON file",
+      trailing: Icon(CustomIcons.import),
+      action: (context) async {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          dialogTitle: "Select file to scan for rules",
+          allowMultiple: false,
+        );
+
+        List<String> files = [];
+        if (result != null) {
+          files = result.paths.nonNulls.toList();
+        }
+        if (files.isEmpty) {
+          SnackBarFactory.showNegativeSnackBar("No files selected...");
+          return;
+        }
+        if (context.mounted) {
+          LoadingDialog.show(context, (context, lc) async {
+            await RuleImportTask().execute(
+              lc,
+              RuleImportTaskArgument(await databaseConnection, files.first),
+            );
+            await sessionCubit.loadApplications();
+          });
+        }
+      },
     );
   }
 }

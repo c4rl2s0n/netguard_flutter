@@ -39,16 +39,24 @@ bool _deepEquals(Object? a, Object? b) {
 }
 
 
+enum RuleType {
+  blacklist,
+  whitelist,
+}
+
 /// MODELS
 class VpnConfig {
   VpnConfig({
+    required this.session,
     this.filteredPackages = const [],
     this.blockedPackages = const [],
-    this.packageRules = const [],
-    this.globalRule,
+    required this.dbPath,
     this.filterUdp = true,
     this.logLevel = 5,
   });
+
+  /// Identifier for the session to allow matching traffic log to session
+  String session;
 
   /// List of PackageNames that are filtered by the firewall
   List<String> filteredPackages;
@@ -56,11 +64,8 @@ class VpnConfig {
   /// List of PackageNames that are completely blocked by the firewall
   List<String> blockedPackages;
 
-  /// List of rules that apply for individual packages
-  List<Rule> packageRules;
-
-  /// Rule that applies for all applications
-  Rule? globalRule;
+  /// path of the sqlite database, so native code can read from it directly
+  String dbPath;
 
   bool filterUdp;
 
@@ -68,10 +73,10 @@ class VpnConfig {
 
   List<Object?> _toList() {
     return <Object?>[
+      session,
       filteredPackages,
       blockedPackages,
-      packageRules,
-      globalRule,
+      dbPath,
       filterUdp,
       logLevel,
     ];
@@ -83,10 +88,10 @@ class VpnConfig {
   static VpnConfig decode(Object result) {
     result as List<Object?>;
     return VpnConfig(
-      filteredPackages: (result[0] as List<Object?>?)!.cast<String>(),
-      blockedPackages: (result[1] as List<Object?>?)!.cast<String>(),
-      packageRules: (result[2] as List<Object?>?)!.cast<Rule>(),
-      globalRule: result[3] as Rule?,
+      session: result[0]! as String,
+      filteredPackages: (result[1] as List<Object?>?)!.cast<String>(),
+      blockedPackages: (result[2] as List<Object?>?)!.cast<String>(),
+      dbPath: result[3]! as String,
       filterUdp: result[4]! as bool,
       logLevel: result[5]! as int,
     );
@@ -118,7 +123,6 @@ class Application {
     this.version = "",
     this.icon,
     this.system = false,
-    this.setting,
   });
 
   int uid;
@@ -133,8 +137,6 @@ class Application {
 
   bool system;
 
-  ApplicationSetting? setting;
-
   List<Object?> _toList() {
     return <Object?>[
       uid,
@@ -143,7 +145,6 @@ class Application {
       version,
       icon,
       system,
-      setting,
     ];
   }
 
@@ -159,7 +160,6 @@ class Application {
       version: result[3]! as String,
       icon: result[4] as Uint8List?,
       system: result[5]! as bool,
-      setting: result[6] as ApplicationSetting?,
     );
   }
 
@@ -167,113 +167,6 @@ class Application {
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
     if (other is! Application || other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return _deepEquals(encode(), other.encode());
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
-}
-
-class ApplicationSetting {
-  ApplicationSetting({
-    required this.packageName,
-    this.filter = false,
-  });
-
-  String packageName;
-
-  bool filter;
-
-  List<Object?> _toList() {
-    return <Object?>[
-      packageName,
-      filter,
-    ];
-  }
-
-  Object encode() {
-    return _toList();  }
-
-  static ApplicationSetting decode(Object result) {
-    result as List<Object?>;
-    return ApplicationSetting(
-      packageName: result[0]! as String,
-      filter: result[1]! as bool,
-    );
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (other is! ApplicationSetting || other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return _deepEquals(encode(), other.encode());
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
-}
-
-class Forward {
-  Forward({
-    this.protocol = -1,
-    this.dport = -1,
-    this.raddr = "",
-    this.rport = -1,
-    this.ruid = -1,
-  });
-
-  int protocol;
-
-  int dport;
-
-  String raddr;
-
-  int rport;
-
-  int ruid;
-
-  List<Object?> _toList() {
-    return <Object?>[
-      protocol,
-      dport,
-      raddr,
-      rport,
-      ruid,
-    ];
-  }
-
-  Object encode() {
-    return _toList();  }
-
-  static Forward decode(Object result) {
-    result as List<Object?>;
-    return Forward(
-      protocol: result[0]! as int,
-      dport: result[1]! as int,
-      raddr: result[2]! as String,
-      rport: result[3]! as int,
-      ruid: result[4]! as int,
-    );
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (other is! Forward || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -458,21 +351,29 @@ class ResourceRecord {
 class Rule {
   Rule({
     this.packageName,
-    this.blockedHosts = const [],
-    this.blockedIPs = const [],
+    required this.type,
+    required this.blockQuic,
+    required this.hosts,
+    required this.ips,
   });
 
   String? packageName;
 
-  List<String> blockedHosts;
+  RuleType type;
 
-  List<String> blockedIPs;
+  bool blockQuic;
+
+  Map<String, bool> hosts;
+
+  Map<String, bool> ips;
 
   List<Object?> _toList() {
     return <Object?>[
       packageName,
-      blockedHosts,
-      blockedIPs,
+      type,
+      blockQuic,
+      hosts,
+      ips,
     ];
   }
 
@@ -483,8 +384,10 @@ class Rule {
     result as List<Object?>;
     return Rule(
       packageName: result[0] as String?,
-      blockedHosts: (result[1] as List<Object?>?)!.cast<String>(),
-      blockedIPs: (result[2] as List<Object?>?)!.cast<String>(),
+      type: result[1]! as RuleType,
+      blockQuic: result[2]! as bool,
+      hosts: (result[3] as Map<Object?, Object?>?)!.cast<String, bool>(),
+      ips: (result[4] as Map<Object?, Object?>?)!.cast<String, bool>(),
     );
   }
 
@@ -506,68 +409,63 @@ class Rule {
 ;
 }
 
-class Usage {
-  Usage({
-    this.time = 0,
-    this.version = 0,
+class TrafficLog {
+  TrafficLog({
+    required this.time,
+    required this.session,
     this.protocol = 0,
-    this.daddr = "",
-    this.dport = 0,
-    this.uid = 0,
-    this.sent = 0,
-    this.received = 0,
+    this.ip = "",
+    this.host,
+    this.packageName,
+    required this.allowed,
   });
 
   int time;
 
-  int version;
+  String session;
 
   int protocol;
 
-  String daddr;
+  String ip;
 
-  int dport;
+  String? host;
 
-  int uid;
+  String? packageName;
 
-  int sent;
-
-  int received;
+  bool allowed;
 
   List<Object?> _toList() {
     return <Object?>[
       time,
-      version,
+      session,
       protocol,
-      daddr,
-      dport,
-      uid,
-      sent,
-      received,
+      ip,
+      host,
+      packageName,
+      allowed,
     ];
   }
 
   Object encode() {
     return _toList();  }
 
-  static Usage decode(Object result) {
+  static TrafficLog decode(Object result) {
     result as List<Object?>;
-    return Usage(
+    return TrafficLog(
       time: result[0]! as int,
-      version: result[1]! as int,
+      session: result[1]! as String,
       protocol: result[2]! as int,
-      daddr: result[3]! as String,
-      dport: result[4]! as int,
-      uid: result[5]! as int,
-      sent: result[6]! as int,
-      received: result[7]! as int,
+      ip: result[3]! as String,
+      host: result[4] as String?,
+      packageName: result[5] as String?,
+      allowed: result[6]! as bool,
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! Usage || other.runtimeType != runtimeType) {
+    if (other is! TrafficLog || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -631,32 +529,29 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is VpnConfig) {
+    }    else if (value is RuleType) {
       buffer.putUint8(129);
-      writeValue(buffer, value.encode());
-    }    else if (value is Application) {
+      writeValue(buffer, value.index);
+    }    else if (value is VpnConfig) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    }    else if (value is ApplicationSetting) {
+    }    else if (value is Application) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    }    else if (value is Forward) {
+    }    else if (value is Packet) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    }    else if (value is Packet) {
+    }    else if (value is ResourceRecord) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceRecord) {
+    }    else if (value is Rule) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    }    else if (value is Rule) {
+    }    else if (value is TrafficLog) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    }    else if (value is Usage) {
-      buffer.putUint8(136);
-      writeValue(buffer, value.encode());
     }    else if (value is Version) {
-      buffer.putUint8(137);
+      buffer.putUint8(136);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -667,22 +562,21 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129: 
-        return VpnConfig.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : RuleType.values[value];
       case 130: 
-        return Application.decode(readValue(buffer)!);
+        return VpnConfig.decode(readValue(buffer)!);
       case 131: 
-        return ApplicationSetting.decode(readValue(buffer)!);
+        return Application.decode(readValue(buffer)!);
       case 132: 
-        return Forward.decode(readValue(buffer)!);
-      case 133: 
         return Packet.decode(readValue(buffer)!);
-      case 134: 
+      case 133: 
         return ResourceRecord.decode(readValue(buffer)!);
-      case 135: 
+      case 134: 
         return Rule.decode(readValue(buffer)!);
+      case 135: 
+        return TrafficLog.decode(readValue(buffer)!);
       case 136: 
-        return Usage.decode(readValue(buffer)!);
-      case 137: 
         return Version.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -777,6 +671,29 @@ class VpnController {
     }
   }
 
+  Future<String?> getSession() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.pigeon_example_package.VpnController.getSession$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?);
+    }
+  }
+
   Future<void> updateSettings(VpnConfig settings) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.pigeon_example_package.VpnController.updateSettings$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -836,11 +753,13 @@ abstract class VpnEventHandler {
 
   void logError(String errorCode, String message, Object details);
 
-  void updateVpnState(bool running);
+  void updateVpnState(String? sessionId);
 
   Future<void> logPacket(Packet packet);
 
   Future<void> logDns(ResourceRecord record);
+
+  Future<void> logTraffic(TrafficLog log);
 
   static void setUp(VpnEventHandler? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -911,11 +830,9 @@ abstract class VpnEventHandler {
           assert(message != null,
           'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final bool? arg_running = (args[0] as bool?);
-          assert(arg_running != null,
-              'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState was null, expected non-null bool.');
+          final String? arg_sessionId = (args[0] as String?);
           try {
-            api.updateVpnState(arg_running!);
+            api.updateVpnState(arg_sessionId);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -966,6 +883,31 @@ abstract class VpnEventHandler {
               'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logDns was null, expected non-null ResourceRecord.');
           try {
             await api.logDns(arg_record!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logTraffic$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logTraffic was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final TrafficLog? arg_log = (args[0] as TrafficLog?);
+          assert(arg_log != null,
+              'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logTraffic was null, expected non-null TrafficLog.');
+          try {
+            await api.logTraffic(arg_log!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

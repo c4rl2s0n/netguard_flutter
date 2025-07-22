@@ -519,10 +519,11 @@ int sdk_int(JNIEnv *env);
 void log_android(int prio, const char *fmt, ...);
 
 void log_packet(const struct arguments *args, jobject jpacket);
-
+void log_traffic(const struct arguments *args, jint uid, jint protocol, const char *ip, const char *host, jboolean allowed);
 void dns_resolved(const struct arguments *args,
                   const char *qname, const char *aname, const char *resource, int ttl, jint uid);
 
+jboolean is_quic_blocked(const struct arguments *args, jint uid);
 jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *name);
 
 jint get_uid_q(const struct arguments *args,
@@ -546,9 +547,6 @@ jobject create_packet(const struct arguments *args,
                       const char *data,
                       jint uid,
                       jboolean allowed);
-
-void account_usage(const struct arguments *args, jint version, jint protocol,
-                   const char *daddr, jint dport, jint uid, jlong sent, jlong received);
 
 void write_pcap_hdr();
 

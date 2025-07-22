@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ApplicationEntryState {
 
- Application get app; bool get filter;
+ Application get app; bool get filter; bool get blockAll; List<RuleCubit> get rules;
 /// Create a copy of ApplicationEntryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ApplicationEntryStateCopyWith<ApplicationEntryState> get copyWith => _$Applicat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApplicationEntryState&&(identical(other.app, app) || other.app == app)&&(identical(other.filter, filter) || other.filter == filter));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApplicationEntryState&&(identical(other.app, app) || other.app == app)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.blockAll, blockAll) || other.blockAll == blockAll)&&const DeepCollectionEquality().equals(other.rules, rules));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,app,filter);
+int get hashCode => Object.hash(runtimeType,app,filter,blockAll,const DeepCollectionEquality().hash(rules));
 
 @override
 String toString() {
-  return 'ApplicationEntryState(app: $app, filter: $filter)';
+  return 'ApplicationEntryState(app: $app, filter: $filter, blockAll: $blockAll, rules: $rules)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ApplicationEntryStateCopyWith<$Res>  {
   factory $ApplicationEntryStateCopyWith(ApplicationEntryState value, $Res Function(ApplicationEntryState) _then) = _$ApplicationEntryStateCopyWithImpl;
 @useResult
 $Res call({
- Application app, bool filter
+ Application app, bool filter, bool blockAll, List<RuleCubit> rules
 });
 
 
@@ -62,11 +62,13 @@ class _$ApplicationEntryStateCopyWithImpl<$Res>
 
 /// Create a copy of ApplicationEntryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? app = null,Object? filter = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? app = null,Object? filter = null,Object? blockAll = null,Object? rules = null,}) {
   return _then(ApplicationEntryState(
 app: null == app ? _self.app : app // ignore: cast_nullable_to_non_nullable
 as Application,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,blockAll: null == blockAll ? _self.blockAll : blockAll // ignore: cast_nullable_to_non_nullable
+as bool,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
+as List<RuleCubit>,
   ));
 }
 

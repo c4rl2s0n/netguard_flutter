@@ -27,13 +27,17 @@ public class VpnEventChannel {
         _vpnEventHandler.logError(errorCode, message, details, _voidResult);
     }
 
-    public static  void updateVpnState(boolean running){
-        _vpnEventHandler.updateVpnState(running, _voidResult);
+    public static void updateVpnState(String sessionId){
+        _vpnEventHandler.updateVpnState(sessionId, _voidResult);
     }
 
     public static void logPacket(Packet packet){
         assert(isInitialized());
         _vpnEventHandler.logPacket(packet, _voidResult);
+    }
+    public static void logTraffic(TrafficLog log){
+        assert(isInitialized());
+        _vpnEventHandler.logTraffic(log, _voidResult);
     }
     public static void logDns(ResourceRecord record){
         assert(isInitialized());

@@ -1,1 +1,0 @@
-enum BlacklistType { ip, host }

@@ -39,7 +39,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   void setLastBlacklistUpdate() {
-    emit(state.copyWith(lastBlacklistUpdate: DateTime.now()));
+    emit(state.copyWith(lastHostlistUpdate: DateTime.now()));
   }
 }
 
@@ -49,7 +49,7 @@ class SettingsState with _$SettingsState {
     required this.darkMode,
     required this.colorScheme,
     required this.includeSystemApps,
-    this.lastBlacklistUpdate,
+    this.lastHostlistUpdate,
   });
 
   @override
@@ -59,7 +59,7 @@ class SettingsState with _$SettingsState {
 
   final bool includeSystemApps;
 
-  final DateTime? lastBlacklistUpdate;
+  final DateTime? lastHostlistUpdate;
 
   SettingsState.empty() : this.fromSettings(Settings());
   SettingsState.fromSettings(Settings settings)
@@ -67,14 +67,14 @@ class SettingsState with _$SettingsState {
         darkMode: settings.darkMode,
         colorScheme: settings.colorScheme,
         includeSystemApps: settings.includeSystemApps,
-        lastBlacklistUpdate: settings.lastBlacklistScan,
+        lastHostlistUpdate: settings.lastHostlistUpdate,
       );
 
   Settings get settings => Settings(
     darkMode: darkMode,
     colorScheme: colorScheme,
     includeSystemApps: includeSystemApps,
-    lastBlacklistScan: lastBlacklistUpdate,
+    lastHostlistUpdate: lastHostlistUpdate,
   );
 
 }

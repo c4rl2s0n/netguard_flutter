@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SessionState {
 
- bool get running; List<Application> get systemApplications; List<Application> get thirdPartyApplications;
+ String? get sessionId; List<TrafficLog> get sessionTrafficLog; Map<String, Application> get systemApplicationsMap; Map<String, Application> get thirdPartyApplicationsMap;
 /// Create a copy of SessionState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SessionStateCopyWith<SessionState> get copyWith => _$SessionStateCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionState&&(identical(other.running, running) || other.running == running)&&const DeepCollectionEquality().equals(other.systemApplications, systemApplications)&&const DeepCollectionEquality().equals(other.thirdPartyApplications, thirdPartyApplications));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionState&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&const DeepCollectionEquality().equals(other.sessionTrafficLog, sessionTrafficLog)&&const DeepCollectionEquality().equals(other.systemApplicationsMap, systemApplicationsMap)&&const DeepCollectionEquality().equals(other.thirdPartyApplicationsMap, thirdPartyApplicationsMap));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,running,const DeepCollectionEquality().hash(systemApplications),const DeepCollectionEquality().hash(thirdPartyApplications));
+int get hashCode => Object.hash(runtimeType,sessionId,const DeepCollectionEquality().hash(sessionTrafficLog),const DeepCollectionEquality().hash(systemApplicationsMap),const DeepCollectionEquality().hash(thirdPartyApplicationsMap));
 
 @override
 String toString() {
-  return 'SessionState(running: $running, systemApplications: $systemApplications, thirdPartyApplications: $thirdPartyApplications)';
+  return 'SessionState(sessionId: $sessionId, sessionTrafficLog: $sessionTrafficLog, systemApplicationsMap: $systemApplicationsMap, thirdPartyApplicationsMap: $thirdPartyApplicationsMap)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SessionStateCopyWith<$Res>  {
   factory $SessionStateCopyWith(SessionState value, $Res Function(SessionState) _then) = _$SessionStateCopyWithImpl;
 @useResult
 $Res call({
- bool running, List<Application> systemApplications, List<Application> thirdPartyApplications
+ String? sessionId, List<TrafficLog> sessionTrafficLog, Map<String, Application> systemApplicationsMap, Map<String, Application> thirdPartyApplicationsMap
 });
 
 
@@ -62,12 +62,13 @@ class _$SessionStateCopyWithImpl<$Res>
 
 /// Create a copy of SessionState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? running = null,Object? systemApplications = null,Object? thirdPartyApplications = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = freezed,Object? sessionTrafficLog = null,Object? systemApplicationsMap = null,Object? thirdPartyApplicationsMap = null,}) {
   return _then(SessionState(
-running: null == running ? _self.running : running // ignore: cast_nullable_to_non_nullable
-as bool,systemApplications: null == systemApplications ? _self.systemApplications : systemApplications // ignore: cast_nullable_to_non_nullable
-as List<Application>,thirdPartyApplications: null == thirdPartyApplications ? _self.thirdPartyApplications : thirdPartyApplications // ignore: cast_nullable_to_non_nullable
-as List<Application>,
+sessionId: freezed == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
+as String?,sessionTrafficLog: null == sessionTrafficLog ? _self.sessionTrafficLog : sessionTrafficLog // ignore: cast_nullable_to_non_nullable
+as List<TrafficLog>,systemApplicationsMap: null == systemApplicationsMap ? _self.systemApplicationsMap : systemApplicationsMap // ignore: cast_nullable_to_non_nullable
+as Map<String, Application>,thirdPartyApplicationsMap: null == thirdPartyApplicationsMap ? _self.thirdPartyApplicationsMap : thirdPartyApplicationsMap // ignore: cast_nullable_to_non_nullable
+as Map<String, Application>,
   ));
 }
 

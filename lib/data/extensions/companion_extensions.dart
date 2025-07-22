@@ -7,11 +7,12 @@ extension ApplicationSettingToCompanion on ApplicationSetting {
       ApplicationSettingTableCompanion(
         packageName: Value(packageName),
         filter: Value(filter),
+        blockAll: Value(blockAll),
       );
 }
 
-extension BlacklistToCompanion on BlacklistEntry {
-  BlacklistTableCompanion get companion => BlacklistTableCompanion(
+extension HostToCompanion on HostEntry {
+  HostsTableCompanion get companion => HostsTableCompanion(
     ruleId: Value(ruleId),
     target: Value(target),
     type: Value(type),
@@ -19,11 +20,9 @@ extension BlacklistToCompanion on BlacklistEntry {
   );
 }
 
-extension GlobalRuleSourceToCompanion on GlobalRuleSource{
-  GlobalRuleSourceTableCompanion get companion => GlobalRuleSourceTableCompanion(
-    source: Value(source),
-    type: Value(type),
-  );
+extension GlobalRuleSourceToCompanion on GlobalRuleSource {
+  GlobalRuleSourceTableCompanion get companion =>
+      GlobalRuleSourceTableCompanion(source: Value(source), type: Value(type));
 }
 
 extension ResourceRecordToCompanion on ResourceRecord {
@@ -42,7 +41,11 @@ extension RuleToCompanion on Rule {
     id: Value(id),
     packageName: packageName.notEmpty ? Value(packageName!) : Value.absent(),
     targetVersion: Value(targetVersion),
+    name: Value(name),
     description: Value(description),
+    active: Value(active),
+    type: Value(type),
+    blockQuic: Value(blockQuic),
   );
 }
 
@@ -52,5 +55,18 @@ extension SettingsToCompanion on Settings {
     darkMode: darkMode,
     colorScheme: colorScheme,
     includeSystemApps: includeSystemApps,
+  );
+}
+
+extension TrafficLogToCompanion on TrafficLog {
+  TrafficLogTableCompanion get companion => TrafficLogTableCompanion(
+    id: Value(IdTools.generateUuid()),
+    time: Value(time),
+    session: Value(session),
+    protocol: Value(protocol),
+    packageName: Value(packageName),
+    ip: Value(ip),
+    host: Value(host),
+    allowed: Value(allowed),
   );
 }

@@ -2,6 +2,8 @@ import 'package:netguard/data/data.dart';
 import 'repository_base.dart';
 
 abstract class IGlobalRuleSourceRepository extends RepositoryBase {
+  IGlobalRuleSourceRepository(super.db);
+
   Future<List<GlobalRuleSource>> getOnline();
   Future<List<GlobalRuleSource>> getLocal();
   Future<List<GlobalRuleSource>> getAll();

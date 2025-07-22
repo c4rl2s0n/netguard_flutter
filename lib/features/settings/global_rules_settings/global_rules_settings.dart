@@ -1,4 +1,6 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/features/settings/global_rules_settings/logic/global_rules_cubit.dart';
 import 'package:netguard/features/settings/global_rules_settings/widgets/rule_source_entry.dart';
@@ -73,24 +75,100 @@ class GlobalRulesSettings extends StatelessWidget {
   Widget _lastScanIndication() {
     return BlocBuilder<SettingsCubit, SettingsState>(
       buildWhen: (oldState, state) =>
-          oldState.lastBlacklistUpdate != state.lastBlacklistUpdate,
+          oldState.lastHostlistUpdate != state.lastHostlistUpdate,
       builder: (context, state) {
         TextStyle? style = context.textTheme.bodyLarge;
-        return state.lastBlacklistUpdate == null
+        return state.lastHostlistUpdate == null
             ? Text(
                 "No rules have been scanned!",
                 style: style?.copyWith(color: context.colors.warning),
               )
-            : Text(state.lastBlacklistUpdate.toString(), style: style);
+            : Column(
+                children: [
+                  Text("${state.lastHostlistUpdate}\n", style: style),
+                  FutureBuilder<int>(
+                    future: hostsRepository.getGenericCount(),
+                    builder: (context, state) => state.hasData
+                        ? Text("${state.data} records")
+                        : SizedBox.shrink(),
+                  ),
+                ],
+              );
       },
     );
   }
 
   Widget _addSourceButton(BuildContext context, SourceType type) {
     return IconButton(
-      onPressed: () => context.read<GlobalRulesCubit>().createSource(type),
+      onPressed: () async {
+        var ruleCubit = context.read<GlobalRulesCubit>();
+        List<GlobalRuleSource> newSources = switch (type) {
+          SourceType.online => await _getOnlineSources(ruleCubit.state),
+          SourceType.local => await _getLocalSources(ruleCubit.state),
+        };
+        ruleCubit.addSources(newSources);
+      },
       icon: Icon(CustomIcons.add, color: context.colors.positive),
     );
+  }
+
+  Future<List<GlobalRuleSource>> _getOnlineSources(
+    GlobalRulesState state,
+  ) async {
+    if (!await Clipboard.hasStrings()) {
+      SnackBarFactory.showNegativeSnackBar("No URL in the clipboard...");
+      return [];
+    }
+    List<String> data =
+        (await Clipboard.getData(
+          Clipboard.kTextPlain,
+        ))?.text?.split("\n").where((l) => l.trim().notEmpty).toList() ??
+        [];
+    int dataCount = data.length;
+    data.removeWhere((d) => state.onlineSources.any((s) => s.source == d));
+    int dataNew = dataCount - data.length;
+    if (dataNew <= 0) {
+      SnackBarFactory.showNegativeSnackBar(
+        "No new URLs found in the clipboard...",
+      );
+      return [];
+    }
+    SnackBarFactory.showPositiveSnackBar("Added $dataNew new URLs!");
+    return data
+        .map((l) => GlobalRuleSource(source: l, type: SourceType.online))
+        .toList();
+  }
+
+  Future<List<GlobalRuleSource>> _getLocalSources(
+    GlobalRulesState state,
+  ) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: "Select files to scan for hosts",
+      allowMultiple: true,
+    );
+
+    List<String> files = [];
+    if (result != null) {
+      files = result.paths.nonNulls.toList();
+    }
+
+    if (files.isEmpty) {
+      SnackBarFactory.showNegativeSnackBar("No files selected...");
+      return [];
+    }
+
+    int dataCount = files.length;
+    files.removeWhere((d) => state.localSources.any((s) => s.source == d));
+    int dataNew = dataCount - files.length;
+
+    if (dataNew <= 0) {
+      SnackBarFactory.showNegativeSnackBar("No new files were selected...");
+      return [];
+    }
+    SnackBarFactory.showPositiveSnackBar("Added $dataNew new files!");
+    return files
+        .map((l) => GlobalRuleSource(source: l, type: SourceType.local))
+        .toList();
   }
 
   Widget _online(BuildContext context) {
@@ -114,6 +192,7 @@ class GlobalRulesSettings extends StatelessWidget {
           oldState.localSources != state.localSources,
       builder: (context, state) => SettingsGroup(
         title: "Local Sources",
+        action: _addSourceButton(context, SourceType.local),
         info: Text(
           "Specify a list of files that contain hosts or ips to be blocked",
         ),
