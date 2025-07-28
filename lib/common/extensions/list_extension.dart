@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-extension NullableListExtensions<T> on List<T>? {
+extension NullableIterableExtensions<T> on Iterable<T>? {
   bool get empty => this == null || this!.isEmpty;
   bool get notEmpty => this != null && this!.isNotEmpty;
 }

@@ -18,8 +18,7 @@
 */
 
 #include "netguard.h"
-
-int get_sni(
+int parse_sni(
         const uint8_t *data,
         const uint16_t datalen,
         char *server_name) {

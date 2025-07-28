@@ -12,25 +12,23 @@ class ApplicationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OnLeaveUpdater(
-      update: (_) async => await applicationCubit.store(),
-      child: BlocProvider.value(
-        value: applicationCubit,
-        child: PageComponentFactory.scaffold(
+    return BlocProvider.value(
+      value: applicationCubit,
+      child: PageComponentFactory.scaffold(
+        context,
+        appBar: PageComponentFactory.appBar(
           context,
-          appBar: PageComponentFactory.appBar(
-            context,
-            title: app.label,
-            actions: [PageComponentFactory.settingsNavigationButton(context)],
-          ),
-          body: _buildContent(context),
+          title: app.label,
+          actions: [PageComponentFactory.settingsNavigationButton()],
         ),
+        body: _buildContent(context),
       ),
     );
   }
 
   Widget _buildContent(BuildContext context) {
     return BlocBuilder<ApplicationEntryCubit, ApplicationEntryState>(
+      buildWhen: (oldState, state) => oldState.rules != state.rules,
       builder: (context, state) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,17 +51,18 @@ class ApplicationView extends StatelessWidget {
   }
 
   Widget _generic(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: context.colors.primary),
-        borderRadius: ThemeConstants.borderRadius,
-      ),
-      padding: const EdgeInsets.all(ThemeConstants.spacing),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [_newRule(), _blockAll(), _sessionRunningInfo()],
-      ),
-    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Todo(
+          "Show warning if multiple rules have different types or blockQUIC",
+        ),
+        _newRule(),
+        _blockAll(),
+        _blockQuic(),
+        _sessionRunningInfo(),
+      ],
+    ).withBorder();
   }
 
   Widget _newRule() {
@@ -83,6 +82,25 @@ class ApplicationView extends StatelessWidget {
             "When set, all traffic is blocked, ignoring any specified rules",
         value: state.blockAll,
         onChanged: context.read<ApplicationEntryCubit>().setBlockAll,
+      ),
+    );
+  }
+
+  Widget _blockQuic() {
+    return BlocBuilder<ApplicationEntryCubit, ApplicationEntryState>(
+      buildWhen: (oldState, state) => oldState.blockQuic != state.blockQuic,
+      builder: (context, state) => SwitchSetting(
+        name: "Block QUIC",
+        description: "When QUIC is blocked, applications may fallback to TLS",
+        value: state.blockQuic,
+        warning:
+          !state.blockQuic && state.rules.any((r) => r.state.shouldBlockQuic)
+            ? "At least one rule suggests to block QUIC traffic!"
+            : state.blockQuic &&
+                  !state.rules.any((r) => r.state.shouldBlockQuic)
+              ? "No rule suggests to block QUIC."
+              : null,
+        onChanged: context.read<ApplicationEntryCubit>().setBlockQuic,
       ),
     );
   }

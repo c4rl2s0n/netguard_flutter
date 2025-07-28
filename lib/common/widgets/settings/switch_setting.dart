@@ -6,6 +6,7 @@ class SwitchSetting extends StatelessWidget {
     required this.name,
     required this.value,
     this.description,
+    this.leading,
     this.onChanged,
     this.warning,
     super.key,
@@ -13,6 +14,7 @@ class SwitchSetting extends StatelessWidget {
 
   final String name;
   final String? description;
+  final Widget? leading;
   final bool value;
   final Function(bool)? onChanged;
   final String? warning;
@@ -21,6 +23,7 @@ class SwitchSetting extends StatelessWidget {
     return ActionSetting(
       name: name,
       description: description,
+      leading: leading,
       trailing: Switch(value: value, onChanged: onChanged),
       action: onChanged != null ? (_) => onChanged?.call(!value) : null,
     );

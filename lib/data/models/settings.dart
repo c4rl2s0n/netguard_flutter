@@ -6,11 +6,15 @@ class Settings {
     this.darkMode = true,
     this.colorScheme = FlexScheme.green,
     this.includeSystemApps = true,
+    this.logTraffic = true,
+    this.logCompactView = false,
     this.lastHostlistUpdate,
   });
   int id;
   bool darkMode;
   FlexScheme colorScheme;
   bool includeSystemApps;
+  bool logTraffic;
+  bool logCompactView;
   DateTime? lastHostlistUpdate;
 }

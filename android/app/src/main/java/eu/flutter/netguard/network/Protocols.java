@@ -1,4 +1,4 @@
-package eu.flutter.netguard.utils;
+package eu.flutter.netguard.network;
 
 public class Protocols {
     public static final int ICMPv4 = 1;

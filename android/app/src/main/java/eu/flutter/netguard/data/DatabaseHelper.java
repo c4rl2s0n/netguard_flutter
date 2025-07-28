@@ -22,32 +22,39 @@ package eu.flutter.netguard.data;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.os.HandlerThread;
+import android.os.Handler;
+import android.os.Looper;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import eu.flutter.netguard.NativeBridge.*;
 
 public class DatabaseHelper {
     private static final String TAG = "NetGuard.Database";
 
-    // TODO: what is this and do I need it?
-    private static HandlerThread hthread = null;
-    static {
-        hthread = new HandlerThread("DatabaseHelper");
-        hthread.start();
-    }
-
+    private Handler queryHandler;
     private final SQLiteDatabase db;
 
     // TODO: maybe parse package rules directly from db here? depends on how many it will be...
 
     public DatabaseHelper(String dbPath){
+        assert(new File(dbPath).canWrite());
+
+        queryHandler = new Handler(Looper.getMainLooper());
         db = SQLiteDatabase.openDatabase(
                 dbPath,
                 null,
-                SQLiteDatabase.OPEN_READONLY
+                SQLiteDatabase.OPEN_READWRITE
         );
 
         prepareStatements();
+    }
+
+    public void close(){
+        db.close();
     }
 
     private SQLiteStatement genericBlacklistContainsHost;
@@ -58,20 +65,37 @@ public class DatabaseHelper {
 
         sql = "SELECT EXISTS(SELECT 1 FROM hosts_table WHERE rule_id IS NULL and type = 'ip' and target = ?)";
         genericBlacklistContainsIp = db.compileStatement(sql);
+
+
     }
 
     public boolean genericBlacklistContainsHost(String domain){
         genericBlacklistContainsHost.bindString(1, domain);
-        return genericBlacklistContainsHost.simpleQueryForLong() != 0;
+        return runBlocking(() -> genericBlacklistContainsHost.simpleQueryForLong() != 0);
     }
     public boolean genericBlacklistContainsIp(String ip){
         genericBlacklistContainsIp.bindString(1, ip);
-        return genericBlacklistContainsIp.simpleQueryForLong() != 0;
+        return runBlocking(() ->genericBlacklistContainsIp.simpleQueryForLong() != 0);
     }
 
-    private void addTargetToRule(Rule rule, String target, String hostType, boolean blockQuic){
-        // if any of the rules defines to block Quic, it will be applied, ignoring the rules that do not block quic
-        if(blockQuic) rule.setBlockQuic(true);
+    public List<ApplicationSetting> getApplicationSettings(List<String> packageNames){
+        String sql = "SELECT t.package_name, t.filter, t.block_all, t.block_quic FROM application_setting_table as t";
+        List<ApplicationSetting> applicationSettings = new ArrayList<>();
+        Cursor cursor = db.rawQuery(sql, null);
+        while(cursor.moveToNext()){
+            String packageName = cursor.getString(0);
+            if(!packageNames.contains(packageName)) continue;
+            applicationSettings.add(ModelBuilder.ApplicationSetting(
+                    packageName,
+                    cursor.getLong(1) != 0,
+                    cursor.getLong(2) != 0,
+                    cursor.getLong(3) != 0));
+        }
+        cursor.close();
+        return applicationSettings;
+    }
+
+    private void addTargetToRule(Rule rule, String target, String hostType){
         switch (hostType){
             case "host":
                 rule.getHosts().put(target, true);
@@ -82,12 +106,14 @@ public class DatabaseHelper {
         }
     }
     public Rule getPackageRule(String packageName){
-        String sql = "SELECT r.package_name, r.type as rule_type, r.active, r.block_quic, h.target, h.type as host_type " +
+        String[] args = new String[1];
+        args[0] = packageName;
+
+        String sql = "SELECT r.package_name, r.type as rule_type, r.active, h.target, h.type as host_type " +
                 "FROM rules_table as r " +
                 "LEFT JOIN hosts_table as h ON r.id = h.rule_id " +
                 "WHERE r.active and r.package_name = ?";
-        String[] args = new String[1];
-        args[0] = packageName;
+
         Rule blacklist = ModelBuilder.Rule(packageName, RuleType.BLACKLIST);
         Rule whitelist = ModelBuilder.Rule(packageName, RuleType.WHITELIST);
 
@@ -95,17 +121,20 @@ public class DatabaseHelper {
         Cursor cursor = db.rawQuery(sql, args);
         while(cursor.moveToNext()) {
             String ruleType = cursor.getString(1);
-            boolean blockQuic = 0 != cursor.getShort(3);
-            String target = cursor.getString(4);
-            String hostType = cursor.getString(5);
-            switch (ruleType){
+            String target = cursor.getString(3);
+            String hostType = cursor.getString(4);
+            Rule rule;
+            switch(ruleType){
                 case "whitelist":
-                    addTargetToRule(whitelist, target, hostType, blockQuic);
+                    rule = whitelist;
                     break;
                 case "blacklist":
-                    addTargetToRule(blacklist, target, hostType, blockQuic);
+                    rule = blacklist;
                     break;
+                default:
+                    continue;
             }
+            if(target != null && hostType != null) addTargetToRule(rule, target, hostType);
         }
         cursor.close();
 
@@ -118,6 +147,28 @@ public class DatabaseHelper {
             return blacklist;
         }
         return null;
+    }
+
+    private interface QueryTask<T> {
+        T run();
+    }
+
+    private <T> T runBlocking(QueryTask<T> task) {
+        final Object[] result = new Object[1];
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        queryHandler.post(() -> {
+            result[0] = task.run();
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Blocking task was interrupted", e);
+        }
+
+        return (T) result[0];
     }
 
 }

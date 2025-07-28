@@ -13,7 +13,7 @@ class Rule extends native.Rule {
     this.description,
     this.active = true,
     required super.type,
-    super.blockQuic = false,
+    super.shouldBlockQuic = false,
     super.packageName,
     super.hosts = const <String, bool>{},
     super.ips = const <String, bool>{},

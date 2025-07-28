@@ -48,10 +48,9 @@ enum RuleType {
 class VpnConfig {
   VpnConfig({
     required this.session,
-    this.filteredPackages = const [],
-    this.blockedPackages = const [],
+    required this.filteredPackages,
     required this.dbPath,
-    this.filterUdp = true,
+    this.logTraffic = true,
     this.logLevel = 5,
   });
 
@@ -61,13 +60,10 @@ class VpnConfig {
   /// List of PackageNames that are filtered by the firewall
   List<String> filteredPackages;
 
-  /// List of PackageNames that are completely blocked by the firewall
-  List<String> blockedPackages;
-
   /// path of the sqlite database, so native code can read from it directly
   String dbPath;
 
-  bool filterUdp;
+  bool logTraffic;
 
   int logLevel;
 
@@ -75,9 +71,8 @@ class VpnConfig {
     return <Object?>[
       session,
       filteredPackages,
-      blockedPackages,
       dbPath,
-      filterUdp,
+      logTraffic,
       logLevel,
     ];
   }
@@ -90,10 +85,9 @@ class VpnConfig {
     return VpnConfig(
       session: result[0]! as String,
       filteredPackages: (result[1] as List<Object?>?)!.cast<String>(),
-      blockedPackages: (result[2] as List<Object?>?)!.cast<String>(),
-      dbPath: result[3]! as String,
-      filterUdp: result[4]! as bool,
-      logLevel: result[5]! as int,
+      dbPath: result[2]! as String,
+      logTraffic: result[3]! as bool,
+      logLevel: result[4]! as int,
     );
   }
 
@@ -167,6 +161,62 @@ class Application {
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
     if (other is! Application || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+class ApplicationSetting {
+  ApplicationSetting({
+    required this.packageName,
+    this.filter = false,
+    this.blockAll = false,
+    this.blockQuic = false,
+  });
+
+  String packageName;
+
+  bool filter;
+
+  bool blockAll;
+
+  bool blockQuic;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      packageName,
+      filter,
+      blockAll,
+      blockQuic,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ApplicationSetting decode(Object result) {
+    result as List<Object?>;
+    return ApplicationSetting(
+      packageName: result[0]! as String,
+      filter: result[1]! as bool,
+      blockAll: result[2]! as bool,
+      blockQuic: result[3]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ApplicationSetting || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -352,7 +402,7 @@ class Rule {
   Rule({
     this.packageName,
     required this.type,
-    required this.blockQuic,
+    required this.shouldBlockQuic,
     required this.hosts,
     required this.ips,
   });
@@ -361,7 +411,7 @@ class Rule {
 
   RuleType type;
 
-  bool blockQuic;
+  bool shouldBlockQuic;
 
   Map<String, bool> hosts;
 
@@ -371,7 +421,7 @@ class Rule {
     return <Object?>[
       packageName,
       type,
-      blockQuic,
+      shouldBlockQuic,
       hosts,
       ips,
     ];
@@ -385,7 +435,7 @@ class Rule {
     return Rule(
       packageName: result[0] as String?,
       type: result[1]! as RuleType,
-      blockQuic: result[2]! as bool,
+      shouldBlockQuic: result[2]! as bool,
       hosts: (result[3] as Map<Object?, Object?>?)!.cast<String, bool>(),
       ips: (result[4] as Map<Object?, Object?>?)!.cast<String, bool>(),
     );
@@ -409,14 +459,118 @@ class Rule {
 ;
 }
 
+class LogEntry {
+  LogEntry({
+    required this.time,
+    required this.session,
+    required this.data,
+  });
+
+  int time;
+
+  String session;
+
+  Object data;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      time,
+      session,
+      data,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static LogEntry decode(Object result) {
+    result as List<Object?>;
+    return LogEntry(
+      time: result[0]! as int,
+      session: result[1]! as String,
+      data: result[2]!,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! LogEntry || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+class ErrorLog {
+  ErrorLog({
+    required this.time,
+    required this.session,
+    this.message = "Error",
+  });
+
+  int time;
+
+  String session;
+
+  String message;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      time,
+      session,
+      message,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ErrorLog decode(Object result) {
+    result as List<Object?>;
+    return ErrorLog(
+      time: result[0]! as int,
+      session: result[1]! as String,
+      message: result[2]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ErrorLog || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 class TrafficLog {
   TrafficLog({
     required this.time,
     required this.session,
     this.protocol = 0,
+    this.dport = 0,
     this.ip = "",
     this.host,
     this.packageName,
+    this.size = 0,
     required this.allowed,
   });
 
@@ -426,11 +580,15 @@ class TrafficLog {
 
   int protocol;
 
+  int dport;
+
   String ip;
 
   String? host;
 
   String? packageName;
+
+  int size;
 
   bool allowed;
 
@@ -439,9 +597,11 @@ class TrafficLog {
       time,
       session,
       protocol,
+      dport,
       ip,
       host,
       packageName,
+      size,
       allowed,
     ];
   }
@@ -455,10 +615,12 @@ class TrafficLog {
       time: result[0]! as int,
       session: result[1]! as String,
       protocol: result[2]! as int,
-      ip: result[3]! as String,
-      host: result[4] as String?,
-      packageName: result[5] as String?,
-      allowed: result[6]! as bool,
+      dport: result[3]! as int,
+      ip: result[4]! as String,
+      host: result[5] as String?,
+      packageName: result[6] as String?,
+      size: result[7]! as int,
+      allowed: result[8]! as bool,
     );
   }
 
@@ -538,20 +700,29 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is Application) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    }    else if (value is Packet) {
+    }    else if (value is ApplicationSetting) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceRecord) {
+    }    else if (value is Packet) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    }    else if (value is Rule) {
+    }    else if (value is ResourceRecord) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    }    else if (value is TrafficLog) {
+    }    else if (value is Rule) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    }    else if (value is Version) {
+    }    else if (value is LogEntry) {
       buffer.putUint8(136);
+      writeValue(buffer, value.encode());
+    }    else if (value is ErrorLog) {
+      buffer.putUint8(137);
+      writeValue(buffer, value.encode());
+    }    else if (value is TrafficLog) {
+      buffer.putUint8(138);
+      writeValue(buffer, value.encode());
+    }    else if (value is Version) {
+      buffer.putUint8(139);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -569,14 +740,20 @@ class _PigeonCodec extends StandardMessageCodec {
       case 131: 
         return Application.decode(readValue(buffer)!);
       case 132: 
-        return Packet.decode(readValue(buffer)!);
+        return ApplicationSetting.decode(readValue(buffer)!);
       case 133: 
-        return ResourceRecord.decode(readValue(buffer)!);
+        return Packet.decode(readValue(buffer)!);
       case 134: 
-        return Rule.decode(readValue(buffer)!);
+        return ResourceRecord.decode(readValue(buffer)!);
       case 135: 
-        return TrafficLog.decode(readValue(buffer)!);
+        return Rule.decode(readValue(buffer)!);
       case 136: 
+        return LogEntry.decode(readValue(buffer)!);
+      case 137: 
+        return ErrorLog.decode(readValue(buffer)!);
+      case 138: 
+        return TrafficLog.decode(readValue(buffer)!);
+      case 139: 
         return Version.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -755,10 +932,6 @@ abstract class VpnEventHandler {
 
   void updateVpnState(String? sessionId);
 
-  Future<void> logPacket(Packet packet);
-
-  Future<void> logDns(ResourceRecord record);
-
   Future<void> logTraffic(TrafficLog log);
 
   static void setUp(VpnEventHandler? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
@@ -833,56 +1006,6 @@ abstract class VpnEventHandler {
           final String? arg_sessionId = (args[0] as String?);
           try {
             api.updateVpnState(arg_sessionId);
-            return wrapResponse(empty: true);
-          } on PlatformException catch (e) {
-            return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
-          }
-        });
-      }
-    }
-    {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logPacket$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
-      if (api == null) {
-        pigeonVar_channel.setMessageHandler(null);
-      } else {
-        pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logPacket was null.');
-          final List<Object?> args = (message as List<Object?>?)!;
-          final Packet? arg_packet = (args[0] as Packet?);
-          assert(arg_packet != null,
-              'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logPacket was null, expected non-null Packet.');
-          try {
-            await api.logPacket(arg_packet!);
-            return wrapResponse(empty: true);
-          } on PlatformException catch (e) {
-            return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
-          }
-        });
-      }
-    }
-    {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logDns$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
-      if (api == null) {
-        pigeonVar_channel.setMessageHandler(null);
-      } else {
-        pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logDns was null.');
-          final List<Object?> args = (message as List<Object?>?)!;
-          final ResourceRecord? arg_record = (args[0] as ResourceRecord?);
-          assert(arg_record != null,
-              'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logDns was null, expected non-null ResourceRecord.');
-          try {
-            await api.logDns(arg_record!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

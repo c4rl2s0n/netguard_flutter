@@ -1,3 +1,4 @@
+export 'bborder.dart';
 export 'expander.dart';
 export 'expander_edit.dart';
 export 'expander_simple.dart';

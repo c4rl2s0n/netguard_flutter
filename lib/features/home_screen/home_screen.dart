@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:netguard/features/home_screen/logs_page/logs_page.dart';
+import 'package:netguard/features/session_logs/session_logs.dart';
 import 'package:netguard/netguard.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
       appBar: PageComponentFactory.appBar(
         context,
         title: "Home",
-        actions: [PageComponentFactory.settingsNavigationButton(context)],
+        actions: [PageComponentFactory.settingsNavigationButton()],
       ),
       body: _content(),
     );
@@ -58,7 +58,8 @@ class HomeScreen extends StatelessWidget {
         IconButton(
           onPressed: () async {
             await sessionCubit.startVpn();
-            if (context.mounted) _showLogs(context);
+            if (settingsCubit.state.logTraffic && context.mounted)
+              _showLogs(context);
           },
           style: IconButton.styleFrom(
             backgroundColor: context.colors.onBackground,
@@ -103,17 +104,17 @@ class HomeScreen extends StatelessWidget {
   Widget _showLogsBtn(BuildContext context) {
     return BlocBuilder<SessionCubit, SessionState>(
       buildWhen: (oldState, state) =>
-          oldState.sessionTrafficLog != state.sessionTrafficLog,
-      builder: (context, state) => state.sessionTrafficLog.empty
-          ? SizedBox.shrink()
-          : IconTextButton(
-              icon: Icon(Icons.filter_list),
+          oldState.sessionLogState != state.sessionLogState,
+      builder: (context, state) => state.sessionLogState.hasLogs
+          ? IconTextButton(
+              icon: Icon(CustomIcons.logs),
               text: "Session Logs",
               onTap: () => _showLogs(context),
-            ),
+            )
+          : SizedBox.shrink(),
     );
   }
 
   void _showLogs(BuildContext context) =>
-      context.navigator.navigateTo(const LogsPage());
+      context.navigator.navigateTo(const SessionLogs());
 }

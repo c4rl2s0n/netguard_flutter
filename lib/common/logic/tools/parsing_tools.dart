@@ -70,12 +70,10 @@ class ParsingTools {
       ...RegExp(ipv6Pattern).allMatches(line),
     ];
 
-    // TODO: check performance if it is better to check for existence this here or do .distinct later...
-    // Iterable<String> ips = matches.map((m) => m.group(0)).nonNulls.where((s) => !result.ips.contains(s));
     Iterable<String> ips = matches
         .map((m) => m.group(0))
         .nonNulls
-        .where((s) => !_ignoreIps.contains(s) && s.notEmpty);
+        .where((s) => s.notEmpty);
     result.ips.addAll(ips);
   }
 

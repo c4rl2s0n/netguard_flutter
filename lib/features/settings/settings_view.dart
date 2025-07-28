@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:netguard/netguard.dart' hide VpnSettings;
+import 'package:netguard/netguard.dart';
 
 import 'widgets/widgets.dart';
 
@@ -19,6 +19,7 @@ class SettingsView extends StatelessWidget {
     return ListView(
       shrinkWrap: true,
       children: [
+        Todo("TrafficLog cache duration (TTL)"),
         const ThemeSettings(),
         const VpnSettings(),
       ],

@@ -17,8 +17,6 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
     _loadData();
   }
 
-  late final SettingsCubit _settingsCubit;
-
   late final String applicationDocumentsDirectory;
   late final String databaseFilename;
 
@@ -59,6 +57,7 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
 
   Future _initializeFilepaths() async {
     // initialize filepaths and database
+    // NOTE: do not change these, as the filenames are also hardcoded in JAVA/Native side
     Directory dir = await getApplicationDocumentsDirectory();
     applicationDocumentsDirectory = path.join(dir.path, 'netguard');
     databaseFilename = 'netguard.db';

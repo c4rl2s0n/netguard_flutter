@@ -88,13 +88,9 @@ struct arguments {
     jobject instance;
     int tun;
     jboolean fwd53;
+    jboolean logTraffic;
     jint rcode;
     struct context *ctx;
-};
-
-struct allowed {
-    char raddr[INET6_ADDRSTRLEN + 1];
-    uint16_t rport; // host notation
 };
 
 struct segment {
@@ -260,7 +256,7 @@ typedef struct pcaprec_hdr_s {
 #define TLS_MESSAGE_CLIENTHELLO 1
 #define TLS_EXTENSION_TYPE_SERVER_NAME 0
 
-int get_sni(
+int parse_sni(
         const uint8_t *data,
         const uint16_t datalen,
         char *server_name);
@@ -432,7 +428,7 @@ void block_udp(const struct arguments *args,
 jboolean handle_udp(const struct arguments *args,
                     const uint8_t *pkt, size_t length,
                     const uint8_t *payload,
-                    int uid, struct allowed *redirect,
+                    int uid,
                     const int epoll_fd);
 
 int check_dhcp(const struct arguments *args, const struct udp_session *u,
@@ -443,7 +439,7 @@ void clear_tcp_data(struct tcp_session *cur);
 jboolean handle_tcp(const struct arguments *args,
                     const uint8_t *pkt, size_t length,
                     const uint8_t *payload,
-                    int uid, int allowed, struct allowed *redirect,
+                    int uid, int allowed,
                     const int epoll_fd);
 
 void queue_tcp(const struct arguments *args,
@@ -453,11 +449,9 @@ void queue_tcp(const struct arguments *args,
 
 int open_icmp_socket(const struct arguments *args, const struct icmp_session *cur);
 
-int open_udp_socket(const struct arguments *args,
-                    const struct udp_session *cur, const struct allowed *redirect);
+int open_udp_socket(const struct arguments *args, const struct udp_session *cur);
 
-int open_tcp_socket(const struct arguments *args,
-                    const struct tcp_session *cur, const struct allowed *redirect);
+int open_tcp_socket(const struct arguments *args, const struct tcp_session *cur);
 
 int32_t get_local_port(const int sock);
 
@@ -519,12 +513,13 @@ int sdk_int(JNIEnv *env);
 void log_android(int prio, const char *fmt, ...);
 
 void log_packet(const struct arguments *args, jobject jpacket);
-void log_traffic(const struct arguments *args, jint uid, jint protocol, const char *ip, const char *host, jboolean allowed);
+void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jint length, jint uid, jboolean allowed);
 void dns_resolved(const struct arguments *args,
                   const char *qname, const char *aname, const char *resource, int ttl, jint uid);
 
 jboolean is_quic_blocked(const struct arguments *args, jint uid);
 jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *name);
+void sni_resolved(const struct arguments *args, const char *sni, jint version, jint protocol, const char* daddr, jint dport, const char* saddr, jint sport, jint uid);
 
 jint get_uid_q(const struct arguments *args,
                jint version,
@@ -533,6 +528,16 @@ jint get_uid_q(const struct arguments *args,
                jint sport,
                const char *dest,
                jint dport);
+
+jint get_uid_cached(const struct arguments *args,
+                    jint version, jint protocol,
+                    const char *source, jint sport,
+                    const char *dest, jint dport);
+
+jint cache_uid(const struct arguments *args,
+               jint version, jint protocol,
+               const char *source, jint sport,
+               const char *dest, jint dport, jint uid);
 
 jboolean is_address_allowed(const struct arguments *args, jobject objPacket);
 

@@ -8,11 +8,43 @@ part 'rule_cubit.freezed.dart';
 class RuleCubit extends Cubit<RuleState> {
   RuleCubit(Rule rule) : super(RuleState.fromRule(rule));
 
-  void setName(String name) => emit(state.copyWith(name: name));
-  void setDescription(String description) => emit(state.copyWith(description: description));
-  void setType(RuleType type) => emit(state.copyWith(type: type));
-  void setBlockQuic(bool block) => emit(state.copyWith(blockQuic: block));
-  void setActive(bool active) => emit(state.copyWith(active: active));
+  Future setName(String name) async {
+    emit(state.copyWith(name: name));
+    await rulesRepository.updateName(state.id, name);
+  }
+
+  Future setDescription(String description) async {
+    emit(state.copyWith(description: description));
+    await rulesRepository.updateDescription(state.id, description);
+  }
+
+  Future setType(RuleType type) async {
+    emit(state.copyWith(type: type));
+    await rulesRepository.updateType(state.id, type);
+  }
+
+
+  Future setActive(bool active) async {
+    emit(state.copyWith(active: active));
+    await rulesRepository.updateActive(state.id, active);
+  }
+
+  Future setHosts(Iterable<HostEntry> entries) async {
+    List<HostEntry> hosts = entries.toList();
+    emit(
+      state.copyWith(
+        hosts: hosts
+            .where((e) => e.type == HostType.host)
+            .map((e) => e.target)
+            .toList(),
+        ips: hosts
+            .where((e) => e.type == HostType.ip)
+            .map((e) => e.target)
+            .toList(),
+      ),
+    );
+    await rulesRepository.updateHosts(state.id, hosts);
+  }
 }
 
 @freezed
@@ -25,7 +57,7 @@ class RuleState with _$RuleState {
     this.targetVersion,
     this.type = RuleType.blacklist,
     this.active = true,
-    this.blockQuic = false,
+    this.shouldBlockQuic = false,
     this.hosts = const [],
     this.ips = const [],
   });
@@ -38,14 +70,16 @@ class RuleState with _$RuleState {
         targetVersion: rule.targetVersion,
         type: rule.type,
         active: rule.active,
-        blockQuic: rule.blockQuic,
+        shouldBlockQuic: rule.shouldBlockQuic,
         hosts: rule.hosts.keys.toList(),
         ips: rule.ips.keys.toList(),
       );
 
+  @override
   String id;
   @override
   String? name;
+  @override
   String? packageName;
   @override
   String? description;
@@ -56,7 +90,7 @@ class RuleState with _$RuleState {
   @override
   bool active;
   @override
-  bool blockQuic;
+  bool shouldBlockQuic;
   @override
   List<String> hosts;
   @override
@@ -70,7 +104,7 @@ class RuleState with _$RuleState {
     targetVersion: targetVersion,
     type: type,
     active: active,
-    blockQuic: blockQuic,
+    shouldBlockQuic: shouldBlockQuic,
     hosts: hosts.boolMap((_) => true),
     ips: ips.boolMap((_) => true),
   );

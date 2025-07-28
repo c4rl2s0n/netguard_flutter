@@ -11,7 +11,7 @@ part 'applications_view_cubit.freezed.dart';
 
 class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
   ApplicationsViewCubit() : super(const ApplicationsViewState()) {
-    load();
+    _load();
   }
 
   final List<StreamSubscription> _entryListener = [];
@@ -25,6 +25,21 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
     for (var e in state.entries) {
       await e.close();
     }
+  }
+
+  void _load() {
+    List<ApplicationEntryCubit> thirdParty = _applicationsToCubits(
+      sessionCubit.state.thirdPartyApplications,
+    );
+    List<ApplicationEntryCubit> system = _applicationsToCubits(
+      sessionCubit.state.systemApplications,
+    );
+    emit(
+      state.copyWith(
+        thirdPartyEntries: thirdParty,
+        systemEntries: system,
+      ),
+    );
   }
 
   List<ApplicationEntryCubit> _applicationsToCubits(
@@ -42,20 +57,6 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
     return cubits;
   }
 
-  void load() {
-    List<ApplicationEntryCubit> thirdParty = _applicationsToCubits(
-      sessionCubit.state.thirdPartyApplications,
-    );
-    List<ApplicationEntryCubit> system = _applicationsToCubits(
-      sessionCubit.state.systemApplications,
-    );
-    emit(
-      state.copyWith(
-        thirdPartyEntries: thirdParty,
-        systemEntries: system,
-      ),
-    );
-  }
 
   void updateAllEnabled() {
     emit(
@@ -69,13 +70,16 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
       ),
     );
   }
-  void setFilterForAll(List<ApplicationEntryCubit> cubits, bool filter){
+  Future setFilterForAll(List<ApplicationEntryCubit> cubits, bool filter)async{
     _updateOnCubitChange = false;
     for(var cubit in cubits){
       cubit.setFilter(filter);
     }
-    updateAllEnabled();
-    _updateOnCubitChange = true;
+    // small async gap to ensure cubits are updated before we listen for updates again
+    Future.delayed(Duration(milliseconds: 100), (){
+      updateAllEnabled();
+      _updateOnCubitChange = true;
+    });
   }
 
   // TODO: this is not working reliably, if at all....
@@ -94,7 +98,9 @@ class ApplicationsViewState with _$ApplicationsViewState {
     this.systemAllEnabled = false,
   });
 
+  @override
   final bool thirdPartyAllEnabled;
+  @override
   final bool systemAllEnabled;
   @override
   final List<ApplicationEntryCubit> thirdPartyEntries;

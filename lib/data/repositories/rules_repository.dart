@@ -30,9 +30,7 @@ class RulesRepository extends IRulesRepository {
     for (var rule in rules) {
       rule.hosts = {};
       rule.ips = {};
-      List<HostEntry> hosts = packageName.empty
-          ? await repo.getGeneric()
-          : await repo.getForPackage(packageName!);
+      List<HostEntry> hosts = await repo.getForRule(rule.id);
       rule.hosts.addEntries(
         hosts
             .where((b) => b.type == HostType.host)
@@ -88,5 +86,38 @@ class RulesRepository extends IRulesRepository {
   Future<void> delete(String id) async {
     await db.hostsTable.deleteWhere((t) => t.ruleId.equals(id));
     await db.rulesTable.deleteWhere((t) => t.id.equals(id));
+  }
+
+  UpdateStatement<$RulesTableTable, Rule> _updateRule(String id) => db.rulesTable.update()..where((t) => t.id.equals(id));
+
+  @override
+  Future<void> updateName(String id, String name) async {
+    await _updateRule(id).write(RulesTableCompanion(name: Value(name)));
+  }
+
+  @override
+  Future<void> updateActive(String id, bool active) async {
+    await _updateRule(id).write(RulesTableCompanion(active: Value(active)));
+  }
+
+  @override
+  Future<void> updateDescription(String id, String description) async {
+    await _updateRule(id).write(RulesTableCompanion(description: Value(description)));
+  }
+
+  @override
+  Future<void> updateType(String id, RuleType type) async {
+    await _updateRule(id).write(RulesTableCompanion(type: Value(type)));
+  }
+
+  @override
+  Future<void> updateHosts(String id, List<HostEntry> hosts) async {
+    // clear the host-list for the rule, in case an update takes place. The rules will be inserted afterwards
+    await db.hostsTable.deleteWhere((t) => t.ruleId.equals(id));
+    List<HostsTableCompanion> hostCompanions = [];
+    hostCompanions.addAll(hosts.map((h) => h.companion.copyWith(ruleId: Value(id))));
+    await db.batch((batch) {
+      batch.insertAll(db.hostsTable, hostCompanions);
+    });
   }
 }

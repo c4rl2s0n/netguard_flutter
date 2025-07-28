@@ -10,24 +10,24 @@ class ApplicationsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageComponentFactory.scaffold(
-      context,
-      appBar: PageComponentFactory.appBar(
-        context,
-        title: "Applications",
-        actions: [PageComponentFactory.settingsNavigationButton(context)],
-      ),
-      body: BlocBuilder<SessionCubit, SessionState>(
-        buildWhen: (oldState, state) => oldState.applications != state.applications,
-        builder: (context, state) =>  BlocProvider(
-          create: (context) => ApplicationsViewCubit(),
-          child: _buildContent(context),
+    return BlocBuilder<SessionCubit, SessionState>(
+      buildWhen: (oldState, state) => oldState.applications != state.applications,
+      builder: (context, state) =>  BlocProvider(
+        create: (_) => ApplicationsViewCubit(),
+        child: PageComponentFactory.scaffold(
+            context,
+            appBar: PageComponentFactory.appBar(
+              context,
+              title: "Applications",
+              actions: [PageComponentFactory.settingsNavigationButton()],
+            ),
+            body: _buildContent(),
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent() {
     return BlocBuilder<ApplicationsViewCubit, ApplicationsViewState>(
       builder: (context, state) {
         return BlocBuilder<SessionCubit, SessionState>(

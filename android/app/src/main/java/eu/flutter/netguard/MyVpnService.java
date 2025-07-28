@@ -1,10 +1,9 @@
 package eu.flutter.netguard;
 
-import android.annotation.TargetApi;
+import android.app.ForegroundServiceStartNotAllowedException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -13,25 +12,29 @@ import android.os.Build;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.StrictMode;
 import android.util.Log;
 
+import androidx.core.content.ContextCompat;
+
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 //import eu.flutter.netguard.data.DatabaseHelper;
 import eu.flutter.netguard.data.DatabaseHelper;
+import eu.flutter.netguard.data.IPKey;
 import eu.flutter.netguard.data.ModelBuilder;
+import eu.flutter.netguard.network.NetworkMonitor;
+import eu.flutter.netguard.network.NetworkUtils;
+import eu.flutter.netguard.network.Protocols;
 import eu.flutter.netguard.utils.*;
 import eu.flutter.netguard.NativeBridge.*;
 
@@ -50,7 +53,7 @@ public class MyVpnService extends VpnService {
     private static long jni_context = 0;
     private native long jni_init(int sdk);
     private native void jni_start(long context, int loglevel);
-    private native void jni_run(long context, int tun, boolean fwd53, int rcode);
+    private native void jni_run(long context, int tun, boolean fwd53, boolean logTraffic, int rcode);
     private native void jni_stop(long context);
     private native void jni_clear(long context);
     private native int jni_get_mtu();
@@ -64,14 +67,21 @@ public class MyVpnService extends VpnService {
     private ParcelFileDescriptor vpnInterface;
     private static VpnConfig vpnConfig;
 
+    NetworkMonitor networkMonitor;
     private LogHandler logHandler;
     private NotificationTools notification;
 
     private Map<String, Boolean> mapGlobalBlockedHosts = new HashMap<>();
     private Map<String, Boolean> mapGlobalBlockedIPs = new HashMap<>();
     private Map<Long, Rule> mapUidRules = new HashMap<>();
-    private Set<Long> setUidBlockedFully = new HashSet<>();
+    private Set<Long> setUidBlockAll = new HashSet<>();
+    private Set<Long> setUidBlockQuic = new HashSet<>();
     private Map<Long, String> mapUidPackageName = new HashMap<>();
+    private Map<IPKey, String> mapIPKeySni = new HashMap<>();
+    private Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
+    private Map<String, String> mapIpDomain = new HashMap<>();
+
+    private List<ApplicationSetting> applicationSettings;
     private static boolean running = false;
 
     private static DatabaseHelper database;
@@ -84,6 +94,24 @@ public class MyVpnService extends VpnService {
         return null;
     }
 
+    public static void reload(Context context, String reason) {
+        if (!running) return;
+        Log.i(TAG, "Reload VPN - "+reason);
+        Intent intent = new Intent(context, MyVpnService.class);
+        intent.setAction(Values.Intent.Actions.RELOAD);
+        try {
+            ContextCompat.startForegroundService(context, intent);
+        } catch (Throwable ex) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    ex instanceof ForegroundServiceStartNotAllowedException) {
+                try {
+                    context.startService(intent);
+                } catch (Throwable exex) {
+                    Log.e(TAG, exex + "\n" + Log.getStackTraceString(exex));
+                }
+            }
+        }
+    }
 
     @Override
     public void onCreate() {
@@ -92,11 +120,7 @@ public class MyVpnService extends VpnService {
         notification = new NotificationTools(this);
         startForeground(NotificationTools.WAITING, notification.getWaitingNotification());
 
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                .detectAll()
-                .penaltyLog()
-                .build());
-
+        networkMonitor = new NetworkMonitor(this);
         logHandler = new LogHandler(this, Looper.getMainLooper());
 
         if (jni_context != 0) {
@@ -114,7 +138,6 @@ public class MyVpnService extends VpnService {
 
         super.onCreate();
 
-        return;
         /// TODO: Maybe register some of these listeners from SinkholeService.onCreate
         ///  i.e. idleState, connectivity, alarmManager, ... (?)
     }
@@ -128,8 +151,8 @@ public class MyVpnService extends VpnService {
                 case Values.Intent.Actions.START:
                     startVpn();
                     break;
-                case Values.Intent.Actions.UPDATE_SETTINGS:
-                    // This happens everytime an intent with settings is received
+                case Values.Intent.Actions.RELOAD:
+                    reloadVpn();
                     break;
                 case Values.Intent.Actions.STOP:
                     stopVpn();
@@ -145,19 +168,24 @@ public class MyVpnService extends VpnService {
         if(config == null) return;
 
         MyVpnService.vpnConfig = config;
-        database = new DatabaseHelper(config.getDbPath());
+
         // TODO: if running, probably need to restart service in order to apply new settings
         // TODO: send reload intent (?)
     }
     private void startVpn(){
         if (vpnInterface != null) return;
 
+        startForeground(NotificationTools.WAITING, notification.getRunningNotification());
         logHandler.logText("Starting the VPN!");
 
-        startForeground(NotificationTools.WAITING, notification.getRunningNotification());
 
+        database = new DatabaseHelper(Values.Paths.database(this));
+
+        applicationSettings = database.getApplicationSettings(vpnConfig.getFilteredPackages());
         // Keep awake
         WakeLock.getLock(this).acquire();
+
+        networkMonitor.openListener();
 
         Builder builder = getBuilder(vpnConfig.getFilteredPackages());
 
@@ -168,6 +196,7 @@ public class MyVpnService extends VpnService {
             } else {
                 Log.i(TAG, "VPN interface established");
                 running = true;
+                logHandler.vpnStarted(vpnConfig.getSession());
                 startNative(vpnInterface);
                 return;
             }
@@ -176,8 +205,14 @@ public class MyVpnService extends VpnService {
         }
         running = false;
     }
-    void stopVpn(){
+    private void reloadVpn(){
+        Log.i(TAG, "Restarting VPN");
+        stopVpn();
+        startVpn();
+    }
+    private void stopVpn(){
         stopNative();
+        database.close();
         if (vpnInterface != null) {
             try {
                 vpnInterface.close();
@@ -185,6 +220,9 @@ public class MyVpnService extends VpnService {
             } catch (Exception ignored) {}
             vpnInterface = null;
         }
+
+        networkMonitor.closeListener();
+
         stopForeground(true);
 
         // release WakeLock
@@ -192,12 +230,13 @@ public class MyVpnService extends VpnService {
 
         logHandler.vpnStopped();
         Log.i(TAG, "VPN stopped");
+        running = false;
     }
 
     @Override
     public void onDestroy() {
-        running = false;
         Log.i(TAG, "VPN stopping...");
+
         stopVpn();
 
         super.onDestroy();
@@ -205,43 +244,33 @@ public class MyVpnService extends VpnService {
 
 
 
-    private Builder getBuilder(List<String> filteredPackages) {
-        assert !filteredPackages.isEmpty();
-
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MyVpnService.this);
-        boolean subnet = false; // prefs.getBoolean("subnet", false);
-        boolean tethering = false; //prefs.getBoolean("tethering", false);
-        boolean lan = false; // prefs.getBoolean("lan", false);
-        boolean ip6 = true; // prefs.getBoolean("ip6", true);
-        boolean filter = false; // prefs.getBoolean("filter", false);
-        boolean system = false; // prefs.getBoolean("manage_system", false);
-
+    private Builder getBuilder(List<String> packageNames) {
+        assert !applicationSettings.isEmpty();
 
         // Build VPN service
         Builder builder = new Builder();
-        builder.setSession(getString(R.string.app_name));
+        builder.setSession("NetGuard");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            builder.setMetered(Util.isMeteredNetwork(this));
+            builder.setMetered(NetworkUtils.isMeteredNetwork(this));
 
         // VPN address
         String vpn4 = "10.1.10.1"; //prefs.getString("vpn4", "10.1.10.1");
         Log.i(TAG, "Using VPN4=" + vpn4);
         builder.addAddress(vpn4, 32);
-        if (ip6) {
-            String vpn6 = "fd00:1:fd00:1:fd00:1:fd00:1"; // prefs.getString("vpn6", "fd00:1:fd00:1:fd00:1:fd00:1");
-            Log.i(TAG, "Using VPN6=" + vpn6);
-            builder.addAddress(vpn6, 128);
-        }
+        String vpn6 = "fd00:1:fd00:1:fd00:1:fd00:1"; // prefs.getString("vpn6", "fd00:1:fd00:1:fd00:1:fd00:1");
+        Log.i(TAG, "Using VPN6=" + vpn6);
+        builder.addAddress(vpn6, 128);
 
         // DNS address
-        // (WHITELIST MODE) original: if (filter)
         // TODO: custom DNS servers
-        for (InetAddress dns : DNS.getDns(MyVpnService.this)) {
-            if (ip6 || dns instanceof Inet4Address) {
-                Log.i(TAG, "Using DNS=" + dns);
-                builder.addDnsServer(dns);
-            }
+        for (InetAddress dns : NetworkUtils.getDefaultDns(MyVpnService.this)) {
+            Log.i(TAG, "Using DNS=" + dns);
+            builder.addDnsServer(dns);
+            if (dns instanceof Inet4Address)
+                builder.addRoute(dns.getHostAddress(), 32);
+            else if (dns instanceof Inet6Address)
+                builder.addRoute(dns.getHostAddress(), 128);
         }
 
         // TODO: what is this?!
@@ -259,121 +288,9 @@ public class MyVpnService extends VpnService {
                 Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
             }
 
-        // TODO: Subnet routing needed?
-        // Subnet routing
-        if (subnet) {
-            // Exclude IP ranges
-            List<IPUtil.CIDR> listExclude = new ArrayList<>();
-            listExclude.add(new IPUtil.CIDR("127.0.0.0", 8)); // localhost
-
-            if (tethering && !lan) {
-                // USB tethering 192.168.42.x
-                // Wi-Fi tethering 192.168.43.x
-                listExclude.add(new IPUtil.CIDR("192.168.42.0", 23));
-                // Bluetooth tethering 192.168.44.x
-                listExclude.add(new IPUtil.CIDR("192.168.44.0", 24));
-                // Wi-Fi direct 192.168.49.x
-                listExclude.add(new IPUtil.CIDR("192.168.49.0", 24));
-            }
-
-            if (lan) {
-                // https://tools.ietf.org/html/rfc1918
-                listExclude.add(new IPUtil.CIDR("10.0.0.0", 8));
-                listExclude.add(new IPUtil.CIDR("172.16.0.0", 12));
-                listExclude.add(new IPUtil.CIDR("192.168.0.0", 16));
-            }
-
-            // https://en.wikipedia.org/wiki/Mobile_country_code
-            Configuration config = getResources().getConfiguration();
-
-            // T-Mobile Wi-Fi calling
-            if (config.mcc == 310 && (config.mnc == 160 ||
-                    config.mnc == 200 ||
-                    config.mnc == 210 ||
-                    config.mnc == 220 ||
-                    config.mnc == 230 ||
-                    config.mnc == 240 ||
-                    config.mnc == 250 ||
-                    config.mnc == 260 ||
-                    config.mnc == 270 ||
-                    config.mnc == 310 ||
-                    config.mnc == 490 ||
-                    config.mnc == 660 ||
-                    config.mnc == 800)) {
-                listExclude.add(new IPUtil.CIDR("66.94.2.0", 24));
-                listExclude.add(new IPUtil.CIDR("66.94.6.0", 23));
-                listExclude.add(new IPUtil.CIDR("66.94.8.0", 22));
-                listExclude.add(new IPUtil.CIDR("208.54.0.0", 16));
-            }
-
-            // Verizon wireless calling
-            if ((config.mcc == 310 &&
-                    (config.mnc == 4 ||
-                            config.mnc == 5 ||
-                            config.mnc == 6 ||
-                            config.mnc == 10 ||
-                            config.mnc == 12 ||
-                            config.mnc == 13 ||
-                            config.mnc == 350 ||
-                            config.mnc == 590 ||
-                            config.mnc == 820 ||
-                            config.mnc == 890 ||
-                            config.mnc == 910)) ||
-                    (config.mcc == 311 && (config.mnc == 12 ||
-                            config.mnc == 110 ||
-                            (config.mnc >= 270 && config.mnc <= 289) ||
-                            config.mnc == 390 ||
-                            (config.mnc >= 480 && config.mnc <= 489) ||
-                            config.mnc == 590)) ||
-                    (config.mcc == 312 && (config.mnc == 770))) {
-                listExclude.add(new IPUtil.CIDR("66.174.0.0", 16)); // 66.174.0.0 - 66.174.255.255
-                listExclude.add(new IPUtil.CIDR("66.82.0.0", 15)); // 69.82.0.0 - 69.83.255.255
-                listExclude.add(new IPUtil.CIDR("69.96.0.0", 13)); // 69.96.0.0 - 69.103.255.255
-                listExclude.add(new IPUtil.CIDR("70.192.0.0", 11)); // 70.192.0.0 - 70.223.255.255
-                listExclude.add(new IPUtil.CIDR("97.128.0.0", 9)); // 97.128.0.0 - 97.255.255.255
-                listExclude.add(new IPUtil.CIDR("174.192.0.0", 9)); // 174.192.0.0 - 174.255.255.255
-                listExclude.add(new IPUtil.CIDR("72.96.0.0", 9)); // 72.96.0.0 - 72.127.255.255
-                listExclude.add(new IPUtil.CIDR("75.192.0.0", 9)); // 75.192.0.0 - 75.255.255.255
-                listExclude.add(new IPUtil.CIDR("97.0.0.0", 10)); // 97.0.0.0 - 97.63.255.255
-            }
-
-            // SFR MMS
-            if (config.mnc == 10 && config.mcc == 208)
-                listExclude.add(new IPUtil.CIDR("10.151.0.0", 24));
-
-            // Broadcast
-            listExclude.add(new IPUtil.CIDR("224.0.0.0", 3));
-
-            Collections.sort(listExclude);
-
-            try {
-                InetAddress start = InetAddress.getByName("0.0.0.0");
-                for (IPUtil.CIDR exclude : listExclude) {
-                    Log.i(TAG, "Exclude " + exclude.getStart().getHostAddress() + "..." + exclude.getEnd().getHostAddress());
-                    for (IPUtil.CIDR include : IPUtil.toCIDR(start, IPUtil.minus1(exclude.getStart())))
-                        try {
-                            builder.addRoute(include.address, include.prefix);
-                        } catch (Throwable ex) {
-                            Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
-                        }
-                    start = IPUtil.plus1(exclude.getEnd());
-                }
-                String end = (lan ? "255.255.255.254" : "255.255.255.255");
-                for (IPUtil.CIDR include : IPUtil.toCIDR("224.0.0.0", end))
-                    try {
-                        builder.addRoute(include.address, include.prefix);
-                    } catch (Throwable ex) {
-                        Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
-                    }
-            } catch (UnknownHostException ex) {
-                Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
-            }
-        } else
-            builder.addRoute("0.0.0.0", 0);
-
-        Log.i(TAG, "IPv6=" + ip6);
-        if (ip6)
-            builder.addRoute("2000::", 3); // unicast
+        // TODO: Subnet routing needed? See NetGuard
+        builder.addRoute("0.0.0.0", 0);
+        builder.addRoute("::", 0); // unicast
 
         // MTU
         int mtu = jni_get_mtu();
@@ -382,7 +299,7 @@ public class MyVpnService extends VpnService {
 
         // Add list of allowed applications
         // Whitelist
-        for (String packageName : filteredPackages) {
+        for (var packageName : packageNames) {
             try {
                 builder.addAllowedApplication(packageName);
                 Log.i(TAG, "MyVpnService " + packageName);
@@ -393,10 +310,12 @@ public class MyVpnService extends VpnService {
 
         return builder;
     }
+
     private void startNative(final ParcelFileDescriptor vpn) {
+        prepareCacheMaps();
         prepareGlobalRules();
         preparePackageRules();
-        prepareBlockedPackages();
+        prepareApplicationSettings();
 
         int prio = vpnConfig.getLogLevel().intValue();
         final int rcode = 3; // TODO: not sure if this is necessary, related to DNS... original: Integer.parseInt(prefs.getString("rcode", "3"));
@@ -409,7 +328,7 @@ public class MyVpnService extends VpnService {
                 @Override
                 public void run() {
                     Log.i(TAG, "Running tunnel context=" + jni_context);
-                    jni_run(jni_context, vpn.getFd(), true /* TODO: mapForward.containsKey(53)*/, rcode);
+                    jni_run(jni_context, vpn.getFd(), false /* TODO: mapForward.containsKey(53)*/, vpnConfig.getLogTraffic(), rcode);
                     Log.i(TAG, "Tunnel exited");
                     tunnelThread = null;
                 }
@@ -453,32 +372,43 @@ public class MyVpnService extends VpnService {
         mapGlobalBlockedHosts.clear();
         mapGlobalBlockedIPs.clear();
     }
+    private void prepareCacheMaps() {
+        mapIPKeyUid.clear();
+        mapIPKeySni.clear();
+        mapIpDomain.clear();
+    }
     private void preparePackageRules() {
         lock.writeLock().lock();
         mapUidRules.clear();
         mapUidPackageName.clear();
-        for(var packageName : vpnConfig.getFilteredPackages()){
-            Rule rule = database.getPackageRule(packageName);
-            if(rule == null) continue;
+        for(var applicationSetting : applicationSettings){
+            String packageName = applicationSetting.getPackageName();
+            if(!vpnConfig.getFilteredPackages().contains(packageName)) continue;
 
             // lookup the uid of a packageName
             long uid = Util.packageNameToUid(this, packageName);
-            if(uid < 0) {
-                continue;
-            }
+            mapUidPackageName.put(uid, packageName);
+
+            // check if a rule is available for the package
+            Rule rule = database.getPackageRule(packageName);
+            if(rule == null || uid < 0) continue;
 
             mapUidRules.put(uid, rule);
-            mapUidPackageName.put(uid, packageName);
         }
 
         lock.writeLock().unlock();
     }
-    private void prepareBlockedPackages() {
-        setUidBlockedFully.clear();
-        for(var packageName : vpnConfig.getBlockedPackages()){
+    private void prepareApplicationSettings() {
+        setUidBlockAll.clear();
+        setUidBlockQuic.clear();
+        for(var applicationSetting : applicationSettings){
+            String packageName = applicationSetting.getPackageName();
+            if(!vpnConfig.getFilteredPackages().contains(packageName)) continue;
+
             long uid = Util.packageNameToUid(this, packageName);
             if(uid < 0) continue;
-            setUidBlockedFully.add(uid);
+            if(applicationSetting.getBlockAll()) setUidBlockAll.add(uid);
+            if(applicationSetting.getBlockQuic()) setUidBlockQuic.add(uid);
         }
     }
 
@@ -504,55 +434,60 @@ public class MyVpnService extends VpnService {
 
     // Called from native code
     private void logPacket(Packet packet) {
-        logHandler.packet(packet);
+        //logHandler.packet(packet);
     }
+
     // Called from native code
-    private void logTraffic(long time, int uid, int protocol, String ip, String host, boolean allowed) {
-        // TODO: make logging optional
-        if(uid > 0){
-            Log.wtf(TAG, "LogTraffic: uid is "+uid+"!!!!!");
-            Log.wtf(TAG, "Mapped packages:"+String.join(",", mapUidPackageName.values()));
+    private void logTraffic(long time, int version, int protocol, String daddr, int dport, int length, int uid, boolean allowed) {
+        if(uid <= 0) {
+            var key = new IPKey(version, protocol, daddr, dport, -1);
+            if(mapIPKeyUid.containsKey(key))
+                uid = mapIPKeyUid.get(key).intValue();
         }
         if (uid != Process.myUid()) {
+            IPKey key = new IPKey(version, protocol, daddr, dport, uid);
             String packageName = mapUidPackageName.get((long)uid);
-            Log.wtf(TAG, "LogTraffic: uid is "+uid+", packageName is "+packageName);
-            TrafficLog log = ModelBuilder.TrafficLog(time, vpnConfig.getSession(), packageName, protocol, ip, host, allowed);
+            String domain = getDomainName(key);
+
+            // TODO: remove this block
+            if(domain != null && !domain.isBlank() && (packageName == null || packageName.isBlank())){
+                for (IPKey ikey : mapIPKeyUid.keySet()) {
+                    Log.i(TAG, "Key: "+ikey.toString());
+                    if(Objects.equals(ikey.getDaddr(), daddr)){
+                        Log.wtf(TAG, "Key: " + ikey + "... Why no match?! " + daddr);
+                    }
+                }
+            }
+            TrafficLog log = ModelBuilder.TrafficLog(time, vpnConfig.getSession(), packageName, protocol, daddr, domain, dport, length, allowed);
             logHandler.traffic(log);
         }
     }
 
+    // TODO: log dns to lookup domain names
     // Called from native code
     private void dnsResolved(ResourceRecord rr) {
-        try{
-            rr.setPackageName(mapUidPackageName.get(rr.getUid()));
-        } catch (Exception ignored) {}
-        logHandler.dns(rr);
+        mapIpDomain.put(rr.getResource(), rr.getQName());
+    }
+    private void sniResolved(String sni, int version, int protocol, String daddr, int dport, String saddr, int sport, int uid) {
+        IPKey key = new IPKey(version, protocol, daddr, dport, uid);
+        mapIPKeySni.put(key, sni);
     }
 
     // Called from native code
     private boolean isQuicBlocked(int uid) {
-        return mapUidRules.containsKey((long)uid) && mapUidRules.get((long)uid).getBlockQuic();
+        return setUidBlockQuic.contains((long)uid);
     }
     private boolean isDomainBlocked(int uid, String name) {
         lock.readLock().lock();
 
         // check if the uid is fully blocked
-        boolean blocked = setUidBlockedFully.contains((long) uid);
+        boolean blocked = setUidBlockAll.contains((long) uid);
 
 
         // check if the domain is blocked globally
+        blocked |= hostBlockedGlobally(name);
         if(!blocked) {
-            if (mapGlobalBlockedHosts.containsKey(name)) {
-                // if domain was checked before, look up if it is globally blocked
-                blocked = mapGlobalBlockedHosts.get(name);
-            } else {
-                // otherwise, lookup the domain in the database; store it in the lookup table for future lookups
-                if (database.genericBlacklistContainsHost(name)) {
-                    mapGlobalBlockedHosts.put(name, true);
-                } else {
-                    mapGlobalBlockedHosts.put(name, false);
-                }
-            }
+            blocked = hostBlockedGlobally(name);
         }
 
         // if not, check if the domain is blocked for the given application
@@ -575,9 +510,9 @@ public class MyVpnService extends VpnService {
     }
 
     // Called from native code
-    @TargetApi(Build.VERSION_CODES.Q)
+    @androidx.annotation.RequiresApi(Build.VERSION_CODES.Q)
     private int getUidQ(int version, int protocol, String saddr, int sport, String daddr, int dport) {
-        if (protocol != 6 /* TCP */ && protocol != 17 /* UDP */)
+        if (protocol != Protocols.TCP && protocol != Protocols.UDP)
             return Process.INVALID_UID;
 
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -592,41 +527,43 @@ public class MyVpnService extends VpnService {
         Log.i(TAG, "Get uid=" + uid);
         return uid;
     }
+
+    private int getUidCached(int version, int protocol, String saddr, int sport, String daddr, int dport) {
+        int uid = -1;
+        var key = new IPKey(version, protocol, daddr, dport, -1);
+        if(mapIPKeyUid.containsKey(key)) uid = mapIPKeyUid.get(key).intValue();
+        return uid;
+    }
+    private void cacheUid(int version, int protocol, String saddr, int sport, String daddr, int dport, int uid) {
+        var key = new IPKey(version, protocol, daddr, dport, -1);
+        mapIPKeyUid.put(key, (long) uid);
+    }
+
     private boolean isAddressAllowed(Packet packet) {
         lock.readLock().lock();
         packet.setAllowed(true);
 
-        if(setUidBlockedFully.contains(packet.getUid())) {
+        if(setUidBlockAll.contains(packet.getUid())) {
             // check if the uid is fully blocked
             packet.setAllowed(false);
-        }else if (packet.getProtocol() == Protocols.UDP && !vpnConfig.getFilterUdp()) {
-            // https://android.googlesource.com/platform/system/core/+/master/include/private/android_filesystem_config.h
-            // Allow unfiltered UDP
-            packet.setAllowed(true);
-            // Log.i(TAG, "Allowing UDP " + packet);
         } else if (packet.getUid() == android.os.Process.myUid()) {
             // Allow self
             packet.setAllowed(true);
             // Log.w(TAG, "Allowing self " + packet);
         } else {
             String ip = packet.getDaddr();
-            boolean blocked = false;
 
-            // IP is already cached?
-            if(mapGlobalBlockedIPs.containsKey(ip)){
-                // check if IP is globally blocked
-                blocked = mapGlobalBlockedIPs.get(ip);
-            } else {
-                // otherwise, lookup the ip in the database; store it in the lookup table for future lookups
-                if (database.genericBlacklistContainsIp(ip)) {
-                    mapGlobalBlockedIPs.put(ip, true);
-                } else {
-                    mapGlobalBlockedIPs.put(ip, false);
-                }
-            }
+            boolean blocked = ipBlockedGlobally(ip);
 
-            // check if IP is blocked for given package
             long uid = packet.getUid();
+
+            // lookup domain and check if that might be blocked
+            String domain = null;
+            if(!blocked) domain = getDomainName(packet);
+            if(domain != null && !domain.isBlank()){
+                blocked = isDomainBlocked((int)uid, domain);
+            }
+            // check if IP is blocked for given package
             if (!blocked && mapUidRules.containsKey(uid)) {
                Rule rule = mapUidRules.get(uid);
                boolean ipListed = rule.getIps().containsKey(ip);
@@ -646,6 +583,49 @@ public class MyVpnService extends VpnService {
         lock.readLock().unlock();
 
         return packet.getAllowed();
+    }
+
+    private boolean hostBlockedGlobally(String host){
+        // host is already cached?
+        if(mapGlobalBlockedIPs.containsKey(host)){
+            // check if host is globally blocked
+            return mapGlobalBlockedHosts.get(host);
+        } else {
+            // otherwise, lookup the host in the database; store it in the lookup table for future lookups
+            if (database.genericBlacklistContainsHost(host)) {
+                mapGlobalBlockedHosts.put(host, true);
+                return true;
+            } else {
+                mapGlobalBlockedHosts.put(host, false);
+                return false;
+            }
+        }
+    }
+    private boolean ipBlockedGlobally(String ip){
+        // IP is already cached?
+        if(mapGlobalBlockedIPs.containsKey(ip)){
+            // check if IP is globally blocked
+            return mapGlobalBlockedIPs.get(ip);
+        } else {
+            // otherwise, lookup the ip in the database; store it in the lookup table for future lookups
+            if (database.genericBlacklistContainsIp(ip)) {
+                mapGlobalBlockedIPs.put(ip, true);
+                return true;
+            } else {
+                mapGlobalBlockedIPs.put(ip, false);
+                return false;
+            }
+        }
+    }
+
+    private String getDomainName(Packet packet) {
+        return getDomainName(new IPKey(packet));
+    }
+    private String getDomainName(IPKey key){
+        if(mapIPKeySni.containsKey(key)){
+            return mapIPKeySni.get(key);
+        }
+        return mapIpDomain.get(key.getDaddr());
     }
 
 }

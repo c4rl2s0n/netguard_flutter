@@ -14,7 +14,7 @@ class VpnSettings extends StatelessWidget {
       buildWhen: (oldState, state) => oldState.running != state.running,
       builder: (context, session) => SettingsGroup(
         title: "VPN Settings",
-        settings: [_systemApps(), _globalRules(), _ruleImport()],
+        settings: [_systemApps(), _logTraffic(), _globalRules(), _ruleImport()],
         info: session.running
             ? Text(
                 "These settings will only be affective after restarting the VPN.",
@@ -28,18 +28,27 @@ class VpnSettings extends StatelessWidget {
   }
 
   Widget _systemApps() {
-    return SimpleSetting(
-      name: "Include System Applications",
-      description: "If system applications should be filtered by the firewall",
-      action: BlocBuilder<SettingsCubit, SettingsState>(
-        buildWhen: (oldState, state) =>
-            oldState.includeSystemApps != state.includeSystemApps,
-        builder: (context, state) {
-          return Switch(
-            value: state.includeSystemApps,
-            onChanged: (_) => settingsCubit.toggleIncludeSystemApps(),
-          );
-        },
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      buildWhen: (oldState, state) =>
+          oldState.includeSystemApps != state.includeSystemApps,
+      builder: (context, state) => SwitchSetting(
+        name: "Include System Applications",
+        description:
+            "If system applications should be filtered by the firewall",
+        value: state.includeSystemApps,
+        onChanged: settingsCubit.setIncludeSystemApps,
+      ),
+    );
+  }
+
+  Widget _logTraffic() {
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) => SwitchSetting(
+        name: "Log Traffic",
+        description:
+            "If the traffic should be logged. Might increase battery usage, but is necessary to use found domains in custom rules.",
+        value: state.logTraffic,
+        onChanged: (_) => settingsCubit.toggleLogTraffic(),
       ),
     );
   }

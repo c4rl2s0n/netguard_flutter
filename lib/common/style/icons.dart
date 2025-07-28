@@ -4,9 +4,10 @@ class CustomIcons {
 
   static const IconData start = Icons.play_arrow;
   static const IconData stop = Icons.stop;
-  static const IconData appIcon = Icons.fire_extinguisher_sharp;
+  static const IconData appIcon = Icons.security;
   static const IconData home = Icons.fire_hydrant_alt_outlined;
   static const IconData applications = Icons.app_registration;
+  static const IconData logs = Icons.filter_list;
   static const IconData active = Icons.security;
   static const IconData inactive = Icons.local_fire_department_outlined;
   static const IconData scan = Icons.document_scanner_outlined;

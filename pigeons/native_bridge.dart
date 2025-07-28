@@ -25,10 +25,6 @@ abstract class VpnEventHandler {
   void logError(String errorCode, String message, Object details);
   void updateVpnState(String? sessionId);
   @async
-  void logPacket(Packet packet);
-  @async
-  void logDns(ResourceRecord record);
-  @async
   void logTraffic(TrafficLog log);
 }
 
@@ -36,10 +32,9 @@ abstract class VpnEventHandler {
 class VpnConfig {
   VpnConfig({
     required this.session,
-    this.filteredPackages = const [],
-    this.blockedPackages = const [],
     required this.dbPath,
-    this.filterUdp = true,
+    required this.filteredPackages,
+    this.logTraffic = true,
     this.logLevel = 5,
   });
 
@@ -49,13 +44,10 @@ class VpnConfig {
   /// List of PackageNames that are filtered by the firewall
   List<String> filteredPackages;
 
-  /// List of PackageNames that are completely blocked by the firewall
-  List<String> blockedPackages;
-
   /// path of the sqlite database, so native code can read from it directly
   String dbPath;
 
-  bool filterUdp;
+  bool logTraffic;
 
   int logLevel;
 }
@@ -75,6 +67,20 @@ class Application {
   String version;
   Uint8List? icon;
   bool system;
+}
+
+class ApplicationSetting {
+  ApplicationSetting({
+    required this.packageName,
+    this.filter = false,
+    this.blockAll = false,
+    this.blockQuic = false,
+  });
+
+  String packageName;
+  bool filter;
+  bool blockAll;
+  bool blockQuic;
 }
 
 class Packet {
@@ -130,15 +136,45 @@ enum RuleType { blacklist, whitelist }
 class Rule {
   Rule({
     required this.type,
-    required this.blockQuic,
+    required this.shouldBlockQuic,
     required this.hosts,
     required this.ips,
   });
   String? packageName;
   RuleType type;
-  bool blockQuic;
+  bool shouldBlockQuic;
   Map<String, bool> hosts;
   Map<String, bool> ips;
+}
+
+
+// class LogEntry {
+//   LogEntry({required this.time, required this.session, this.data});
+//   final int time;
+//   final String session;
+//   Object? data;
+// }
+class LogEntry {
+  LogEntry({
+    required this.time,
+    required this.session,
+    required this.data,
+  });
+
+  int time;
+  String session;
+  Object data;
+}
+
+class ErrorLog {
+  ErrorLog({
+    required this.time,
+    required this.session,
+    this.message = "Error",
+  });
+  int time;
+  String session;
+  String message;
 }
 
 class TrafficLog {
@@ -146,17 +182,22 @@ class TrafficLog {
     required this.time,
     required this.session,
     this.protocol = 0,
+    this.dport = 0,
     this.ip = "",
     this.host,
     this.packageName,
+    this.size = 0,
     required this.allowed,
   });
+
   int time;
   String session;
   int protocol;
+  int dport;
   String ip;
   String? host;
   String? packageName;
+  int size;
   bool allowed;
 }
 

@@ -8,6 +8,7 @@ extension ApplicationSettingToCompanion on ApplicationSetting {
         packageName: Value(packageName),
         filter: Value(filter),
         blockAll: Value(blockAll),
+        blockQuic: Value(blockQuic),
       );
 }
 
@@ -39,13 +40,13 @@ extension ResourceRecordToCompanion on ResourceRecord {
 extension RuleToCompanion on Rule {
   RulesTableCompanion get companion => RulesTableCompanion(
     id: Value(id),
-    packageName: packageName.notEmpty ? Value(packageName!) : Value.absent(),
+    packageName: packageName.notEmpty ? Value(packageName!) : Value(""), // TODO: check this...
     targetVersion: Value(targetVersion),
     name: Value(name),
     description: Value(description),
     active: Value(active),
     type: Value(type),
-    blockQuic: Value(blockQuic),
+    shouldBlockQuic: Value(shouldBlockQuic),
   );
 }
 
@@ -55,6 +56,8 @@ extension SettingsToCompanion on Settings {
     darkMode: darkMode,
     colorScheme: colorScheme,
     includeSystemApps: includeSystemApps,
+    logTraffic: logTraffic,
+    logCompactView: logCompactView,
   );
 }
 

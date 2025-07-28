@@ -281,6 +281,17 @@ void handle_ip(const struct arguments *args,
         }
     }
 
+    // Get uid
+    jint uid = -1;
+    if (args->ctx->sdk <= 28) // Android 9 Pie
+        uid = get_uid(version, protocol, saddr, sport, daddr, dport);
+    else
+        uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
+    // cache uid
+    if (uid == -1)
+        uid = get_uid_cached(args, version, protocol, source, sport, dest, dport);
+    else
+        cache_uid(args, version, protocol, source, sport, dest, dport, uid);
 
     // Get server name
     char server_name[TLS_SNI_LENGTH + 1];
@@ -291,25 +302,13 @@ void handle_ip(const struct arguments *args,
         const uint8_t *data = payload + sizeof(struct tcphdr) + tcpoptlen;
         const uint16_t datalen = (const uint16_t) (length - (data - pkt));
 
-        if (get_sni(data, datalen, server_name)) {
+        if (parse_sni(data, datalen, server_name)) {
             log_android(ANDROID_LOG_INFO, "TLS server name: %s", server_name);
         }
     }
 
-    // Get uid
-    jint uid = -1;
-    if (true || protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6 ||
-        (protocol == IPPROTO_UDP) || // TODO: check, try to always get uid for udp to be able to block QUIC; original: && !has_udp_session(args, pkt, payload)) ||
-        (protocol == IPPROTO_TCP && (syn || *server_name))) {
-        if (args->ctx->sdk <= 28) // Android 9 Pie
-            uid = get_uid(version, protocol, saddr, sport, daddr, dport);
-        else
-            uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
-    }
-
     if (*server_name) {
-        strcpy(data, "sni");
-        dns_resolved(args, server_name, server_name, dest, -1, uid);
+        sni_resolved(args, server_name, version, protocol, dest, dport, source, sport, uid);
     }
 
     log_android(ANDROID_LOG_DEBUG,
@@ -321,14 +320,13 @@ void handle_ip(const struct arguments *args,
     if(protocol == IPPROTO_UDP && uid > 0 && dport == 443 && is_quic_blocked(args, uid)){
         // check if QUIC should be blocked for current application (UDP Port 443)
         allowed = 0;
-    } else if (protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload)){
+    } else if (protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload)) {
         allowed = 1; // could be a lingering/blocked session
-    } else if (protocol == IPPROTO_TCP && (!syn || (uid == 0 && dport == 53)) &&
-               *server_name == 0) {
+    } else if (false && protocol == IPPROTO_TCP && (!syn || (uid <= 0 && dport == 53)) &&
+               *server_name == 0) { // TODO: not sure if this still makes sense for me, maybe skip it
         allowed = 1; // assume existing session
     } else {
-        jobject objPacket = create_packet(
-                args, version, protocol, flags, source, sport, dest, dport, data, uid, 0);
+        jobject objPacket = create_packet(args, version, protocol, flags, source, sport, dest, dport, data, uid, 0);
         allowed = is_address_allowed(args, objPacket);
         if (allowed && *server_name && is_domain_blocked(args, uid, server_name)) {
             allowed = 0;
@@ -340,19 +338,24 @@ void handle_ip(const struct arguments *args,
         if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6)
             handle_icmp(args, pkt, length, payload, uid, epoll_fd);
         else if (protocol == IPPROTO_UDP)
-            handle_udp(args, pkt, length, payload, uid, NULL, epoll_fd);
+            handle_udp(args, pkt, length, payload, uid, epoll_fd);
         else if (protocol == IPPROTO_TCP)
-            handle_tcp(args, pkt, length, payload, uid, allowed, NULL, epoll_fd);
+            handle_tcp(args, pkt, length, payload, uid, allowed, epoll_fd);
     } else {
         if (protocol == IPPROTO_UDP)
             block_udp(args, pkt, length, payload, uid);
         else if (protocol == IPPROTO_TCP) // TODO: why need server_name here? original: && *server_name)
-            handle_tcp(args, pkt, length, payload, uid, allowed, NULL, epoll_fd); // RST
+            handle_tcp(args, pkt, length, payload, uid, allowed, epoll_fd); // RST
 
         log_android(ANDROID_LOG_WARN, "Address v%d p%d %s/%u syn %d not allowed",
                     version, protocol, dest, dport, syn);
     }
-    log_traffic(args, uid, protocol, dest, server_name, allowed);
+
+    // optionally, log traffic to database
+    if(args->logTraffic)
+        log_traffic(args, version, protocol, dest, dport, length, uid, allowed);
+    // TODO: log packet size
+
 }
 
 jint get_uid(const int version, const int protocol,

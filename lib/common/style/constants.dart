@@ -17,4 +17,5 @@ class ThemeConstants {
   static const double listTileImageMargin = 10;
   static const double scrollbarThickness = 10;
   static const double dividerHeight = 5;
+  static const double appIconSize = 26;
 }

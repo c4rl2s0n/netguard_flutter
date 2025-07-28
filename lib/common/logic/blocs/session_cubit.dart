@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:netguard/common/common.dart';
@@ -8,7 +9,8 @@ import 'package:netguard/data/data.dart';
 part 'session_cubit.freezed.dart';
 
 class SessionCubit extends Cubit<SessionState> {
-  SessionCubit() : super(SessionState());
+  SessionCubit()
+    : super(SessionState(sessionLogState: SessionLogsState.empty()));
 
   Future load() async {
     await loadApplications();
@@ -66,10 +68,17 @@ class SessionCubit extends Cubit<SessionState> {
     await PermissionTools.requestNotificationPermission();
     await PermissionTools.requestBatteryOptimizationPermission();
 
-    VpnConfig vpnConfig = await VpnTools.getConfig();
+    VpnConfig vpnConfig = await VpnTools.getConfig(
+      settingsCubit.state.settings,
+    );
     await vpnController.startVpn(vpnConfig);
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
-    emit(state.copyWith(sessionId: vpnConfig.session, sessionTrafficLog: []));
+    emit(
+      state.copyWith(
+        sessionId: vpnConfig.session,
+        sessionLogState: state.sessionLogState.clear(),
+      ),
+    );
   }
 
   Future stopVpn() async {
@@ -83,9 +92,7 @@ class SessionCubit extends Cubit<SessionState> {
       emit(state.copyWith(sessionId: sessionId));
 
   void _onTrafficLog(TrafficLog event) {
-    emit(
-      state.copyWith(sessionTrafficLog: [event, ...state.sessionTrafficLog]),
-    );
+    emit(state.copyWith(sessionLogState: state.sessionLogState.addEvent(event)));
   }
 }
 
@@ -93,7 +100,7 @@ class SessionCubit extends Cubit<SessionState> {
 class SessionState with _$SessionState {
   const SessionState({
     this.sessionId,
-    this.sessionTrafficLog = const [],
+    required this.sessionLogState,
     this.systemApplicationsMap = const {},
     this.thirdPartyApplicationsMap = const {},
   });
@@ -101,13 +108,14 @@ class SessionState with _$SessionState {
   @override
   final String? sessionId;
   @override
-  final List<TrafficLog> sessionTrafficLog;
+  final SessionLogsState sessionLogState;
   @override
   final Map<String, Application> systemApplicationsMap;
   @override
   final Map<String, Application> thirdPartyApplicationsMap;
 
   bool get running => sessionId.notEmpty;
+  bool get hasLogs => sessionLogState.hasLogs;
 
   Map<String, Application> get applicationsMap => {
     ...thirdPartyApplicationsMap,
@@ -121,4 +129,37 @@ class SessionState with _$SessionState {
     ...systemApplications,
     ...thirdPartyApplications,
   ];
+}
+
+@freezed
+class SessionLogsState with _$SessionLogsState {
+  const SessionLogsState._({
+    this.sessionTrafficLog = const IListConst([]),
+    this.sessionTrafficLogByApp = const IMapConst({}),
+    required this.sessionTrafficLogGroups,
+  });
+  factory SessionLogsState.empty() => SessionLogsState._(sessionTrafficLogGroups: TrafficLogGroups());
+
+  @override
+  final IList<TrafficLog> sessionTrafficLog;
+  @override
+  final IMap<String?, IList<TrafficLog>> sessionTrafficLogByApp;
+  @override
+  final TrafficLogGroups sessionTrafficLogGroups;
+
+  bool get hasLogs => sessionTrafficLog.notEmpty;
+
+  SessionLogsState clear(){
+    return SessionLogsState.empty();
+  }
+  SessionLogsState addEvent(TrafficLog event){
+    IMap<String?, IList<TrafficLog>> logByApp = sessionTrafficLogByApp;
+    IList<TrafficLog> appLog = logByApp.get(event.packageName) ?? IList<TrafficLog>();
+
+    sessionTrafficLogGroups.insert(event);
+    return copyWith(
+      sessionTrafficLog: sessionTrafficLog.add(event),
+      sessionTrafficLogByApp: logByApp.add(event.packageName, appLog.add(event)),
+    );
+  }
 }

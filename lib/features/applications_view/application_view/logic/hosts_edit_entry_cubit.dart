@@ -14,8 +14,10 @@ class HostsEditEntryCubit extends Cubit<HostsEditEntryState> {
 
 @freezed
 class HostsEditEntryState with _$HostsEditEntryState {
-  HostsEditEntryState({required this.entry, required this.selected});
+  const HostsEditEntryState({required this.entry, required this.selected});
 
+  @override
   final HostEntry entry;
+  @override
   final bool selected;
 }

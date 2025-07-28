@@ -14,6 +14,7 @@ class Expander extends StatefulWidget {
     this.color,
     this.buildTrailing,
     required this.children,
+    this.initiallyExpanded = false,
     super.key,
   });
 
@@ -23,6 +24,7 @@ class Expander extends StatefulWidget {
   final List<Widget> children;
   final Color? color;
   final ExpanderWidgetBuilder? buildTrailing;
+  final bool initiallyExpanded;
 
   @override
   State<Expander> createState() => _ExpanderState();
@@ -36,6 +38,7 @@ class _ExpanderState extends State<Expander> {
   void initState() {
     expansibleController = ExpansibleController();
     expansibleController.addListener(onExpansionChange);
+    if(widget.initiallyExpanded) expansibleController.expand();
     super.initState();
   }
 

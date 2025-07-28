@@ -73,14 +73,8 @@ public final class LogHandler extends Handler {
     public void handleMessage(Message msg) {
         try {
             switch (msg.what) {
-                case MSG_PACKET:
-                    VpnEventChannel.logPacket((Packet) msg.obj);
-                    break;
                 case MSG_TRAFFIC:
                     VpnEventChannel.logTraffic((TrafficLog) msg.obj);
-                    break;
-                case MSG_DNS:
-                    VpnEventChannel.logDns((ResourceRecord) msg.obj);
                     break;
 
                 default:
@@ -104,6 +98,10 @@ public final class LogHandler extends Handler {
     }
 
 
+    public void vpnStarted(String sessionId){
+        VpnEventChannel.updateVpnState(sessionId);
+        logText("VPN started!");
+    }
     public void vpnStopped(){
         VpnEventChannel.updateVpnState(null);
         logText("VPN stopped!");

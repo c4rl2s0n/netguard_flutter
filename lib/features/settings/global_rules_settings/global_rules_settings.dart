@@ -124,9 +124,8 @@ class GlobalRulesSettings extends StatelessWidget {
           Clipboard.kTextPlain,
         ))?.text?.split("\n").where((l) => l.trim().notEmpty).toList() ??
         [];
-    int dataCount = data.length;
     data.removeWhere((d) => state.onlineSources.any((s) => s.source == d));
-    int dataNew = dataCount - data.length;
+    int dataNew = data.length;
     if (dataNew <= 0) {
       SnackBarFactory.showNegativeSnackBar(
         "No new URLs found in the clipboard...",
@@ -157,15 +156,13 @@ class GlobalRulesSettings extends StatelessWidget {
       return [];
     }
 
-    int dataCount = files.length;
     files.removeWhere((d) => state.localSources.any((s) => s.source == d));
-    int dataNew = dataCount - files.length;
-
-    if (dataNew <= 0) {
+    int filesNew = files.length;
+    if (filesNew <= 0) {
       SnackBarFactory.showNegativeSnackBar("No new files were selected...");
       return [];
     }
-    SnackBarFactory.showPositiveSnackBar("Added $dataNew new files!");
+    SnackBarFactory.showPositiveSnackBar("Added $filesNew new files!");
     return files
         .map((l) => GlobalRuleSource(source: l, type: SourceType.local))
         .toList();

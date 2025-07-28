@@ -26,7 +26,6 @@ class ApplicationSettingsRepository extends IApplicationSettingsRepository {
 
   @override
   Future<List<ApplicationSetting>> getAll() async {
-    // TODO: better to just return all, or filter by packageNames?
     var all = await (db.applicationSettingTable.select()).get();
     return _getInstalled(all);
   }

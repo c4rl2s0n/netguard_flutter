@@ -11,6 +11,7 @@ import eu.flutter.netguard.utils.Util;
 import eu.flutter.netguard.NativeBridge.*;
 import io.flutter.plugin.common.BinaryMessenger;
 
+// TODO: Intent Handler to start and configure firewall
 public class MainActivity extends FlutterActivity {
     private static final int VPN_REQUEST_CODE = 1000;
 

@@ -12,6 +12,7 @@ class ApplicationEntryCubit extends Cubit<ApplicationEntryState> {
 
   @override
   Future<void> close() async {
+    state.app.rules = state.rules.map((r) => r.state.rule).toList();
     for (var rule in state.rules) {
       await rule.close();
     }
@@ -19,10 +20,18 @@ class ApplicationEntryCubit extends Cubit<ApplicationEntryState> {
   }
 
   Future createRule() async {
+    Rule rule = Rule(
+      id: IdTools.generateUuid(),
+      name: "New Rule",
+      packageName: state.setting.packageName,
+      type: RuleType.blacklist,
+    );
+    await rulesRepository.insert(rule);
     emit(
       state.copyWith(
         rules: [
-          RuleCubit(Rule(id: IdTools.generateUuid(), type: RuleType.blacklist)),
+          // TODO: check what else to init
+          RuleCubit(rule),
           ...state.rules,
         ],
       ),
@@ -38,25 +47,21 @@ class ApplicationEntryCubit extends Cubit<ApplicationEntryState> {
     }
   }
 
-  Future store() async {
-    await applicationSettingsRepository.insert(state.setting);
-    await rulesRepository.insertAll(
-      state.rules.map((r) => r.state.rule).toList(),
-    );
-  }
-
-  void toggleFilter() {
-    emit(state.copyWith(filter: !state.filter));
-    applicationSettingsRepository.insert(state.setting);
-  }
-
   void setFilter(bool filter) {
     emit(state.copyWith(filter: filter));
+    state.app.setting?.filter = filter;
     applicationSettingsRepository.insert(state.setting);
   }
 
   void setBlockAll(bool block) {
     emit(state.copyWith(blockAll: block));
+    state.app.setting?.blockAll = block;
+    applicationSettingsRepository.insert(state.setting);
+  }
+
+  void setBlockQuic(bool blockQuic) {
+    emit(state.copyWith(blockQuic: blockQuic));
+    state.app.setting?.blockQuic = blockQuic;
     applicationSettingsRepository.insert(state.setting);
   }
 }
@@ -67,6 +72,7 @@ class ApplicationEntryState with _$ApplicationEntryState {
     required this.app,
     required this.filter,
     required this.blockAll,
+    required this.blockQuic,
     this.rules = const [],
   });
   ApplicationEntryState.fromModels(Application app, ApplicationSetting setting)
@@ -74,6 +80,7 @@ class ApplicationEntryState with _$ApplicationEntryState {
         app: app,
         filter: setting.filter,
         blockAll: setting.blockAll,
+        blockQuic: setting.blockQuic,
         rules: app.rules.map((r) => RuleCubit(r)).toList(),
       );
   @override
@@ -82,6 +89,8 @@ class ApplicationEntryState with _$ApplicationEntryState {
   final bool filter;
   @override
   final bool blockAll;
+  @override
+  final bool blockQuic;
 
   @override
   final List<RuleCubit> rules;
@@ -90,5 +99,6 @@ class ApplicationEntryState with _$ApplicationEntryState {
     packageName: app.packageName,
     filter: filter,
     blockAll: blockAll,
+    blockQuic: blockQuic,
   );
 }

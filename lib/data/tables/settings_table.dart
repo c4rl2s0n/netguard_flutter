@@ -8,6 +8,8 @@ class SettingsTable extends Table {
   BoolColumn get darkMode => boolean()();
   TextColumn get colorScheme => textEnum<FlexScheme>()();
   BoolColumn get includeSystemApps => boolean()();
+  BoolColumn get logTraffic => boolean()();
+  BoolColumn get logCompactView => boolean()();
   DateTimeColumn get lastHostlistUpdate => dateTime().nullable()();
 
   @override

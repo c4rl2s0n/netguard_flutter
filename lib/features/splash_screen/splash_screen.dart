@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/common/common.dart';
-import 'package:netguard/common/service_locator/accessors.dart';
 import 'package:netguard/features/features.dart';
-import 'package:netguard/main.dart';
 
 import 'splash_screen_cubit.dart';
 
@@ -55,18 +53,35 @@ class SplashScreen extends StatelessWidget {
 
   Widget _waiting() {
     return MaterialApp(
-      home: Container(
-        color: Colors.white,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              //Image.asset("assets/images/ic_launcher.png"),
-              CircularProgressIndicator(),
-            ],
-          ),
-        ),
+      theme: getTheme(true),
+      home: Builder(
+        builder: (context) {
+          return Container(
+            color: context.colors.background,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  //Image.asset("assets/images/ic_launcher.png"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        CustomIcons.appIcon,
+                        size: context.textTheme.headlineLarge.size,
+                      ),
+                      const Margin.horizontal(ThemeConstants.spacing),
+                      Text("NetGuard", style: context.textTheme.headlineLarge),
+                    ],
+                  ),
+                  const Margin.vertical(ThemeConstants.spacing),
+                  CircularProgressIndicator(color: context.colors.onBackground),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

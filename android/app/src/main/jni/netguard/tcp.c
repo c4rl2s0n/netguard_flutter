@@ -515,6 +515,9 @@ void check_tcp_socket(const struct arguments *args,
                     }
                 }
 
+                // TODO: maybe block DNS requests here? Need to also find the code for UDP...
+                // TODO: Might only be incoming traffic here (?)
+
                 // Log data buffered
                 struct segment *seg = s->tcp.forward;
                 while (seg != NULL) {
@@ -621,7 +624,7 @@ void check_tcp_socket(const struct arguments *args,
 jboolean handle_tcp(const struct arguments *args,
                     const uint8_t *pkt, size_t length,
                     const uint8_t *payload,
-                    int uid, int allowed, struct allowed *redirect,
+                    int uid, int allowed,
                     const int epoll_fd) {
 
     // Get headers
@@ -770,7 +773,7 @@ jboolean handle_tcp(const struct arguments *args,
             }
 
             // Open socket
-            s->socket = open_tcp_socket(args, &s->tcp, redirect);
+            s->socket = open_tcp_socket(args, &s->tcp);
             if (s->socket < 0) {
                 // Remote might retry
                 ng_free(s, __FILE__, __LINE__);
@@ -1039,17 +1042,13 @@ void queue_tcp(const struct arguments *args,
     }
 }
 
-int open_tcp_socket(const struct arguments *args,
-                    const struct tcp_session *cur, const struct allowed *redirect) {
+int open_tcp_socket(const struct arguments *args, const struct tcp_session *cur) {
     int sock;
     int version;
-    if (redirect == NULL) {
-        if (*socks5_addr && socks5_port)
-            version = (strstr(socks5_addr, ":") == NULL ? 4 : 6);
-        else
-            version = cur->version;
-    } else
-        version = (strstr(redirect->raddr, ":") == NULL ? 4 : 6);
+    if (*socks5_addr && socks5_port)
+        version = (strstr(socks5_addr, ":") == NULL ? 4 : 6);
+    else
+        version = cur->version;
 
     // Get TCP socket
     if ((sock = socket(version == 4 ? PF_INET : PF_INET6, SOCK_STREAM, 0)) < 0) {
@@ -1077,43 +1076,28 @@ int open_tcp_socket(const struct arguments *args,
     // Build target address
     struct sockaddr_in addr4;
     struct sockaddr_in6 addr6;
-    if (redirect == NULL) {
-        if (*socks5_addr && socks5_port) {
-            log_android(ANDROID_LOG_WARN, "TCP%d SOCKS5 to %s/%u",
-                        version, socks5_addr, socks5_port);
-
-            if (version == 4) {
-                addr4.sin_family = AF_INET;
-                inet_pton(AF_INET, socks5_addr, &addr4.sin_addr);
-                addr4.sin_port = htons(socks5_port);
-            } else {
-                addr6.sin6_family = AF_INET6;
-                inet_pton(AF_INET6, socks5_addr, &addr6.sin6_addr);
-                addr6.sin6_port = htons(socks5_port);
-            }
-        } else {
-            if (version == 4) {
-                addr4.sin_family = AF_INET;
-                addr4.sin_addr.s_addr = (__be32) cur->daddr.ip4;
-                addr4.sin_port = cur->dest;
-            } else {
-                addr6.sin6_family = AF_INET6;
-                memcpy(&addr6.sin6_addr, &cur->daddr.ip6, 16);
-                addr6.sin6_port = cur->dest;
-            }
-        }
-    } else {
-        log_android(ANDROID_LOG_WARN, "TCP%d redirect to %s/%u",
-                    version, redirect->raddr, redirect->rport);
+    if (*socks5_addr && socks5_port) {
+        log_android(ANDROID_LOG_WARN, "TCP%d SOCKS5 to %s/%u",
+                    version, socks5_addr, socks5_port);
 
         if (version == 4) {
             addr4.sin_family = AF_INET;
-            inet_pton(AF_INET, redirect->raddr, &addr4.sin_addr);
-            addr4.sin_port = htons(redirect->rport);
+            inet_pton(AF_INET, socks5_addr, &addr4.sin_addr);
+            addr4.sin_port = htons(socks5_port);
         } else {
             addr6.sin6_family = AF_INET6;
-            inet_pton(AF_INET6, redirect->raddr, &addr6.sin6_addr);
-            addr6.sin6_port = htons(redirect->rport);
+            inet_pton(AF_INET6, socks5_addr, &addr6.sin6_addr);
+            addr6.sin6_port = htons(socks5_port);
+        }
+    } else {
+        if (version == 4) {
+            addr4.sin_family = AF_INET;
+            addr4.sin_addr.s_addr = (__be32) cur->daddr.ip4;
+            addr4.sin_port = cur->dest;
+        } else {
+            addr6.sin6_family = AF_INET6;
+            memcpy(&addr6.sin6_addr, &cur->daddr.ip6, 16);
+            addr6.sin6_port = cur->dest;
         }
     }
 

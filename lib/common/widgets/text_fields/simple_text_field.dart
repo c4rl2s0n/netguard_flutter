@@ -92,6 +92,7 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
         readOnly: !widget.enabled,
         style: theme.textTheme.bodyLarge,
         controller: controller,
+        minLines: 1,
         maxLines: widget.maxLines,
         obscureText: obscured,
         obscuringCharacter: '*',

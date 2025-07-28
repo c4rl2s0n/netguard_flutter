@@ -37,7 +37,7 @@ class ApplicationEntry extends StatelessWidget {
       buildWhen: (oldState, state) => oldState.filter != state.filter,
       builder: (context, state) => Switch(
         value: state.filter,
-        onChanged: (_) => applicationCubit.toggleFilter(),
+        onChanged: applicationCubit.setFilter,
       ),
     );
   }

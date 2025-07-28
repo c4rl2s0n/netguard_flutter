@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/common/common.dart';
+import 'package:netguard/features/session_logs/session_logs.dart';
 import 'package:netguard/features/settings/settings_view.dart';
 
 class PageComponentFactory {
@@ -11,19 +13,15 @@ class PageComponentFactory {
     required Widget body,
     bool withPadding = true,
   }) {
-    return SelectionArea(
-      // hide contextMenu
-      contextMenuBuilder: (_, __) => const SizedBox.shrink(),
-      child: Scaffold(
-        backgroundColor: context.colors.background,
-        appBar: appBar,
-        drawer: NavDrawer(),
-        body: Padding(
-          padding: withPadding
-              ? const EdgeInsets.all(ThemeConstants.spacing)
-              : EdgeInsets.zero,
-          child: body,
-        ),
+    return Scaffold(
+      backgroundColor: context.colors.background,
+      appBar: appBar,
+      drawer: NavDrawer(),
+      body: Padding(
+        padding: withPadding
+            ? const EdgeInsets.all(ThemeConstants.spacing)
+            : EdgeInsets.zero,
+        child: body,
       ),
     );
   }
@@ -43,27 +41,37 @@ class PageComponentFactory {
 
     return AppBar(
       toolbarHeight: 45,
-      titleTextStyle: context.textTheme.headlineLarge.withColor(foreground),
-      title: _appBarTitle(context, title),
+      titleTextStyle: context.textTheme.titleLarge.withColor(foreground),
+      title: Text(title),
       leading: IconTheme(data: iconTheme, child: _appBarLeading()),
+      automaticallyImplyLeading: true,
       actionsIconTheme: iconTheme,
-      actions: actions,
+      actions: [_sessionButton(), ...actions ?? []],
       iconTheme: iconTheme.copyWith(size: 20),
 
       backgroundColor: background,
     );
   }
 
-  static Widget _appBarTitle(BuildContext context, String title) {
-    TextStyle? style = context.textTheme.headlineLarge.withColor(
-      context.colors.onAppBar,
+
+  static Widget _appBarLeading() {
+    return Builder(
+      builder: (context) => ModalRoute.of(context)?.canPop ?? false
+          ? IconButton(
+              onPressed: () => context.navigator.pop(),
+              icon: const Icon(Icons.arrow_back),
+            )
+          : IconButton(
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              icon: const Icon(Icons.menu),
+            ),
     );
+  }
+
+  static Widget _sessionButton() {
     return BlocBuilder<SessionCubit, SessionState>(
-      builder: (context, state) => Row(
-        children: [
-          Expanded(child: Text(title, style: style)),
-          if (state.running)
-            IconButton(
+      builder: (context, state) => state.running
+          ? IconButton(
               onPressed: () async {
                 if (await ConfirmationDialog.ask(
                   context,
@@ -73,52 +81,48 @@ class PageComponentFactory {
                   await sessionCubit.stopVpn();
                 }
               },
-              icon: Icon(CustomIcons.active, size: style.size),
+              icon: Icon(CustomIcons.active),
             )
-          else
-            IconButton(
-              onPressed: sessionCubit.startVpn,
-              icon: Icon(
-                CustomIcons.inactive,
-                size: style.size,
-                color: context.colors.warning,
-              ),
+          : IconButton(
+              onPressed: () async {
+                await sessionCubit.startVpn();
+                if (settingsCubit.state.logTraffic && context.mounted) {
+                  context.navigator.navigateTo(const SessionLogs());
+                }
+              },
+              icon: Icon(CustomIcons.inactive, color: context.colors.warning),
             ),
-        ],
-      ),
     );
   }
 
-  static Widget _appBarLeading() {
+  static Widget appBarIconButton(
+    Function(BuildContext context)? onTap,
+    IconData icon,
+  ) {
     return Builder(
-      builder: (context) => IsNavigationRootObserver.isRoot
-          ? IconButton(
-              onPressed: () => Scaffold.of(context).openDrawer(),
-              icon: const Icon(Icons.menu),
-            )
-          : IconButton(
-              onPressed: () => context.navigator.pop(),
-              icon: Icon(Icons.arrow_back),
-            ),
+      builder: (context) {
+        return IconButton(
+          onPressed: onTap != null ? () => onTap(context) : null,
+          icon: Icon(icon),
+        );
+      },
     );
   }
 
   static Widget navigationIconButton(
-    BuildContext context,
     Widget Function()? getDestination,
     IconData icon,
   ) {
-    return IconButton(
-      onPressed: getDestination != null
-          ? () => context.navigator.navigateTo(getDestination())
+    return appBarIconButton(
+      getDestination != null
+          ? (context) => context.navigator.navigateTo(getDestination())
           : null,
-      icon: Icon(icon),
+      icon,
     );
   }
 
-  static Widget settingsNavigationButton(BuildContext context) =>
+  static Widget settingsNavigationButton() =>
       PageComponentFactory.navigationIconButton(
-        context,
         () => const SettingsView(),
         CustomIcons.settings,
       );

@@ -139,7 +139,7 @@ Java_eu_flutter_netguard_MyVpnService_jni_1start(
 
 JNIEXPORT void JNICALL
 Java_eu_flutter_netguard_MyVpnService_jni_1run(
-        JNIEnv *env, jobject instance, jlong context, jint tun, jboolean fwd53, jint rcode) {
+        JNIEnv *env, jobject instance, jlong context, jint tun, jboolean fwd53, jboolean logTraffic, jint rcode) {
     struct context *ctx = (struct context *) context;
 
     log_android(ANDROID_LOG_WARN, "Running tun %d fwd53 %d level %d", tun, fwd53, loglevel);
@@ -156,6 +156,7 @@ Java_eu_flutter_netguard_MyVpnService_jni_1run(
     args->instance = instance;
     args->tun = tun;
     args->fwd53 = fwd53;
+    args->logTraffic = logTraffic;
     args->rcode = rcode;
     args->ctx = ctx;
     handle_events(args);
@@ -285,7 +286,7 @@ Java_eu_flutter_netguard_MyVpnService_jni_1done(
 // JNI Util
 
 JNIEXPORT jstring JNICALL
-Java_eu_flutter_netguard_utils_Util_jni_1getprop(JNIEnv *env, jclass clazz,
+Java_eu_flutter_netguard_network_NetworkUtils_jni_1getprop(JNIEnv *env, jclass clazz,
                                                                      jstring name_) {
     const char *name = (*env)->GetStringUTFChars(env, name_, 0);
     ng_add_alloc(name, "name");
@@ -300,7 +301,7 @@ Java_eu_flutter_netguard_utils_Util_jni_1getprop(JNIEnv *env, jclass clazz,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_eu_flutter_netguard_utils_Util_is_1numeric_1address(JNIEnv *env, jclass type, jstring ip_) {
+Java_eu_flutter_netguard_network_NetworkUtils_is_1numeric_1address(JNIEnv *env, jclass type, jstring ip_) {
     jboolean numeric = 0;
     const char *ip = (*env)->GetStringUTFChars(env, ip_, 0);
     ng_add_alloc(ip, "ip");
@@ -504,7 +505,7 @@ void log_packet(const struct arguments *args, jobject jpacket) {
 
 static jmethodID midLogTraffic = NULL;
 
-void log_traffic(const struct arguments *args, jint uid, jint protocol, const char*ip, const char* host, jboolean allowed) {
+void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jint length, jint uid, jboolean allowed) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -514,7 +515,7 @@ void log_traffic(const struct arguments *args, jint uid, jint protocol, const ch
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(JIILjava/lang/String;Ljava/lang/String;Z)V";
+    const char *signature = "(JIILjava/lang/String;IIIZ)V";
     if (midLogTraffic == NULL)
         midLogTraffic = jniGetMethodID(args->env, clsService, "logTraffic", signature);
 
@@ -522,18 +523,14 @@ void log_traffic(const struct arguments *args, jint uid, jint protocol, const ch
     gettimeofday(&tv, NULL);
     jlong t = tv.tv_sec * 1000LL + tv.tv_usec / 1000;
 
-    jstring jip = (*args->env)->NewStringUTF(args->env, ip);
-    jstring jhost = (*args->env)->NewStringUTF(args->env, host);
-    ng_add_alloc(jip, "jip");
-    ng_add_alloc(jhost, "jhost");
+    jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
+    ng_add_alloc(jdaddr, "jdaddr");
 
-    (*args->env)->CallVoidMethod(args->env, args->instance, midLogTraffic, t, uid, protocol, jip, jhost, allowed);
+    (*args->env)->CallVoidMethod(args->env, args->instance, midLogTraffic, t, version, protocol, jdaddr, dport, length,  uid, allowed);
     jniCheckException(args->env);
 
-    (*args->env)->DeleteLocalRef(args->env, jip);
-    (*args->env)->DeleteLocalRef(args->env, jhost);
-    ng_delete_alloc(jip, __FILE__, __LINE__);
-    ng_delete_alloc(jhost, __FILE__, __LINE__);
+    (*args->env)->DeleteLocalRef(args->env, jdaddr);
+    ng_delete_alloc(jdaddr, __FILE__, __LINE__);
 
     (*args->env)->DeleteLocalRef(args->env, clsService);
     ng_delete_alloc(clsService, __FILE__, __LINE__);
@@ -644,6 +641,51 @@ void dns_resolved(const struct arguments *args,
     if (mselapsed > PROFILE_JNI)
         log_android(ANDROID_LOG_WARN, "log_packet %f", mselapsed);
 #endif
+}
+
+static jmethodID midSniResolved = NULL;
+void sni_resolved(const struct arguments *args, const char *sni, jint version, jint protocol, const char* daddr, jint dport, const char* saddr, jint sport, jint uid) {
+#ifdef PROFILE_JNI
+    float mselapsed;
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+
+    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
+    ng_add_alloc(clsService, "clsService");
+
+    const char *signature = "(Ljava/lang/String;IILjava/lang/String;ILjava/lang/String;II)V";
+    if (midSniResolved == NULL)
+        midSniResolved = jniGetMethodID(args->env, clsService, "sniResolved", signature);
+
+    jstring jsni = (*args->env)->NewStringUTF(args->env, sni);
+    jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
+    jstring jsaddr = (*args->env)->NewStringUTF(args->env, saddr);
+    ng_add_alloc(jsni, "jsni");
+    ng_add_alloc(jdaddr, "jdaddr");
+    ng_add_alloc(jsaddr, "jsaddr");
+
+    (*args->env)->CallVoidMethod(args->env, args->instance, midSniResolved, jsni, version, protocol, jdaddr, dport, jsaddr, sport, uid);
+    jniCheckException(args->env);
+
+    (*args->env)->DeleteLocalRef(args->env, jsni);
+    (*args->env)->DeleteLocalRef(args->env, jdaddr);
+    (*args->env)->DeleteLocalRef(args->env, jsaddr);
+    (*args->env)->DeleteLocalRef(args->env, clsService);
+    ng_delete_alloc(jsni, __FILE__, __LINE__);
+    ng_delete_alloc(jdaddr, __FILE__, __LINE__);
+    ng_delete_alloc(jsaddr, __FILE__, __LINE__);
+    ng_delete_alloc(clsService, __FILE__, __LINE__);
+
+#ifdef PROFILE_JNI
+    gettimeofday(&end, NULL);
+    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
+                (end.tv_usec - start.tv_usec) / 1000.0;
+    if (mselapsed > PROFILE_JNI)
+        log_android(ANDROID_LOG_WARN, "sni_resolved %f", mselapsed);
+#endif
+
+    return;
 }
 
 static jmethodID midIsQuicBlocked = NULL;
@@ -762,6 +804,97 @@ jint get_uid_q(const struct arguments *args,
 #endif
 
     return juid;
+}
+
+static jmethodID midGetUidCached = NULL;
+
+jint get_uid_cached(const struct arguments *args,
+               jint version, jint protocol,
+               const char *source, jint sport,
+               const char *dest, jint dport) {
+#ifdef PROFILE_JNI
+    float mselapsed;
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+
+    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
+    ng_add_alloc(clsService, "clsService");
+
+    const char *signature = "(IILjava/lang/String;ILjava/lang/String;I)I";
+    if (midGetUidCached == NULL)
+        midGetUidCached = jniGetMethodID(args->env, clsService, "getUidCached", signature);
+
+    jstring jsource = (*args->env)->NewStringUTF(args->env, source);
+    jstring jdest = (*args->env)->NewStringUTF(args->env, dest);
+    ng_add_alloc(jsource, "jsource");
+    ng_add_alloc(jdest, "jdest");
+
+    jint juid = (*args->env)->CallIntMethod(
+            args->env, args->instance, midGetUidCached,
+            version, protocol, jsource, sport, jdest, dport);
+    jniCheckException(args->env);
+
+    (*args->env)->DeleteLocalRef(args->env, jdest);
+    (*args->env)->DeleteLocalRef(args->env, jsource);
+    (*args->env)->DeleteLocalRef(args->env, clsService);
+    ng_delete_alloc(jdest, __FILE__, __LINE__);
+    ng_delete_alloc(jsource, __FILE__, __LINE__);
+    ng_delete_alloc(clsService, __FILE__, __LINE__);
+
+#ifdef PROFILE_JNI
+    gettimeofday(&end, NULL);
+    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
+                (end.tv_usec - start.tv_usec) / 1000.0;
+    if (mselapsed > PROFILE_JNI)
+        log_android(ANDROID_LOG_WARN, "get_cached_uid %f", mselapsed);
+#endif
+
+    return juid;
+}
+
+static jmethodID midCacheUid = NULL;
+
+jint cache_uid(const struct arguments *args,
+               jint version, jint protocol,
+               const char *source, jint sport,
+               const char *dest, jint dport, jint uid) {
+#ifdef PROFILE_JNI
+    float mselapsed;
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+
+    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
+    ng_add_alloc(clsService, "clsService");
+
+    const char *signature = "(IILjava/lang/String;ILjava/lang/String;II)V";
+    if (midCacheUid == NULL)
+        midCacheUid = jniGetMethodID(args->env, clsService, "cacheUid", signature);
+
+    jstring jsource = (*args->env)->NewStringUTF(args->env, source);
+    jstring jdest = (*args->env)->NewStringUTF(args->env, dest);
+    ng_add_alloc(jsource, "jsource");
+    ng_add_alloc(jdest, "jdest");
+
+    (*args->env)->CallVoidMethod(args->env, args->instance, midCacheUid,
+            version, protocol, jsource, sport, jdest, dport, uid);
+    jniCheckException(args->env);
+
+    (*args->env)->DeleteLocalRef(args->env, jdest);
+    (*args->env)->DeleteLocalRef(args->env, jsource);
+    (*args->env)->DeleteLocalRef(args->env, clsService);
+    ng_delete_alloc(jdest, __FILE__, __LINE__);
+    ng_delete_alloc(jsource, __FILE__, __LINE__);
+    ng_delete_alloc(clsService, __FILE__, __LINE__);
+
+#ifdef PROFILE_JNI
+    gettimeofday(&end, NULL);
+    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
+                (end.tv_usec - start.tv_usec) / 1000.0;
+    if (mselapsed > PROFILE_JNI)
+        log_android(ANDROID_LOG_WARN, "cache_uid %f", mselapsed);
+#endif
 }
 
 static jmethodID midIsAddressAllowed = NULL;

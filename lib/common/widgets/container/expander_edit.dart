@@ -11,6 +11,7 @@ class ExpanderEdit extends StatelessWidget {
     required this.child,
     this.onTitleChanged,
     this.showSubtitleOnEdit = false,
+    this.initiallyExpanded = false,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class ExpanderEdit extends StatelessWidget {
   final Color? color;
   final Function(String)? onTitleChanged;
   final bool showSubtitleOnEdit;
+  final bool initiallyExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,7 @@ class ExpanderEdit extends StatelessWidget {
       buildTrailing: (context, isExpanded) =>
           trailing ?? Icon(isExpanded ? CustomIcons.edit : CustomIcons.editOff),
       color: color,
+      initiallyExpanded: initiallyExpanded,
       children: [child],
     );
   }

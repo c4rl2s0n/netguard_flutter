@@ -36,6 +36,19 @@ class NetworkingTools {
     Protocols.IPPROTO_MPTCP => "MPTCP",
     _ => protocol.toString(),
   };
+  static String toPortAwareProtocol(int protocol, int port) => switch (port) {
+    53 => switch (protocol) {
+      Protocols.IPPROTO_UDP => "DNS/UDP",
+      Protocols.IPPROTO_TCP => "DNS/TCP",
+      _ => toProtocol(protocol),
+    },
+    443 => switch (protocol) {
+      Protocols.IPPROTO_UDP => "QUIC",
+      Protocols.IPPROTO_TCP => "TLS",
+      _ => toProtocol(protocol),
+    },
+    _ => toProtocol(protocol),
+  };
 }
 
 class Protocols {

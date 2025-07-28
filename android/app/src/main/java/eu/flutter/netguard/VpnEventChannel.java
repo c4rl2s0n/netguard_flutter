@@ -2,6 +2,9 @@ package eu.flutter.netguard;
 
 import androidx.annotation.NonNull;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import io.flutter.plugin.common.BinaryMessenger;
 import eu.flutter.netguard.NativeBridge.*;
 
@@ -13,38 +16,28 @@ public class VpnEventChannel {
         _vpnEventHandler = new VpnEventHandler(binaryMessenger);
     }
 
-    private static boolean isInitialized(){
-        return _vpnEventHandler != null;
+    private static boolean notInitialized(){
+        return _vpnEventHandler == null;
     }
 
-
     public static void logText(String text){
-        assert(isInitialized());
+        if(notInitialized()) return;
         _vpnEventHandler.logText(text, _voidResult);
     }
     public static void logError(String errorCode, String message, Object details){
-        assert(isInitialized());
+        if(notInitialized()) return;
         _vpnEventHandler.logError(errorCode, message, details, _voidResult);
     }
 
     public static void updateVpnState(String sessionId){
+        if(notInitialized()) return;
         _vpnEventHandler.updateVpnState(sessionId, _voidResult);
     }
 
-    public static void logPacket(Packet packet){
-        assert(isInitialized());
-        _vpnEventHandler.logPacket(packet, _voidResult);
-    }
     public static void logTraffic(TrafficLog log){
-        assert(isInitialized());
+        if(notInitialized()) return;
         _vpnEventHandler.logTraffic(log, _voidResult);
     }
-    public static void logDns(ResourceRecord record){
-        assert(isInitialized());
-        _vpnEventHandler.logDns(record, _voidResult);
-    }
-
-
 
     private static final VoidResult _voidResult = new VoidResult() {
         @Override

@@ -15,16 +15,12 @@ class ThemeSettings extends StatelessWidget {
   }
 
   Widget _darkMode(BuildContext context) {
-    return SimpleSetting(
-      name: "Dark Mode",
-      action: BlocBuilder<SettingsCubit, SettingsState>(
-        buildWhen: (oldState, state) => oldState.darkMode != state.darkMode,
-        builder: (context, state) {
-          return Switch(
-            value: state.darkMode,
-            onChanged: (_) => context.read<SettingsCubit>().toggleDarkMode(),
-          );
-        },
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      buildWhen: (oldState, state) => oldState.darkMode != state.darkMode,
+      builder: (context, state) => SwitchSetting(
+        name: "Dark Mode",
+        value: state.darkMode,
+        onChanged: (_) => settingsCubit.toggleDarkMode(),
       ),
     );
   }

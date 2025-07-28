@@ -46,8 +46,27 @@ class $ApplicationSettingTableTable extends ApplicationSettingTable
       'CHECK ("block_all" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _blockQuicMeta = const VerificationMeta(
+    'blockQuic',
+  );
   @override
-  List<GeneratedColumn> get $columns => [packageName, filter, blockAll];
+  late final GeneratedColumn<bool> blockQuic = GeneratedColumn<bool>(
+    'block_quic',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("block_quic" IN (0, 1))',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    packageName,
+    filter,
+    blockAll,
+    blockQuic,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -87,6 +106,14 @@ class $ApplicationSettingTableTable extends ApplicationSettingTable
     } else if (isInserting) {
       context.missing(_blockAllMeta);
     }
+    if (data.containsKey('block_quic')) {
+      context.handle(
+        _blockQuicMeta,
+        blockQuic.isAcceptableOrUnknown(data['block_quic']!, _blockQuicMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_blockQuicMeta);
+    }
     return context;
   }
 
@@ -108,6 +135,10 @@ class $ApplicationSettingTableTable extends ApplicationSettingTable
         DriftSqlType.bool,
         data['${effectivePrefix}block_all'],
       )!,
+      blockQuic: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}block_quic'],
+      )!,
     );
   }
 
@@ -122,31 +153,37 @@ class ApplicationSettingTableCompanion
   final Value<String> packageName;
   final Value<bool> filter;
   final Value<bool> blockAll;
+  final Value<bool> blockQuic;
   final Value<int> rowid;
   const ApplicationSettingTableCompanion({
     this.packageName = const Value.absent(),
     this.filter = const Value.absent(),
     this.blockAll = const Value.absent(),
+    this.blockQuic = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ApplicationSettingTableCompanion.insert({
     required String packageName,
     required bool filter,
     required bool blockAll,
+    required bool blockQuic,
     this.rowid = const Value.absent(),
   }) : packageName = Value(packageName),
        filter = Value(filter),
-       blockAll = Value(blockAll);
+       blockAll = Value(blockAll),
+       blockQuic = Value(blockQuic);
   static Insertable<ApplicationSetting> custom({
     Expression<String>? packageName,
     Expression<bool>? filter,
     Expression<bool>? blockAll,
+    Expression<bool>? blockQuic,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (packageName != null) 'package_name': packageName,
       if (filter != null) 'filter': filter,
       if (blockAll != null) 'block_all': blockAll,
+      if (blockQuic != null) 'block_quic': blockQuic,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -155,12 +192,14 @@ class ApplicationSettingTableCompanion
     Value<String>? packageName,
     Value<bool>? filter,
     Value<bool>? blockAll,
+    Value<bool>? blockQuic,
     Value<int>? rowid,
   }) {
     return ApplicationSettingTableCompanion(
       packageName: packageName ?? this.packageName,
       filter: filter ?? this.filter,
       blockAll: blockAll ?? this.blockAll,
+      blockQuic: blockQuic ?? this.blockQuic,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -177,6 +216,9 @@ class ApplicationSettingTableCompanion
     if (blockAll.present) {
       map['block_all'] = Variable<bool>(blockAll.value);
     }
+    if (blockQuic.present) {
+      map['block_quic'] = Variable<bool>(blockQuic.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -189,6 +231,7 @@ class ApplicationSettingTableCompanion
           ..write('packageName: $packageName, ')
           ..write('filter: $filter, ')
           ..write('blockAll: $blockAll, ')
+          ..write('blockQuic: $blockQuic, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -274,18 +317,18 @@ class $RulesTableTable extends RulesTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<RuleType>($RulesTableTable.$convertertype);
-  static const VerificationMeta _blockQuicMeta = const VerificationMeta(
-    'blockQuic',
+  static const VerificationMeta _shouldBlockQuicMeta = const VerificationMeta(
+    'shouldBlockQuic',
   );
   @override
-  late final GeneratedColumn<bool> blockQuic = GeneratedColumn<bool>(
-    'block_quic',
+  late final GeneratedColumn<bool> shouldBlockQuic = GeneratedColumn<bool>(
+    'should_block_quic',
     aliasedName,
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("block_quic" IN (0, 1))',
+      'CHECK ("should_block_quic" IN (0, 1))',
     ),
   );
   @override
@@ -297,7 +340,7 @@ class $RulesTableTable extends RulesTable
     description,
     active,
     type,
-    blockQuic,
+    shouldBlockQuic,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -357,13 +400,16 @@ class $RulesTableTable extends RulesTable
     } else if (isInserting) {
       context.missing(_activeMeta);
     }
-    if (data.containsKey('block_quic')) {
+    if (data.containsKey('should_block_quic')) {
       context.handle(
-        _blockQuicMeta,
-        blockQuic.isAcceptableOrUnknown(data['block_quic']!, _blockQuicMeta),
+        _shouldBlockQuicMeta,
+        shouldBlockQuic.isAcceptableOrUnknown(
+          data['should_block_quic']!,
+          _shouldBlockQuicMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_blockQuicMeta);
+      context.missing(_shouldBlockQuicMeta);
     }
     return context;
   }
@@ -400,9 +446,9 @@ class $RulesTableTable extends RulesTable
           data['${effectivePrefix}type'],
         )!,
       ),
-      blockQuic: attachedDatabase.typeMapping.read(
+      shouldBlockQuic: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
-        data['${effectivePrefix}block_quic'],
+        data['${effectivePrefix}should_block_quic'],
       )!,
       packageName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -428,7 +474,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
   final Value<String?> description;
   final Value<bool> active;
   final Value<RuleType> type;
-  final Value<bool> blockQuic;
+  final Value<bool> shouldBlockQuic;
   final Value<int> rowid;
   const RulesTableCompanion({
     this.id = const Value.absent(),
@@ -438,7 +484,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     this.description = const Value.absent(),
     this.active = const Value.absent(),
     this.type = const Value.absent(),
-    this.blockQuic = const Value.absent(),
+    this.shouldBlockQuic = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RulesTableCompanion.insert({
@@ -449,12 +495,12 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     this.description = const Value.absent(),
     required bool active,
     required RuleType type,
-    required bool blockQuic,
+    required bool shouldBlockQuic,
     this.rowid = const Value.absent(),
   }) : packageName = Value(packageName),
        active = Value(active),
        type = Value(type),
-       blockQuic = Value(blockQuic);
+       shouldBlockQuic = Value(shouldBlockQuic);
   static Insertable<Rule> custom({
     Expression<String>? id,
     Expression<String>? packageName,
@@ -463,7 +509,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     Expression<String>? description,
     Expression<bool>? active,
     Expression<String>? type,
-    Expression<bool>? blockQuic,
+    Expression<bool>? shouldBlockQuic,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -474,7 +520,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
       if (description != null) 'description': description,
       if (active != null) 'active': active,
       if (type != null) 'type': type,
-      if (blockQuic != null) 'block_quic': blockQuic,
+      if (shouldBlockQuic != null) 'should_block_quic': shouldBlockQuic,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -487,7 +533,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     Value<String?>? description,
     Value<bool>? active,
     Value<RuleType>? type,
-    Value<bool>? blockQuic,
+    Value<bool>? shouldBlockQuic,
     Value<int>? rowid,
   }) {
     return RulesTableCompanion(
@@ -498,7 +544,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
       description: description ?? this.description,
       active: active ?? this.active,
       type: type ?? this.type,
-      blockQuic: blockQuic ?? this.blockQuic,
+      shouldBlockQuic: shouldBlockQuic ?? this.shouldBlockQuic,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -529,8 +575,8 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
         $RulesTableTable.$convertertype.toSql(type.value),
       );
     }
-    if (blockQuic.present) {
-      map['block_quic'] = Variable<bool>(blockQuic.value);
+    if (shouldBlockQuic.present) {
+      map['should_block_quic'] = Variable<bool>(shouldBlockQuic.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -548,7 +594,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
           ..write('description: $description, ')
           ..write('active: $active, ')
           ..write('type: $type, ')
-          ..write('blockQuic: $blockQuic, ')
+          ..write('shouldBlockQuic: $shouldBlockQuic, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -815,6 +861,34 @@ class $SettingsTableTable extends SettingsTable
       'CHECK ("include_system_apps" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _logTrafficMeta = const VerificationMeta(
+    'logTraffic',
+  );
+  @override
+  late final GeneratedColumn<bool> logTraffic = GeneratedColumn<bool>(
+    'log_traffic',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("log_traffic" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _logCompactViewMeta = const VerificationMeta(
+    'logCompactView',
+  );
+  @override
+  late final GeneratedColumn<bool> logCompactView = GeneratedColumn<bool>(
+    'log_compact_view',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("log_compact_view" IN (0, 1))',
+    ),
+  );
   static const VerificationMeta _lastHostlistUpdateMeta =
       const VerificationMeta('lastHostlistUpdate');
   @override
@@ -832,6 +906,8 @@ class $SettingsTableTable extends SettingsTable
     darkMode,
     colorScheme,
     includeSystemApps,
+    logTraffic,
+    logCompactView,
     lastHostlistUpdate,
   ];
   @override
@@ -867,6 +943,25 @@ class $SettingsTableTable extends SettingsTable
       );
     } else if (isInserting) {
       context.missing(_includeSystemAppsMeta);
+    }
+    if (data.containsKey('log_traffic')) {
+      context.handle(
+        _logTrafficMeta,
+        logTraffic.isAcceptableOrUnknown(data['log_traffic']!, _logTrafficMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_logTrafficMeta);
+    }
+    if (data.containsKey('log_compact_view')) {
+      context.handle(
+        _logCompactViewMeta,
+        logCompactView.isAcceptableOrUnknown(
+          data['log_compact_view']!,
+          _logCompactViewMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_logCompactViewMeta);
     }
     if (data.containsKey('last_hostlist_update')) {
       context.handle(
@@ -904,6 +999,14 @@ class $SettingsTableTable extends SettingsTable
         DriftSqlType.bool,
         data['${effectivePrefix}include_system_apps'],
       )!,
+      logTraffic: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}log_traffic'],
+      )!,
+      logCompactView: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}log_compact_view'],
+      )!,
       lastHostlistUpdate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_hostlist_update'],
@@ -925,12 +1028,16 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
   final Value<bool> darkMode;
   final Value<FlexScheme> colorScheme;
   final Value<bool> includeSystemApps;
+  final Value<bool> logTraffic;
+  final Value<bool> logCompactView;
   final Value<DateTime?> lastHostlistUpdate;
   const SettingsTableCompanion({
     this.id = const Value.absent(),
     this.darkMode = const Value.absent(),
     this.colorScheme = const Value.absent(),
     this.includeSystemApps = const Value.absent(),
+    this.logTraffic = const Value.absent(),
+    this.logCompactView = const Value.absent(),
     this.lastHostlistUpdate = const Value.absent(),
   });
   SettingsTableCompanion.insert({
@@ -938,15 +1045,21 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     required bool darkMode,
     required FlexScheme colorScheme,
     required bool includeSystemApps,
+    required bool logTraffic,
+    required bool logCompactView,
     this.lastHostlistUpdate = const Value.absent(),
   }) : darkMode = Value(darkMode),
        colorScheme = Value(colorScheme),
-       includeSystemApps = Value(includeSystemApps);
+       includeSystemApps = Value(includeSystemApps),
+       logTraffic = Value(logTraffic),
+       logCompactView = Value(logCompactView);
   static Insertable<Settings> custom({
     Expression<int>? id,
     Expression<bool>? darkMode,
     Expression<String>? colorScheme,
     Expression<bool>? includeSystemApps,
+    Expression<bool>? logTraffic,
+    Expression<bool>? logCompactView,
     Expression<DateTime>? lastHostlistUpdate,
   }) {
     return RawValuesInsertable({
@@ -954,6 +1067,8 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
       if (darkMode != null) 'dark_mode': darkMode,
       if (colorScheme != null) 'color_scheme': colorScheme,
       if (includeSystemApps != null) 'include_system_apps': includeSystemApps,
+      if (logTraffic != null) 'log_traffic': logTraffic,
+      if (logCompactView != null) 'log_compact_view': logCompactView,
       if (lastHostlistUpdate != null)
         'last_hostlist_update': lastHostlistUpdate,
     });
@@ -964,6 +1079,8 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     Value<bool>? darkMode,
     Value<FlexScheme>? colorScheme,
     Value<bool>? includeSystemApps,
+    Value<bool>? logTraffic,
+    Value<bool>? logCompactView,
     Value<DateTime?>? lastHostlistUpdate,
   }) {
     return SettingsTableCompanion(
@@ -971,6 +1088,8 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
       darkMode: darkMode ?? this.darkMode,
       colorScheme: colorScheme ?? this.colorScheme,
       includeSystemApps: includeSystemApps ?? this.includeSystemApps,
+      logTraffic: logTraffic ?? this.logTraffic,
+      logCompactView: logCompactView ?? this.logCompactView,
       lastHostlistUpdate: lastHostlistUpdate ?? this.lastHostlistUpdate,
     );
   }
@@ -992,6 +1111,12 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     if (includeSystemApps.present) {
       map['include_system_apps'] = Variable<bool>(includeSystemApps.value);
     }
+    if (logTraffic.present) {
+      map['log_traffic'] = Variable<bool>(logTraffic.value);
+    }
+    if (logCompactView.present) {
+      map['log_compact_view'] = Variable<bool>(logCompactView.value);
+    }
     if (lastHostlistUpdate.present) {
       map['last_hostlist_update'] = Variable<DateTime>(
         lastHostlistUpdate.value,
@@ -1007,6 +1132,8 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
           ..write('darkMode: $darkMode, ')
           ..write('colorScheme: $colorScheme, ')
           ..write('includeSystemApps: $includeSystemApps, ')
+          ..write('logTraffic: $logTraffic, ')
+          ..write('logCompactView: $logCompactView, ')
           ..write('lastHostlistUpdate: $lastHostlistUpdate')
           ..write(')'))
         .toString();
@@ -1929,6 +2056,7 @@ typedef $$ApplicationSettingTableTableCreateCompanionBuilder =
       required String packageName,
       required bool filter,
       required bool blockAll,
+      required bool blockQuic,
       Value<int> rowid,
     });
 typedef $$ApplicationSettingTableTableUpdateCompanionBuilder =
@@ -1936,6 +2064,7 @@ typedef $$ApplicationSettingTableTableUpdateCompanionBuilder =
       Value<String> packageName,
       Value<bool> filter,
       Value<bool> blockAll,
+      Value<bool> blockQuic,
       Value<int> rowid,
     });
 
@@ -1960,6 +2089,11 @@ class $$ApplicationSettingTableTableFilterComposer
 
   ColumnFilters<bool> get blockAll => $composableBuilder(
     column: $table.blockAll,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get blockQuic => $composableBuilder(
+    column: $table.blockQuic,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1987,6 +2121,11 @@ class $$ApplicationSettingTableTableOrderingComposer
     column: $table.blockAll,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get blockQuic => $composableBuilder(
+    column: $table.blockQuic,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ApplicationSettingTableTableAnnotationComposer
@@ -2008,6 +2147,9 @@ class $$ApplicationSettingTableTableAnnotationComposer
 
   GeneratedColumn<bool> get blockAll =>
       $composableBuilder(column: $table.blockAll, builder: (column) => column);
+
+  GeneratedColumn<bool> get blockQuic =>
+      $composableBuilder(column: $table.blockQuic, builder: (column) => column);
 }
 
 class $$ApplicationSettingTableTableTableManager
@@ -2059,11 +2201,13 @@ class $$ApplicationSettingTableTableTableManager
                 Value<String> packageName = const Value.absent(),
                 Value<bool> filter = const Value.absent(),
                 Value<bool> blockAll = const Value.absent(),
+                Value<bool> blockQuic = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ApplicationSettingTableCompanion(
                 packageName: packageName,
                 filter: filter,
                 blockAll: blockAll,
+                blockQuic: blockQuic,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2071,11 +2215,13 @@ class $$ApplicationSettingTableTableTableManager
                 required String packageName,
                 required bool filter,
                 required bool blockAll,
+                required bool blockQuic,
                 Value<int> rowid = const Value.absent(),
               }) => ApplicationSettingTableCompanion.insert(
                 packageName: packageName,
                 filter: filter,
                 blockAll: blockAll,
+                blockQuic: blockQuic,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2116,7 +2262,7 @@ typedef $$RulesTableTableCreateCompanionBuilder =
       Value<String?> description,
       required bool active,
       required RuleType type,
-      required bool blockQuic,
+      required bool shouldBlockQuic,
       Value<int> rowid,
     });
 typedef $$RulesTableTableUpdateCompanionBuilder =
@@ -2128,7 +2274,7 @@ typedef $$RulesTableTableUpdateCompanionBuilder =
       Value<String?> description,
       Value<bool> active,
       Value<RuleType> type,
-      Value<bool> blockQuic,
+      Value<bool> shouldBlockQuic,
       Value<int> rowid,
     });
 
@@ -2200,8 +2346,8 @@ class $$RulesTableTableFilterComposer
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnFilters<bool> get blockQuic => $composableBuilder(
-    column: $table.blockQuic,
+  ColumnFilters<bool> get shouldBlockQuic => $composableBuilder(
+    column: $table.shouldBlockQuic,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2275,8 +2421,8 @@ class $$RulesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get blockQuic => $composableBuilder(
-    column: $table.blockQuic,
+  ColumnOrderings<bool> get shouldBlockQuic => $composableBuilder(
+    column: $table.shouldBlockQuic,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2317,8 +2463,10 @@ class $$RulesTableTableAnnotationComposer
   GeneratedColumnWithTypeConverter<RuleType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<bool> get blockQuic =>
-      $composableBuilder(column: $table.blockQuic, builder: (column) => column);
+  GeneratedColumn<bool> get shouldBlockQuic => $composableBuilder(
+    column: $table.shouldBlockQuic,
+    builder: (column) => column,
+  );
 
   Expression<T> hostsTableRefs<T extends Object>(
     Expression<T> Function($$HostsTableTableAnnotationComposer a) f,
@@ -2381,7 +2529,7 @@ class $$RulesTableTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<bool> active = const Value.absent(),
                 Value<RuleType> type = const Value.absent(),
-                Value<bool> blockQuic = const Value.absent(),
+                Value<bool> shouldBlockQuic = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RulesTableCompanion(
                 id: id,
@@ -2391,7 +2539,7 @@ class $$RulesTableTableTableManager
                 description: description,
                 active: active,
                 type: type,
-                blockQuic: blockQuic,
+                shouldBlockQuic: shouldBlockQuic,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2403,7 +2551,7 @@ class $$RulesTableTableTableManager
                 Value<String?> description = const Value.absent(),
                 required bool active,
                 required RuleType type,
-                required bool blockQuic,
+                required bool shouldBlockQuic,
                 Value<int> rowid = const Value.absent(),
               }) => RulesTableCompanion.insert(
                 id: id,
@@ -2413,7 +2561,7 @@ class $$RulesTableTableTableManager
                 description: description,
                 active: active,
                 type: type,
-                blockQuic: blockQuic,
+                shouldBlockQuic: shouldBlockQuic,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2779,6 +2927,8 @@ typedef $$SettingsTableTableCreateCompanionBuilder =
       required bool darkMode,
       required FlexScheme colorScheme,
       required bool includeSystemApps,
+      required bool logTraffic,
+      required bool logCompactView,
       Value<DateTime?> lastHostlistUpdate,
     });
 typedef $$SettingsTableTableUpdateCompanionBuilder =
@@ -2787,6 +2937,8 @@ typedef $$SettingsTableTableUpdateCompanionBuilder =
       Value<bool> darkMode,
       Value<FlexScheme> colorScheme,
       Value<bool> includeSystemApps,
+      Value<bool> logTraffic,
+      Value<bool> logCompactView,
       Value<DateTime?> lastHostlistUpdate,
     });
 
@@ -2817,6 +2969,16 @@ class $$SettingsTableTableFilterComposer
 
   ColumnFilters<bool> get includeSystemApps => $composableBuilder(
     column: $table.includeSystemApps,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get logTraffic => $composableBuilder(
+    column: $table.logTraffic,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get logCompactView => $composableBuilder(
+    column: $table.logCompactView,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2855,6 +3017,16 @@ class $$SettingsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get logTraffic => $composableBuilder(
+    column: $table.logTraffic,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get logCompactView => $composableBuilder(
+    column: $table.logCompactView,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get lastHostlistUpdate => $composableBuilder(
     column: $table.lastHostlistUpdate,
     builder: (column) => ColumnOrderings(column),
@@ -2884,6 +3056,16 @@ class $$SettingsTableTableAnnotationComposer
 
   GeneratedColumn<bool> get includeSystemApps => $composableBuilder(
     column: $table.includeSystemApps,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get logTraffic => $composableBuilder(
+    column: $table.logTraffic,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get logCompactView => $composableBuilder(
+    column: $table.logCompactView,
     builder: (column) => column,
   );
 
@@ -2928,12 +3110,16 @@ class $$SettingsTableTableTableManager
                 Value<bool> darkMode = const Value.absent(),
                 Value<FlexScheme> colorScheme = const Value.absent(),
                 Value<bool> includeSystemApps = const Value.absent(),
+                Value<bool> logTraffic = const Value.absent(),
+                Value<bool> logCompactView = const Value.absent(),
                 Value<DateTime?> lastHostlistUpdate = const Value.absent(),
               }) => SettingsTableCompanion(
                 id: id,
                 darkMode: darkMode,
                 colorScheme: colorScheme,
                 includeSystemApps: includeSystemApps,
+                logTraffic: logTraffic,
+                logCompactView: logCompactView,
                 lastHostlistUpdate: lastHostlistUpdate,
               ),
           createCompanionCallback:
@@ -2942,12 +3128,16 @@ class $$SettingsTableTableTableManager
                 required bool darkMode,
                 required FlexScheme colorScheme,
                 required bool includeSystemApps,
+                required bool logTraffic,
+                required bool logCompactView,
                 Value<DateTime?> lastHostlistUpdate = const Value.absent(),
               }) => SettingsTableCompanion.insert(
                 id: id,
                 darkMode: darkMode,
                 colorScheme: colorScheme,
                 includeSystemApps: includeSystemApps,
+                logTraffic: logTraffic,
+                logCompactView: logCompactView,
                 lastHostlistUpdate: lastHostlistUpdate,
               ),
           withReferenceMapper: (p0) => p0

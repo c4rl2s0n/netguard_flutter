@@ -11,6 +11,11 @@ abstract class IRulesRepository extends RepositoryBase {
     bool activeOnly = false,
   });
   Future<void> delete(String id);
+  Future<void> updateName(String id, String name);
+  Future<void> updateDescription(String id, String description);
+  Future<void> updateType(String id, RuleType type);
+  Future<void> updateActive(String id, bool active);
+  Future<void> updateHosts(String id, List<HostEntry> hosts);
   Future<void> insert(Rule entry);
   Future<void> insertAll(List<Rule> entries);
 }

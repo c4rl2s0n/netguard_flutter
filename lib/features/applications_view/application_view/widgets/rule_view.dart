@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:netguard/features/applications_view/application_view/widgets/hosts_edit_dialog.dart';
 import 'package:netguard/features/applications_view/logic/application_entry_cubit.dart';
 import 'package:netguard/netguard.dart';
 
@@ -62,7 +63,6 @@ class RuleView extends StatelessWidget {
       children: [
         _description(),
         _ruleType(),
-        _blockQuic(),
         _hosts(),
         _deleteBtn(context),
       ].insertBetweenItems(() => const Margin.vertical(ThemeConstants.spacing)),
@@ -70,14 +70,32 @@ class RuleView extends StatelessWidget {
   }
 
   Widget _description() {
-    return BlocBuilder<RuleCubit, RuleState>(
-      buildWhen: (oldState, state) => oldState.description != state.description,
-      builder: (context, state) => SimpleTextField(
-        initialValue: state.description ?? "",
-        labelText: "Rule Description",
-        maxLines: 4,
-        onChanged: ruleCubit.setDescription,
-      ),
+    return Column(
+      children: [
+        BlocBuilder<RuleCubit, RuleState>(
+          buildWhen: (oldState, state) =>
+              oldState.description != state.description,
+          builder: (context, state) => SimpleTextField(
+            initialValue: state.description ?? "",
+            labelText: "Rule Description",
+            maxLines: 4,
+            onChanged: ruleCubit.setDescription,
+            onChangedDelay: Duration(seconds: 2),
+          ),
+        ),
+        BlocBuilder<RuleCubit, RuleState>(
+          buildWhen: (oldState, state) =>
+              oldState.shouldBlockQuic != state.shouldBlockQuic,
+          builder: (context, state) => state.shouldBlockQuic
+              ? Text(
+                  "This rule suggests to block QUIC for this application",
+                  style: context.textTheme.labelSmall.withColor(
+                    context.colors.warning,
+                  ),
+                )
+              : SizedBox.shrink(),
+        ),
+      ],
     );
   }
 
@@ -123,19 +141,6 @@ class RuleView extends StatelessWidget {
     );
   }
 
-  Widget _blockQuic() {
-    return BlocBuilder<RuleCubit, RuleState>(
-      buildWhen: (oldState, state) => oldState.blockQuic != state.blockQuic,
-      builder: (context, state) => SwitchSetting(
-        name: "Block QUIC",
-        description:
-            "Block QUIC traffic. Might cause applications to fallback to TLS, allowing to filter for domain names.",
-        value: state.blockQuic,
-        onChanged: ruleCubit.setBlockQuic,
-      ),
-    );
-  }
-
   Widget _hosts() {
     return BlocBuilder<RuleCubit, RuleState>(
       buildWhen: (oldState, state) =>
@@ -143,22 +148,17 @@ class RuleView extends StatelessWidget {
       builder: (context, state) => ActionSetting(
         name: "Hosts / IPs",
         description: _hostsInfo(state),
-        trailing: Icon(CustomIcons.add),
-        action: null, //(_) => null,
+        trailing: Icon(CustomIcons.edit),
+        action: (context) async {
+          Iterable<HostEntry>? newEntries = await HostsEditDialog.show(
+            context,
+            rule: rule.rule,
+          );
+          if (newEntries != null && context.mounted) {
+            ruleCubit.setHosts(newEntries);
+          }
+        },
       ),
-      // Padding(
-      //   padding: const EdgeInsets.symmetric(horizontal: ThemeConstants.smallSpacing),
-      //   child: Column(
-      //       crossAxisAlignment: CrossAxisAlignment.start,
-      //       children: [
-      //     Text("Hosts", style: context.textTheme.titleMedium,),
-      //     ...state.hosts.map((h) => Text(h)),
-      //     const Margin.vertical(ThemeConstants.spacing),
-      //     Text("IPs", style: context.textTheme.titleMedium,),
-      //     ...state.ips.map((h) => Text(h)),
-      //
-      //   ]),
-      // ),
     );
   }
 

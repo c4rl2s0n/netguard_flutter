@@ -33,11 +33,21 @@ class SettingsCubit extends Cubit<SettingsState> {
 
 
   // VPN SETTINGS
-  void toggleIncludeSystemApps() {
-    emit(state.copyWith(includeSystemApps: !state.includeSystemApps));
+  void setIncludeSystemApps(bool includeSystem) {
+    emit(state.copyWith(includeSystemApps: includeSystem));
+    saveSettings();
+  }
+  void toggleLogTraffic() {
+    emit(state.copyWith(logTraffic: !state.logTraffic));
     saveSettings();
   }
 
+  // MISC
+
+  void setLogCompactView(bool logCompact) {
+    emit(state.copyWith(logCompactView: logCompact));
+    saveSettings();
+  }
   void setLastBlacklistUpdate() {
     emit(state.copyWith(lastHostlistUpdate: DateTime.now()));
   }
@@ -49,6 +59,8 @@ class SettingsState with _$SettingsState {
     required this.darkMode,
     required this.colorScheme,
     required this.includeSystemApps,
+    required this.logTraffic,
+    required this.logCompactView,
     this.lastHostlistUpdate,
   });
 
@@ -57,8 +69,15 @@ class SettingsState with _$SettingsState {
   @override
   final FlexScheme colorScheme;
 
+  @override
   final bool includeSystemApps;
+  @override
+  final bool logTraffic;
 
+  @override
+  final bool logCompactView;
+
+  @override
   final DateTime? lastHostlistUpdate;
 
   SettingsState.empty() : this.fromSettings(Settings());
@@ -67,6 +86,8 @@ class SettingsState with _$SettingsState {
         darkMode: settings.darkMode,
         colorScheme: settings.colorScheme,
         includeSystemApps: settings.includeSystemApps,
+        logTraffic: settings.logTraffic,
+        logCompactView: settings.logCompactView,
         lastHostlistUpdate: settings.lastHostlistUpdate,
       );
 
@@ -74,6 +95,8 @@ class SettingsState with _$SettingsState {
     darkMode: darkMode,
     colorScheme: colorScheme,
     includeSystemApps: includeSystemApps,
+    logTraffic: logTraffic,
+    logCompactView: logCompactView,
     lastHostlistUpdate: lastHostlistUpdate,
   );
 
