@@ -61,6 +61,7 @@ class ParsingTools {
       // if first part is IP, we take the second part (if available) as host
       host = parts[1];
     }
+    if(host.startsWith("www.")) host = host.substring(4);
     if (host.notEmpty) result.hosts.add(host);
   }
 

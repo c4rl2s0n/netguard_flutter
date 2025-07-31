@@ -77,6 +77,7 @@ public class MyVpnService extends VpnService {
     private Set<Long> setUidBlockAll = new HashSet<>();
     private Set<Long> setUidBlockQuic = new HashSet<>();
     private Map<Long, String> mapUidPackageName = new HashMap<>();
+    private Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
     private Map<IPKey, String> mapIPKeySni = new HashMap<>();
     private Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
     private Map<String, String> mapIpDomain = new HashMap<>();
@@ -438,8 +439,9 @@ public class MyVpnService extends VpnService {
     }
 
     // Called from native code
-    private void logTraffic(long time, int version, int protocol, String daddr, int dport, int length, int uid, boolean allowed) {
+    private void logTraffic(long time, int version, int protocol, String daddr, int dport, long length, int uid, boolean allowed) {
         if(uid <= 0) {
+            // try to lookup uid from logged IPKeys
             var key = new IPKey(version, protocol, daddr, dport, -1);
             if(mapIPKeyUid.containsKey(key))
                 uid = mapIPKeyUid.get(key).intValue();
@@ -449,15 +451,6 @@ public class MyVpnService extends VpnService {
             String packageName = mapUidPackageName.get((long)uid);
             String domain = getDomainName(key);
 
-            // TODO: remove this block
-            if(domain != null && !domain.isBlank() && (packageName == null || packageName.isBlank())){
-                for (IPKey ikey : mapIPKeyUid.keySet()) {
-                    Log.i(TAG, "Key: "+ikey.toString());
-                    if(Objects.equals(ikey.getDaddr(), daddr)){
-                        Log.wtf(TAG, "Key: " + ikey + "... Why no match?! " + daddr);
-                    }
-                }
-            }
             TrafficLog log = ModelBuilder.TrafficLog(time, vpnConfig.getSession(), packageName, protocol, daddr, domain, dport, length, allowed);
             logHandler.traffic(log);
         }
@@ -466,10 +459,11 @@ public class MyVpnService extends VpnService {
     // TODO: log dns to lookup domain names
     // Called from native code
     private void dnsResolved(ResourceRecord rr) {
-        mapIpDomain.put(rr.getResource(), rr.getQName());
+        mapIpDomain.put(rr.getResource(), NetworkUtils.cleanDomain(rr.getQName()));
     }
     private void sniResolved(String sni, int version, int protocol, String daddr, int dport, String saddr, int sport, int uid) {
         IPKey key = new IPKey(version, protocol, daddr, dport, uid);
+        sni = NetworkUtils.cleanDomain(sni);
         mapIPKeySni.put(key, sni);
     }
 
@@ -479,6 +473,9 @@ public class MyVpnService extends VpnService {
     }
     private boolean isDomainBlocked(int uid, String name) {
         lock.readLock().lock();
+
+        // remove eventually leading 'www.'
+        name = NetworkUtils.cleanDomain(name);
 
         // check if the uid is fully blocked
         boolean blocked = setUidBlockAll.contains((long) uid);

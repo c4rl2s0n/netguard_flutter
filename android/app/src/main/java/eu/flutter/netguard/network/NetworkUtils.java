@@ -263,4 +263,11 @@ public class NetworkUtils {
         return is_numeric_address(ip);
     }
 
+    public static String cleanDomain(String domain) {
+        if(domain.startsWith("www.")){
+            return domain.substring(4);
+        }
+        return domain;
+    }
+
 }
