@@ -341,7 +341,6 @@ void handle_ip(const struct arguments *args,
         if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6) {
             handle_icmp(args, pkt, length, payload, uid, epoll_fd);
         } else if (protocol == IPPROTO_UDP) {
-            if(dport == 53) uid = -1;
             handle_udp(args, pkt, length, payload, uid, epoll_fd);
         } else if (protocol == IPPROTO_TCP) {
             handle_tcp(args, pkt, length, payload, uid, allowed, epoll_fd);

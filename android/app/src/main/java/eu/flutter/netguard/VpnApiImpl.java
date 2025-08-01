@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import eu.flutter.netguard.data.ModelBuilder;
 import eu.flutter.netguard.utils.Util;
@@ -68,7 +69,9 @@ public class VpnApiImpl implements VpnController {
         PackageManager pm = context.getPackageManager();
         List<ApplicationInfo> applicationInfos = pm.getInstalledApplications(ApplicationInfo.FLAG_INSTALLED);
         List<Application> applications = new ArrayList<>();
+        String self = context.getPackageName();
         for (ApplicationInfo app : applicationInfos) {
+            if(Objects.equals(app.packageName, self)) continue;
             PackageInfo info;
             String version = "";
             try {

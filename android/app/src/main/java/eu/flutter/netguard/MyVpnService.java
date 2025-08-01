@@ -17,7 +17,6 @@ import android.util.Log;
 import androidx.core.content.ContextCompat;
 
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -239,7 +238,6 @@ public class MyVpnService extends VpnService {
 
         super.onDestroy();
     }
-
 
 
     private Builder getBuilder(List<String> packageNames) {
@@ -521,9 +519,8 @@ public class MyVpnService extends VpnService {
         InetSocketAddress local = new InetSocketAddress(saddr, sport);
         InetSocketAddress remote = new InetSocketAddress(daddr, dport);
 
-        Log.i(TAG, "Get uid local=" + local + " remote=" + remote);
         int uid = cm.getConnectionOwnerUid(protocol, local, remote);
-        Log.i(TAG, "Get uid=" + uid);
+        Log.i(TAG, "Get uid local=" + local + " remote=" + remote + " uid="+uid);
         return uid;
     }
 

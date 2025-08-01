@@ -7,7 +7,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 import 'tables/tables.dart';
 
-// import 'database.steps.dart';
+//import 'database.steps.dart';
 part 'database.g.dart';
 
 @DriftDatabase(
@@ -25,19 +25,13 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (m) async => await m.createAll(),
-      // onUpgrade: stepByStep(
-      //   from1To2: (m, schema) async {},
-      //   from2To3: (m, schema) async {
-      //     await m.addColumn(schema.settingsTable, schema.settingsTable.logTraffic);
-      //     await m.createTable(schema.trafficLogTable);
-      //   },
-      // ),
+      //onUpgrade: stepByStep(),
       beforeOpen: (details) async {
         if (!details.hadUpgrade && !details.wasCreated) return;
         bool reachedTarget(int target) =>
@@ -101,7 +95,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   static QueryExecutor _openConnection() {
-    if (false) {
+    if (true) {
       try {
         File(databaseFilepath).deleteSync();
       } catch (_) {}
