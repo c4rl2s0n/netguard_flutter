@@ -153,7 +153,7 @@ int has_udp_session(const struct arguments *args, const uint8_t *pkt, const uint
     const struct ip6_hdr *ip6 = (struct ip6_hdr *) pkt;
     const struct udphdr *udphdr = (struct udphdr *) payload;
 
-    if (ntohs(udphdr->dest) == 53 && !args->fwd53)
+    if (ntohs(udphdr->dest) == 53)
         return 1;
 
     // Search session

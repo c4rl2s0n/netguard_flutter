@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:netguard/common/common.dart';
 
 class ConfirmButton extends StatelessWidget {
-  const ConfirmButton({this.returnValue = true, this.text = "Okay", super.key});
+  const ConfirmButton({this.returnValue = true, this.text, super.key});
 
   final dynamic returnValue;
   final String? text;
@@ -12,7 +12,7 @@ class ConfirmButton extends StatelessWidget {
     return DialogActionButton(
       onTap: () => Navigator.maybePop(context, returnValue),
       icon: const Icon(CustomIcons.check),
-      text: text,
+      text: text ?? "Okay",
       color: context.colors.positive,
     );
   }

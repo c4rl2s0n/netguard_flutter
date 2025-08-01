@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:netguard/common/common.dart';
 
 class DeclineButton extends StatelessWidget {
-  const DeclineButton({this.returnValue = false, this.text = "No", super.key});
+  const DeclineButton({this.returnValue = false, this.text, super.key});
 
   final dynamic returnValue;
   final String? text;
@@ -12,7 +12,7 @@ class DeclineButton extends StatelessWidget {
     return DialogActionButton(
       onTap: () => Navigator.maybePop(context, returnValue),
       icon: const Icon(CustomIcons.cancel),
-      text: text,
+      text: text ?? "No",
       color: context.colors.negative,
     );
   }

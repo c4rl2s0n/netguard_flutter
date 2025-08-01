@@ -875,6 +875,20 @@ class $SettingsTableTable extends SettingsTable
       'CHECK ("log_traffic" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _observeOnlyMeta = const VerificationMeta(
+    'observeOnly',
+  );
+  @override
+  late final GeneratedColumn<bool> observeOnly = GeneratedColumn<bool>(
+    'observe_only',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("observe_only" IN (0, 1))',
+    ),
+  );
   static const VerificationMeta _logCompactViewMeta = const VerificationMeta(
     'logCompactView',
   );
@@ -907,6 +921,7 @@ class $SettingsTableTable extends SettingsTable
     colorScheme,
     includeSystemApps,
     logTraffic,
+    observeOnly,
     logCompactView,
     lastHostlistUpdate,
   ];
@@ -951,6 +966,17 @@ class $SettingsTableTable extends SettingsTable
       );
     } else if (isInserting) {
       context.missing(_logTrafficMeta);
+    }
+    if (data.containsKey('observe_only')) {
+      context.handle(
+        _observeOnlyMeta,
+        observeOnly.isAcceptableOrUnknown(
+          data['observe_only']!,
+          _observeOnlyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_observeOnlyMeta);
     }
     if (data.containsKey('log_compact_view')) {
       context.handle(
@@ -1003,6 +1029,10 @@ class $SettingsTableTable extends SettingsTable
         DriftSqlType.bool,
         data['${effectivePrefix}log_traffic'],
       )!,
+      observeOnly: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}observe_only'],
+      )!,
       logCompactView: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}log_compact_view'],
@@ -1029,6 +1059,7 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
   final Value<FlexScheme> colorScheme;
   final Value<bool> includeSystemApps;
   final Value<bool> logTraffic;
+  final Value<bool> observeOnly;
   final Value<bool> logCompactView;
   final Value<DateTime?> lastHostlistUpdate;
   const SettingsTableCompanion({
@@ -1037,6 +1068,7 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     this.colorScheme = const Value.absent(),
     this.includeSystemApps = const Value.absent(),
     this.logTraffic = const Value.absent(),
+    this.observeOnly = const Value.absent(),
     this.logCompactView = const Value.absent(),
     this.lastHostlistUpdate = const Value.absent(),
   });
@@ -1046,12 +1078,14 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     required FlexScheme colorScheme,
     required bool includeSystemApps,
     required bool logTraffic,
+    required bool observeOnly,
     required bool logCompactView,
     this.lastHostlistUpdate = const Value.absent(),
   }) : darkMode = Value(darkMode),
        colorScheme = Value(colorScheme),
        includeSystemApps = Value(includeSystemApps),
        logTraffic = Value(logTraffic),
+       observeOnly = Value(observeOnly),
        logCompactView = Value(logCompactView);
   static Insertable<Settings> custom({
     Expression<int>? id,
@@ -1059,6 +1093,7 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     Expression<String>? colorScheme,
     Expression<bool>? includeSystemApps,
     Expression<bool>? logTraffic,
+    Expression<bool>? observeOnly,
     Expression<bool>? logCompactView,
     Expression<DateTime>? lastHostlistUpdate,
   }) {
@@ -1068,6 +1103,7 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
       if (colorScheme != null) 'color_scheme': colorScheme,
       if (includeSystemApps != null) 'include_system_apps': includeSystemApps,
       if (logTraffic != null) 'log_traffic': logTraffic,
+      if (observeOnly != null) 'observe_only': observeOnly,
       if (logCompactView != null) 'log_compact_view': logCompactView,
       if (lastHostlistUpdate != null)
         'last_hostlist_update': lastHostlistUpdate,
@@ -1080,6 +1116,7 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     Value<FlexScheme>? colorScheme,
     Value<bool>? includeSystemApps,
     Value<bool>? logTraffic,
+    Value<bool>? observeOnly,
     Value<bool>? logCompactView,
     Value<DateTime?>? lastHostlistUpdate,
   }) {
@@ -1089,6 +1126,7 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
       colorScheme: colorScheme ?? this.colorScheme,
       includeSystemApps: includeSystemApps ?? this.includeSystemApps,
       logTraffic: logTraffic ?? this.logTraffic,
+      observeOnly: observeOnly ?? this.observeOnly,
       logCompactView: logCompactView ?? this.logCompactView,
       lastHostlistUpdate: lastHostlistUpdate ?? this.lastHostlistUpdate,
     );
@@ -1114,6 +1152,9 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     if (logTraffic.present) {
       map['log_traffic'] = Variable<bool>(logTraffic.value);
     }
+    if (observeOnly.present) {
+      map['observe_only'] = Variable<bool>(observeOnly.value);
+    }
     if (logCompactView.present) {
       map['log_compact_view'] = Variable<bool>(logCompactView.value);
     }
@@ -1133,6 +1174,7 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
           ..write('colorScheme: $colorScheme, ')
           ..write('includeSystemApps: $includeSystemApps, ')
           ..write('logTraffic: $logTraffic, ')
+          ..write('observeOnly: $observeOnly, ')
           ..write('logCompactView: $logCompactView, ')
           ..write('lastHostlistUpdate: $lastHostlistUpdate')
           ..write(')'))
@@ -2928,6 +2970,7 @@ typedef $$SettingsTableTableCreateCompanionBuilder =
       required FlexScheme colorScheme,
       required bool includeSystemApps,
       required bool logTraffic,
+      required bool observeOnly,
       required bool logCompactView,
       Value<DateTime?> lastHostlistUpdate,
     });
@@ -2938,6 +2981,7 @@ typedef $$SettingsTableTableUpdateCompanionBuilder =
       Value<FlexScheme> colorScheme,
       Value<bool> includeSystemApps,
       Value<bool> logTraffic,
+      Value<bool> observeOnly,
       Value<bool> logCompactView,
       Value<DateTime?> lastHostlistUpdate,
     });
@@ -2974,6 +3018,11 @@ class $$SettingsTableTableFilterComposer
 
   ColumnFilters<bool> get logTraffic => $composableBuilder(
     column: $table.logTraffic,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get observeOnly => $composableBuilder(
+    column: $table.observeOnly,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3022,6 +3071,11 @@ class $$SettingsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get observeOnly => $composableBuilder(
+    column: $table.observeOnly,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get logCompactView => $composableBuilder(
     column: $table.logCompactView,
     builder: (column) => ColumnOrderings(column),
@@ -3061,6 +3115,11 @@ class $$SettingsTableTableAnnotationComposer
 
   GeneratedColumn<bool> get logTraffic => $composableBuilder(
     column: $table.logTraffic,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get observeOnly => $composableBuilder(
+    column: $table.observeOnly,
     builder: (column) => column,
   );
 
@@ -3111,6 +3170,7 @@ class $$SettingsTableTableTableManager
                 Value<FlexScheme> colorScheme = const Value.absent(),
                 Value<bool> includeSystemApps = const Value.absent(),
                 Value<bool> logTraffic = const Value.absent(),
+                Value<bool> observeOnly = const Value.absent(),
                 Value<bool> logCompactView = const Value.absent(),
                 Value<DateTime?> lastHostlistUpdate = const Value.absent(),
               }) => SettingsTableCompanion(
@@ -3119,6 +3179,7 @@ class $$SettingsTableTableTableManager
                 colorScheme: colorScheme,
                 includeSystemApps: includeSystemApps,
                 logTraffic: logTraffic,
+                observeOnly: observeOnly,
                 logCompactView: logCompactView,
                 lastHostlistUpdate: lastHostlistUpdate,
               ),
@@ -3129,6 +3190,7 @@ class $$SettingsTableTableTableManager
                 required FlexScheme colorScheme,
                 required bool includeSystemApps,
                 required bool logTraffic,
+                required bool observeOnly,
                 required bool logCompactView,
                 Value<DateTime?> lastHostlistUpdate = const Value.absent(),
               }) => SettingsTableCompanion.insert(
@@ -3137,6 +3199,7 @@ class $$SettingsTableTableTableManager
                 colorScheme: colorScheme,
                 includeSystemApps: includeSystemApps,
                 logTraffic: logTraffic,
+                observeOnly: observeOnly,
                 logCompactView: logCompactView,
                 lastHostlistUpdate: lastHostlistUpdate,
               ),

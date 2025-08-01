@@ -41,6 +41,10 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit(state.copyWith(logTraffic: !state.logTraffic));
     saveSettings();
   }
+  void setObserveOnly(bool observeOnly){
+    emit(state.copyWith(observeOnly: observeOnly));
+    saveSettings();
+  }
 
   // MISC
 
@@ -60,6 +64,7 @@ class SettingsState with _$SettingsState {
     required this.colorScheme,
     required this.includeSystemApps,
     required this.logTraffic,
+    required this.observeOnly,
     required this.logCompactView,
     this.lastHostlistUpdate,
   });
@@ -73,6 +78,8 @@ class SettingsState with _$SettingsState {
   final bool includeSystemApps;
   @override
   final bool logTraffic;
+  @override
+  final bool observeOnly;
 
   @override
   final bool logCompactView;
@@ -87,6 +94,7 @@ class SettingsState with _$SettingsState {
         colorScheme: settings.colorScheme,
         includeSystemApps: settings.includeSystemApps,
         logTraffic: settings.logTraffic,
+        observeOnly: settings.observeOnly,
         logCompactView: settings.logCompactView,
         lastHostlistUpdate: settings.lastHostlistUpdate,
       );
@@ -96,6 +104,7 @@ class SettingsState with _$SettingsState {
     colorScheme: colorScheme,
     includeSystemApps: includeSystemApps,
     logTraffic: logTraffic,
+    observeOnly: observeOnly,
     logCompactView: logCompactView,
     lastHostlistUpdate: lastHostlistUpdate,
   );

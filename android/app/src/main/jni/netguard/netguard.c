@@ -139,10 +139,10 @@ Java_eu_flutter_netguard_MyVpnService_jni_1start(
 
 JNIEXPORT void JNICALL
 Java_eu_flutter_netguard_MyVpnService_jni_1run(
-        JNIEnv *env, jobject instance, jlong context, jint tun, jboolean fwd53, jboolean logTraffic, jint rcode) {
+        JNIEnv *env, jobject instance, jlong context, jint tun, jboolean logTraffic, jboolean observeOnly, jint rcode) {
     struct context *ctx = (struct context *) context;
 
-    log_android(ANDROID_LOG_WARN, "Running tun %d fwd53 %d level %d", tun, fwd53, loglevel);
+    log_android(ANDROID_LOG_WARN, "Running tun %d logTraffic %d observeOnly %d level %d", tun, logTraffic, observeOnly, loglevel);
 
     // Set blocking
     int flags = fcntl(tun, F_GETFL, 0);
@@ -155,8 +155,8 @@ Java_eu_flutter_netguard_MyVpnService_jni_1run(
     args->env = env;
     args->instance = instance;
     args->tun = tun;
-    args->fwd53 = fwd53;
     args->logTraffic = logTraffic;
+    args->observeOnly = observeOnly;
     args->rcode = rcode;
     args->ctx = ctx;
     handle_events(args);
@@ -505,7 +505,7 @@ void log_packet(const struct arguments *args, jobject jpacket) {
 
 static jmethodID midLogTraffic = NULL;
 
-void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jint length, jint uid, jboolean allowed) {
+void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -515,7 +515,7 @@ void log_traffic(const struct arguments *args, jint version, jint protocol, cons
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(JIILjava/lang/String;IIIZ)V";
+    const char *signature = "(JIILjava/lang/String;IJIZ)V";
     if (midLogTraffic == NULL)
         midLogTraffic = jniGetMethodID(args->env, clsService, "logTraffic", signature);
 
@@ -526,7 +526,7 @@ void log_traffic(const struct arguments *args, jint version, jint protocol, cons
     jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
     ng_add_alloc(jdaddr, "jdaddr");
 
-    (*args->env)->CallVoidMethod(args->env, args->instance, midLogTraffic, t, version, protocol, jdaddr, dport, length,  uid, allowed);
+    (*args->env)->CallVoidMethod(args->env, args->instance, midLogTraffic, t, version, protocol, jdaddr, dport, length, uid, allowed);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jdaddr);

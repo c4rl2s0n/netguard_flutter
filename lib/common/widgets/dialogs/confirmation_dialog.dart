@@ -6,11 +6,15 @@ class ConfirmationDialog extends StatelessWidget {
   const ConfirmationDialog({
     required this.title,
     required this.content,
+    this.declineText,
+    this.confirmText,
     super.key,
   });
 
   final String title;
   final String content;
+  final String? declineText;
+  final String? confirmText;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +22,10 @@ class ConfirmationDialog extends StatelessWidget {
       title: title,
       icon: const Icon(CustomIcons.info),
       content: SingleChildScrollView(child: Text(content, softWrap: true)),
-      actions: const [DeclineButton(), ConfirmButton()],
+      actions: [
+        DeclineButton(text: declineText),
+        ConfirmButton(text: confirmText),
+      ],
       expand: false,
     );
   }
@@ -27,13 +34,17 @@ class ConfirmationDialog extends StatelessWidget {
     BuildContext context, {
     String? title,
     String? content,
+    String? declineText,
+    String? confirmText,
   }) async {
     return await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => ConfirmationDialog(
         title: title ?? "Are you sure?",
-        content: content ?? "",
+        content: content ?? "Please confirm!",
+        declineText: declineText,
+        confirmText: confirmText,
       ),
     );
   }

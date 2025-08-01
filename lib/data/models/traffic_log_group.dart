@@ -1,6 +1,25 @@
 import 'package:netguard/common/native/native_bridge.g.dart';
 import 'package:netguard/features/session_logs/logic/session_logs_filter_cubit.dart';
 
+// abstract class TrafficLogGroup {
+//   TrafficLogGroup._({
+//     required this.allowed,
+//     required this.latest,
+//     required this.count,
+//     required this.size,
+//   });
+//   final bool allowed;
+//   int latest;
+//   int count;
+//   int size;
+//
+//   void add(TrafficLog log) {
+//     count++;
+//     size += log.size;
+//     if (log.time > latest) latest = log.time;
+//   }
+// }
+
 class TrafficLogGroup {
   TrafficLogGroup._({
     required this.packageName,
@@ -10,6 +29,7 @@ class TrafficLogGroup {
     required this.allowed,
     required this.latest,
     required this.count,
+    required this.size,
   });
   TrafficLogGroup.fromLog(TrafficLog log)
     : this._(
@@ -20,6 +40,7 @@ class TrafficLogGroup {
         allowed: log.allowed,
         latest: log.time,
         count: 0,
+        size: 0,
       );
   final String? packageName;
   final int protocol;
@@ -28,9 +49,11 @@ class TrafficLogGroup {
   final bool allowed;
   int latest;
   int count;
+  int size;
 
   void add(TrafficLog log) {
     count++;
+    size += log.size;
     if (log.time > latest) latest = log.time;
   }
 }
@@ -61,15 +84,16 @@ class TrafficLogGroups {
 
   List<TrafficLogGroup> list({String? packageName}) {
     List<TrafficLogGroup> groups = [];
-    void addByPackage(Map<String, Map<int, TrafficLogGroup>> byPackage){
+    void addByPackage(Map<String, Map<int, TrafficLogGroup>> byPackage) {
       for (var byDest in byPackage.values) {
         groups.addAll(byDest.values);
       }
     }
-    if(packageName != null && packageName != FilterStrings.all){
-      if(packageName == FilterStrings.unknown) packageName = null;
-      if(_groups.containsKey(packageName)) addByPackage(_groups[packageName]!);
-    }else{
+
+    if (packageName != null && packageName != FilterStrings.all) {
+      if (packageName == FilterStrings.unknown) packageName = null;
+      if (_groups.containsKey(packageName)) addByPackage(_groups[packageName]!);
+    } else {
       for (Map<String, Map<int, TrafficLogGroup>> byPackage in _groups.values) {
         addByPackage(byPackage);
       }

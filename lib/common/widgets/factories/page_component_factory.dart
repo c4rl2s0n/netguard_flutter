@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/common/common.dart';
-import 'package:netguard/features/session_logs/session_logs.dart';
 import 'package:netguard/features/settings/settings_view.dart';
 
 class PageComponentFactory {
@@ -46,13 +45,13 @@ class PageComponentFactory {
       leading: IconTheme(data: iconTheme, child: _appBarLeading()),
       automaticallyImplyLeading: true,
       actionsIconTheme: iconTheme,
+      actionsPadding: EdgeInsets.zero, // TODO: check
       actions: [_sessionButton(), ...actions ?? []],
       iconTheme: iconTheme.copyWith(size: 20),
 
       backgroundColor: background,
     );
   }
-
 
   static Widget _appBarLeading() {
     return Builder(
@@ -83,14 +82,11 @@ class PageComponentFactory {
               },
               icon: Icon(CustomIcons.active),
             )
-          : IconButton(
-              onPressed: () async {
-                await sessionCubit.startVpn();
-                if (settingsCubit.state.logTraffic && context.mounted) {
-                  context.navigator.navigateTo(const SessionLogs());
-                }
-              },
-              icon: Icon(CustomIcons.inactive, color: context.colors.warning),
+          : VpnLauncher(
+              (launchVpn) => IconButton(
+                onPressed: () => launchVpn(context),
+                icon: Icon(CustomIcons.inactive, color: context.colors.warning),
+              ),
             ),
     );
   }

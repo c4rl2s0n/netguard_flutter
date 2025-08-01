@@ -30,7 +30,7 @@ class SessionLogs extends StatelessWidget {
                   (context) => LogFilterDialog.show(context, filterCubit),
                   CustomIcons.filter,
                 ),
-                //PageComponentFactory.settingsNavigationButton(),
+                PageComponentFactory.settingsNavigationButton(),
               ],
             ),
             body: _log(),

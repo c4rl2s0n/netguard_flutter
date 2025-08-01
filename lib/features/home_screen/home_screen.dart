@@ -55,17 +55,15 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         const Margin.vertical(ThemeConstants.spacing),
-        IconButton(
-          onPressed: () async {
-            await sessionCubit.startVpn();
-            if (settingsCubit.state.logTraffic && context.mounted)
-              _showLogs(context);
-          },
-          style: IconButton.styleFrom(
-            backgroundColor: context.colors.onBackground,
-            foregroundColor: context.colors.positive,
+        VpnLauncher(
+          (launchVpn) => IconButton(
+            onPressed: () => launchVpn(context),
+            style: IconButton.styleFrom(
+              backgroundColor: context.colors.onBackground,
+              foregroundColor: context.colors.positive,
+            ),
+            icon: Icon(CustomIcons.start, size: _buttonSize),
           ),
-          icon: Icon(CustomIcons.start, size: _buttonSize),
         ),
       ],
     );

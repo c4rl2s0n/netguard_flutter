@@ -14,7 +14,13 @@ class VpnSettings extends StatelessWidget {
       buildWhen: (oldState, state) => oldState.running != state.running,
       builder: (context, session) => SettingsGroup(
         title: "VPN Settings",
-        settings: [_systemApps(), _logTraffic(), _globalRules(), _ruleImport()],
+        settings: [
+          _systemApps(),
+          _logTraffic(),
+          _observeOnly(),
+          _globalRules(),
+          _ruleImport(),
+        ],
         info: session.running
             ? Text(
                 "These settings will only be affective after restarting the VPN.",
@@ -49,6 +55,18 @@ class VpnSettings extends StatelessWidget {
             "If the traffic should be logged. Might increase battery usage, but is necessary to use found domains in custom rules.",
         value: state.logTraffic,
         onChanged: (_) => settingsCubit.toggleLogTraffic(),
+      ),
+    );
+  }
+
+  Widget _observeOnly() {
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) => SwitchSetting(
+        name: "Observe only",
+        description:
+            "If set, the firewall does not block any traffic.\nIt jus observes the traffic and logs, which traffic would usually be blocked. Useful for analysis.",
+        value: state.observeOnly,
+        onChanged: settingsCubit.setObserveOnly,
       ),
     );
   }

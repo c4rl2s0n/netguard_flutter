@@ -144,6 +144,19 @@ public class NativeBridge {
       this.logTraffic = setterArg;
     }
 
+    private @NonNull Boolean observeOnly;
+
+    public @NonNull Boolean getObserveOnly() {
+      return observeOnly;
+    }
+
+    public void setObserveOnly(@NonNull Boolean setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"observeOnly\" is null.");
+      }
+      this.observeOnly = setterArg;
+    }
+
     private @NonNull Long logLevel;
 
     public @NonNull Long getLogLevel() {
@@ -165,12 +178,12 @@ public class NativeBridge {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
       VpnConfig that = (VpnConfig) o;
-      return session.equals(that.session) && filteredPackages.equals(that.filteredPackages) && dbPath.equals(that.dbPath) && logTraffic.equals(that.logTraffic) && logLevel.equals(that.logLevel);
+      return session.equals(that.session) && filteredPackages.equals(that.filteredPackages) && dbPath.equals(that.dbPath) && logTraffic.equals(that.logTraffic) && observeOnly.equals(that.observeOnly) && logLevel.equals(that.logLevel);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(session, filteredPackages, dbPath, logTraffic, logLevel);
+      return Objects.hash(session, filteredPackages, dbPath, logTraffic, observeOnly, logLevel);
     }
 
     public static final class Builder {
@@ -207,6 +220,14 @@ public class NativeBridge {
         return this;
       }
 
+      private @Nullable Boolean observeOnly;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setObserveOnly(@NonNull Boolean setterArg) {
+        this.observeOnly = setterArg;
+        return this;
+      }
+
       private @Nullable Long logLevel;
 
       @CanIgnoreReturnValue
@@ -221,6 +242,7 @@ public class NativeBridge {
         pigeonReturn.setFilteredPackages(filteredPackages);
         pigeonReturn.setDbPath(dbPath);
         pigeonReturn.setLogTraffic(logTraffic);
+        pigeonReturn.setObserveOnly(observeOnly);
         pigeonReturn.setLogLevel(logLevel);
         return pigeonReturn;
       }
@@ -228,11 +250,12 @@ public class NativeBridge {
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(5);
+      ArrayList<Object> toListResult = new ArrayList<>(6);
       toListResult.add(session);
       toListResult.add(filteredPackages);
       toListResult.add(dbPath);
       toListResult.add(logTraffic);
+      toListResult.add(observeOnly);
       toListResult.add(logLevel);
       return toListResult;
     }
@@ -247,7 +270,9 @@ public class NativeBridge {
       pigeonResult.setDbPath((String) dbPath);
       Object logTraffic = pigeonVar_list.get(3);
       pigeonResult.setLogTraffic((Boolean) logTraffic);
-      Object logLevel = pigeonVar_list.get(4);
+      Object observeOnly = pigeonVar_list.get(4);
+      pigeonResult.setObserveOnly((Boolean) observeOnly);
+      Object logLevel = pigeonVar_list.get(5);
       pigeonResult.setLogLevel((Long) logLevel);
       return pigeonResult;
     }

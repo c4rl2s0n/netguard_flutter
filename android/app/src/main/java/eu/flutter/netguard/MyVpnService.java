@@ -24,11 +24,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-//import eu.flutter.netguard.data.DatabaseHelper;
 import eu.flutter.netguard.data.DatabaseHelper;
 import eu.flutter.netguard.data.IPKey;
 import eu.flutter.netguard.data.ModelBuilder;
@@ -53,7 +51,7 @@ public class MyVpnService extends VpnService {
     private static long jni_context = 0;
     private native long jni_init(int sdk);
     private native void jni_start(long context, int loglevel);
-    private native void jni_run(long context, int tun, boolean fwd53, boolean logTraffic, int rcode);
+    private native void jni_run(long context, int tun, boolean logTraffic, boolean observeOnly, int rcode);
     private native void jni_stop(long context);
     private native void jni_clear(long context);
     private native int jni_get_mtu();
@@ -79,7 +77,6 @@ public class MyVpnService extends VpnService {
     private Map<Long, String> mapUidPackageName = new HashMap<>();
     private Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
     private Map<IPKey, String> mapIPKeySni = new HashMap<>();
-    private Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
     private Map<String, String> mapIpDomain = new HashMap<>();
 
     private List<ApplicationSetting> applicationSettings;
@@ -268,10 +265,10 @@ public class MyVpnService extends VpnService {
         for (InetAddress dns : NetworkUtils.getDefaultDns(MyVpnService.this)) {
             Log.i(TAG, "Using DNS=" + dns);
             builder.addDnsServer(dns);
-            if (dns instanceof Inet4Address)
-                builder.addRoute(dns.getHostAddress(), 32);
-            else if (dns instanceof Inet6Address)
-                builder.addRoute(dns.getHostAddress(), 128);
+//            if (dns instanceof Inet4Address)
+//                builder.addRoute(dns.getHostAddress(), 32);
+//            else if (dns instanceof Inet6Address)
+//                builder.addRoute(dns.getHostAddress(), 128);
         }
 
         // TODO: what is this?!
@@ -291,7 +288,8 @@ public class MyVpnService extends VpnService {
 
         // TODO: Subnet routing needed? See NetGuard
         builder.addRoute("0.0.0.0", 0);
-        builder.addRoute("::", 0); // unicast
+        // builder.addRoute("::", 0); // unicast
+        builder.addRoute("2000::", 3); // unicast
 
         // MTU
         int mtu = jni_get_mtu();
@@ -329,7 +327,11 @@ public class MyVpnService extends VpnService {
                 @Override
                 public void run() {
                     Log.i(TAG, "Running tunnel context=" + jni_context);
-                    jni_run(jni_context, vpn.getFd(), false /* TODO: mapForward.containsKey(53)*/, vpnConfig.getLogTraffic(), rcode);
+                    jni_run(jni_context,
+                            vpn.getFd(),
+                            vpnConfig.getLogTraffic(),
+                            vpnConfig.getObserveOnly(),
+                            rcode);
                     Log.i(TAG, "Tunnel exited");
                     tunnelThread = null;
                 }

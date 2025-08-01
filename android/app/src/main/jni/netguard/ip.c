@@ -317,9 +317,11 @@ void handle_ip(const struct arguments *args,
 
     // Check if allowed
     int allowed = 0;
-    if(protocol == IPPROTO_UDP && uid > 0 && dport == 443 && is_quic_blocked(args, uid)){
+    int blockedQuic = 0;    // for observation mode, we want to only block quic if it is blocked to achieve TLS fallback
+    if(protocol == IPPROTO_UDP && dport == 443 && uid > 0 && is_quic_blocked(args, uid)){
         // check if QUIC should be blocked for current application (UDP Port 443)
         allowed = 0;
+        blockedQuic = 1;
     } else if (protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload)) {
         allowed = 1; // could be a lingering/blocked session
     } else if (false && protocol == IPPROTO_TCP && (!syn || (uid <= 0 && dport == 53)) &&
@@ -334,13 +336,16 @@ void handle_ip(const struct arguments *args,
     }
 
     // Handle allowed traffic
-    if (allowed) {
-        if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6)
+    // if we only observe the traffic, it is allowed unless it is QUIC that we want to block for TLS fallback
+    if (allowed || (args->observeOnly && !blockedQuic)) {
+        if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6) {
             handle_icmp(args, pkt, length, payload, uid, epoll_fd);
-        else if (protocol == IPPROTO_UDP)
+        } else if (protocol == IPPROTO_UDP) {
+            if(dport == 53) uid = -1;
             handle_udp(args, pkt, length, payload, uid, epoll_fd);
-        else if (protocol == IPPROTO_TCP)
+        } else if (protocol == IPPROTO_TCP) {
             handle_tcp(args, pkt, length, payload, uid, allowed, epoll_fd);
+        }
     } else {
         if (protocol == IPPROTO_UDP)
             block_udp(args, pkt, length, payload, uid);
@@ -354,7 +359,6 @@ void handle_ip(const struct arguments *args,
     // optionally, log traffic to database
     if(args->logTraffic)
         log_traffic(args, version, protocol, dest, dport, length, uid, allowed);
-    // TODO: log packet size
 
 }
 

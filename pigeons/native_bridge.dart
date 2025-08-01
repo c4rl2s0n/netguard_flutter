@@ -35,6 +35,7 @@ class VpnConfig {
     required this.dbPath,
     required this.filteredPackages,
     this.logTraffic = true,
+    this.observeOnly = false,
     this.logLevel = 5,
   });
 
@@ -47,7 +48,13 @@ class VpnConfig {
   /// path of the sqlite database, so native code can read from it directly
   String dbPath;
 
+  /// defines if the traffic should be logged. This enables analytics, but may increase battery usage.
   bool logTraffic;
+
+  /// If this is set, the firewall does not block the traffic, but just observes it.
+  /// It then logs whether or not it would usually block certain packets.
+  /// Can be useful to understand the potential impact of the firewall.
+  bool observeOnly;
 
   int logLevel;
 }

@@ -1,5 +1,4 @@
 import 'package:netguard/netguard.dart';
-import 'package:netguard/common/native/native_bridge.g.dart' as native;
 
 class VpnTools {
   static List<T> getRelevant<T>(
@@ -26,8 +25,10 @@ class VpnTools {
     VpnConfig config = VpnConfig(
       session: IdTools.generateUuid(),
       logTraffic: settings.logTraffic,
+      observeOnly: settings.observeOnly,
       dbPath: databaseFilepath,
       filteredPackages: filtered,
+      logLevel: 3,
     );
     return config;
   }

@@ -51,6 +51,7 @@ class VpnConfig {
     required this.filteredPackages,
     required this.dbPath,
     this.logTraffic = true,
+    this.observeOnly = false,
     this.logLevel = 5,
   });
 
@@ -65,6 +66,8 @@ class VpnConfig {
 
   bool logTraffic;
 
+  bool observeOnly;
+
   int logLevel;
 
   List<Object?> _toList() {
@@ -73,6 +76,7 @@ class VpnConfig {
       filteredPackages,
       dbPath,
       logTraffic,
+      observeOnly,
       logLevel,
     ];
   }
@@ -87,7 +91,8 @@ class VpnConfig {
       filteredPackages: (result[1] as List<Object?>?)!.cast<String>(),
       dbPath: result[2]! as String,
       logTraffic: result[3]! as bool,
-      logLevel: result[4]! as int,
+      observeOnly: result[4]! as bool,
+      logLevel: result[5]! as int,
     );
   }
 
