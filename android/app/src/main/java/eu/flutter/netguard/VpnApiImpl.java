@@ -28,7 +28,7 @@ public class VpnApiImpl implements VpnController {
     }
     @Override
     public void startVpn(@NonNull VpnConfig config) {
-        MyVpnService.updateVpnConfig(config);
+        MyVpnService.updateVpnConfig(context, config);
         Intent prepareIntent = VpnService.prepare(context);
         if (prepareIntent != null) {
             // Need user consent — ask MainActivity to launch permission
@@ -60,7 +60,7 @@ public class VpnApiImpl implements VpnController {
 
     @Override
     public void updateSettings(@NonNull VpnConfig config) {
-        MyVpnService.updateVpnConfig(config);
+        MyVpnService.updateVpnConfig(context, config);
     }
 
     @NonNull

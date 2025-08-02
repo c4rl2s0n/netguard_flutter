@@ -25,20 +25,20 @@ import android.database.sqlite.SQLiteStatement;
 import android.os.Handler;
 import android.os.Looper;
 
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import eu.flutter.netguard.utils.Log;
 import eu.flutter.netguard.NativeBridge.*;
 
 public class DatabaseHelper {
     private static final String TAG = "NetGuard.Database";
 
-    private Handler queryHandler;
+    private final Handler queryHandler;
     private final SQLiteDatabase db;
-
-    // TODO: maybe parse package rules directly from db here? depends on how many it will be...
 
     public DatabaseHelper(String dbPath){
         assert(new File(dbPath).canWrite());
@@ -50,32 +50,41 @@ public class DatabaseHelper {
                 SQLiteDatabase.OPEN_READWRITE
         );
 
-        prepareStatements();
-    }
-
-    public void close(){
-        db.close();
-    }
-
-    private SQLiteStatement genericBlacklistContainsHost;
-    private SQLiteStatement genericBlacklistContainsIp;
-    private void prepareStatements(){
+        // prepare SQLiteStatements
         String sql = "SELECT EXISTS(SELECT 1 FROM hosts_table WHERE rule_id = NULL and type = 'host' and target = ?)";
         genericBlacklistContainsHost = db.compileStatement(sql);
 
         sql = "SELECT EXISTS(SELECT 1 FROM hosts_table WHERE rule_id IS NULL and type = 'ip' and target = ?)";
         genericBlacklistContainsIp = db.compileStatement(sql);
 
-
     }
+
+
+    public void close(){
+        db.close();
+    }
+
+    private final SQLiteStatement genericBlacklistContainsHost;
+    private final SQLiteStatement genericBlacklistContainsIp;
 
     public boolean genericBlacklistContainsHost(String domain){
-        genericBlacklistContainsHost.bindString(1, domain);
-        return runBlocking(() -> genericBlacklistContainsHost.simpleQueryForLong() != 0);
+        Log.i(TAG, "Check BlacklistHost for "+domain);
+        return runBlocking(() -> {
+            synchronized (genericBlacklistContainsHost) {
+                genericBlacklistContainsHost.clearBindings();
+                genericBlacklistContainsHost.bindString(1, domain);
+                return genericBlacklistContainsHost.simpleQueryForLong() != 0;
+            }
+        });
     }
     public boolean genericBlacklistContainsIp(String ip){
-        genericBlacklistContainsIp.bindString(1, ip);
-        return runBlocking(() ->genericBlacklistContainsIp.simpleQueryForLong() != 0);
+        return runBlocking(() ->{
+            synchronized (genericBlacklistContainsIp) {
+                genericBlacklistContainsIp.clearBindings();
+                genericBlacklistContainsIp.bindString(1, ip);
+                return genericBlacklistContainsIp.simpleQueryForLong() != 0;
+            }
+        });
     }
 
     public List<ApplicationSetting> getApplicationSettings(List<String> packageNames){

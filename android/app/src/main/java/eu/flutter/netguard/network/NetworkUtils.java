@@ -9,17 +9,15 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
-import android.util.Log;
-import android.util.Pair;
 
 import androidx.core.net.ConnectivityManagerCompat;
 
-import java.math.BigInteger;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import eu.flutter.netguard.utils.Log;
 
 public class NetworkUtils {
     private static final String TAG = "NetGuard.NetworkUtils";

@@ -2,13 +2,10 @@ package eu.flutter.netguard.utils;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
-import androidx.preference.PreferenceManager;
 
 import eu.flutter.netguard.NativeBridge.*;
 import eu.flutter.netguard.VpnEventChannel;

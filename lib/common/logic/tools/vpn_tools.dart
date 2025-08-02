@@ -28,7 +28,7 @@ class VpnTools {
       observeOnly: settings.observeOnly,
       dbPath: databaseFilepath,
       filteredPackages: filtered,
-      logLevel: 3,
+      logLevel: 5,
     );
     return config;
   }

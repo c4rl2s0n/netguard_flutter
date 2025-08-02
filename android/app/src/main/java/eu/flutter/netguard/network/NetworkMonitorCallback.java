@@ -6,7 +6,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.util.Log;
+
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,6 +14,8 @@ import java.net.Socket;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import eu.flutter.netguard.utils.Log;
 
 public  class NetworkMonitorCallback extends ConnectivityManager.NetworkCallback {
     private static final String TAG = "NetGuard.NetworkMonitor";

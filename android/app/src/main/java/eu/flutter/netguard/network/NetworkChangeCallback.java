@@ -8,14 +8,14 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
+
 
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Objects;
 
 import eu.flutter.netguard.MyVpnService;
-import eu.flutter.netguard.utils.Util;
+import eu.flutter.netguard.utils.Log;
 
 public class NetworkChangeCallback extends ConnectivityManager.NetworkCallback{
     private static final String TAG = "NetGuard.NetworkChange";

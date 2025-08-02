@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
@@ -157,17 +156,18 @@ public class MyVpnService extends VpnService {
             }
         }
 
-
         return START_STICKY;
     }
 
-    public static void updateVpnConfig(VpnConfig config){
+    public static void updateVpnConfig(Context context, VpnConfig config){
         if(config == null) return;
 
         MyVpnService.vpnConfig = config;
+        Log.setLogLevel(config.getLogLevel().intValue());
 
-        // TODO: if running, probably need to restart service in order to apply new settings
-        // TODO: send reload intent (?)
+        if(isRunning()){
+            reload(context, "Update Config");
+        }
     }
     private void startVpn(){
         if (vpnInterface != null) return;
@@ -456,7 +456,6 @@ public class MyVpnService extends VpnService {
         }
     }
 
-    // TODO: log dns to lookup domain names
     // Called from native code
     private void dnsResolved(ResourceRecord rr) {
         mapIpDomain.put(rr.getResource(), NetworkUtils.cleanDomain(rr.getQName()));
@@ -482,7 +481,6 @@ public class MyVpnService extends VpnService {
 
 
         // check if the domain is blocked globally
-        blocked |= hostBlockedGlobally(name);
         if(!blocked) {
             blocked = hostBlockedGlobally(name);
         }

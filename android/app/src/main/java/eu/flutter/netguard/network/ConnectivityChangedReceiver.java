@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.util.Log;
 
+import eu.flutter.netguard.utils.Log;
 import eu.flutter.netguard.MyVpnService;
 
 public class ConnectivityChangedReceiver extends BroadcastReceiver {

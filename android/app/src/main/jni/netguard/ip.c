@@ -288,10 +288,15 @@ void handle_ip(const struct arguments *args,
     else
         uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
     // cache uid
-    if (uid == -1)
-        uid = get_uid_cached(args, version, protocol, source, sport, dest, dport);
-    else
+    if (uid == -1) {
+        jint cuid = get_uid_cached(args, version, protocol, source, sport, dest, dport);
+        if(cuid != -1){
+            log_android(ANDROID_LOG_INFO, "get_uid_q failed but had it chached...");
+        }
+        uid = cuid;
+    } else {
         cache_uid(args, version, protocol, source, sport, dest, dport, uid);
+    }
 
     // Get server name
     char server_name[TLS_SNI_LENGTH + 1];

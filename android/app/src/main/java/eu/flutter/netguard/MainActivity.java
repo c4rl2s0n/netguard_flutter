@@ -7,7 +7,6 @@ import androidx.core.content.ContextCompat;
 import eu.flutter.netguard.utils.Values;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
-import eu.flutter.netguard.utils.Util;
 import eu.flutter.netguard.NativeBridge.*;
 import io.flutter.plugin.common.BinaryMessenger;
 

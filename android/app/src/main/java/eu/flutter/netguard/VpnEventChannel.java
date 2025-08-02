@@ -2,9 +2,6 @@ package eu.flutter.netguard;
 
 import androidx.annotation.NonNull;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import io.flutter.plugin.common.BinaryMessenger;
 import eu.flutter.netguard.NativeBridge.*;
 
