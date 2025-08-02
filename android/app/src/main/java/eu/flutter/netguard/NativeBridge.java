@@ -6,7 +6,7 @@ package eu.flutter.netguard;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.CLASS;
 
-
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.plugin.common.BasicMessageChannel;
@@ -131,6 +131,7 @@ public class NativeBridge {
       this.dbPath = setterArg;
     }
 
+    /** defines if the traffic should be logged. This enables analytics, but may increase battery usage. */
     private @NonNull Boolean logTraffic;
 
     public @NonNull Boolean getLogTraffic() {
@@ -144,6 +145,11 @@ public class NativeBridge {
       this.logTraffic = setterArg;
     }
 
+    /**
+     * If this is set, the firewall does not block the traffic, but just observes it.
+     * It then logs whether or not it would usually block certain packets.
+     * Can be useful to understand the potential impact of the firewall.
+     */
     private @NonNull Boolean observeOnly;
 
     public @NonNull Boolean getObserveOnly() {

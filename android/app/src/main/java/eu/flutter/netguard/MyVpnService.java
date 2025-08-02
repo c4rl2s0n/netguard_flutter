@@ -173,7 +173,7 @@ public class MyVpnService extends VpnService {
         if (vpnInterface != null) return;
 
         startForeground(NotificationTools.WAITING, notification.getRunningNotification());
-        logHandler.logText("Starting the VPN!");
+        Log.i(TAG, "Starting the VPN!");
 
 
         database = new DatabaseHelper(Values.Paths.database(this));
@@ -263,10 +263,6 @@ public class MyVpnService extends VpnService {
         for (InetAddress dns : NetworkUtils.getDefaultDns(MyVpnService.this)) {
             Log.i(TAG, "Using DNS=" + dns);
             builder.addDnsServer(dns);
-//            if (dns instanceof Inet4Address)
-//                builder.addRoute(dns.getHostAddress(), 32);
-//            else if (dns instanceof Inet6Address)
-//                builder.addRoute(dns.getHostAddress(), 128);
         }
 
         // TODO: what is this?!
@@ -281,13 +277,13 @@ public class MyVpnService extends VpnService {
                     builder.addSearchDomain(domain);
                 }
             } catch (Throwable ex) {
-                Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
+                Log.e(TAG, ex + "\n" + Log.getStackTraceString(ex));
             }
 
         // TODO: Subnet routing needed? See NetGuard
         builder.addRoute("0.0.0.0", 0);
-        // builder.addRoute("::", 0); // unicast
-        builder.addRoute("2000::", 3); // unicast
+        builder.addRoute("::", 0); // unicast
+        // builder.addRoute("2000::", 3); // unicast
 
         // MTU
         int mtu = jni_get_mtu();
@@ -419,23 +415,14 @@ public class MyVpnService extends VpnService {
         Log.w(TAG, "Native exit reason=" + reason);
         if (reason != null) {
             // TODO: showErrorNotification(reason);
-
-
-            //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            //prefs.edit().putBoolean("enabled", false).apply();
-            // TODO: WidgetMain.updateWidgets(this);
+            logHandler.logError("[NATIVE EXIT]", reason, null);
         }
     }
 
     // Called from native code
     private void nativeError(int error, String message) {
         Log.w(TAG, "Native error " + error + ": " + message);
-        // TODO: showErrorNotification(message);
-    }
 
-    // Called from native code
-    private void logPacket(Packet packet) {
-        //logHandler.packet(packet);
     }
 
     // Called from native code

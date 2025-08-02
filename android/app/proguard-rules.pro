@@ -40,8 +40,7 @@
 -keep class eu.flutter.netguard.MyVpnService {
     void nativeExit(java.lang.String);
     void nativeError(int, java.lang.String);
-    void logPacket(eu.flutter.netguard.NativeBridge$Packet);
-    void logTraffic(long, int, int, java.lang.String, int, java.lang.String, int, int, boolean);
+    void logTraffic(long, int, int, java.lang.String, int, long, int, boolean);
     void dnsResolved(eu.flutter.netguard.NativeBridge$ResourceRecord);
     void sniResolved(java.lang.String, int, int, java.lang.String, int, java.lang.String, int, int);
     boolean isQuicBlocked(int);

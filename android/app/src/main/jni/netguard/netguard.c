@@ -470,39 +470,6 @@ int jniCheckException(JNIEnv *env) {
     return 0;
 }
 
-static jmethodID midLogPacket = NULL;
-
-void log_packet(const struct arguments *args, jobject jpacket) {
-#ifdef PROFILE_JNI
-    float mselapsed;
-    struct timeval start, end;
-    gettimeofday(&start, NULL);
-#endif
-
-    jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
-    ng_add_alloc(clsService, "clsService");
-
-    const char *signature = "(Leu/flutter/netguard/NativeBridge$Packet;)V";
-    if (midLogPacket == NULL)
-        midLogPacket = jniGetMethodID(args->env, clsService, "logPacket", signature);
-
-    (*args->env)->CallVoidMethod(args->env, args->instance, midLogPacket, jpacket);
-    jniCheckException(args->env);
-
-    (*args->env)->DeleteLocalRef(args->env, clsService);
-    (*args->env)->DeleteLocalRef(args->env, jpacket);
-    ng_delete_alloc(clsService, __FILE__, __LINE__);
-    ng_delete_alloc(jpacket, __FILE__, __LINE__);
-
-#ifdef PROFILE_JNI
-    gettimeofday(&end, NULL);
-    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
-                (end.tv_usec - start.tv_usec) / 1000.0;
-    if (mselapsed > PROFILE_JNI)
-        log_android(ANDROID_LOG_WARN, "log_packet %f", mselapsed);
-#endif
-}
-
 static jmethodID midLogTraffic = NULL;
 
 void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed) {

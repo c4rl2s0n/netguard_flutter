@@ -512,7 +512,6 @@ int sdk_int(JNIEnv *env);
 
 void log_android(int prio, const char *fmt, ...);
 
-void log_packet(const struct arguments *args, jobject jpacket);
 void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed);
 void dns_resolved(const struct arguments *args,
                   const char *qname, const char *aname, const char *resource, int ttl, jint uid);
