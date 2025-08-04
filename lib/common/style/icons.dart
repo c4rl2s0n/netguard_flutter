@@ -7,7 +7,7 @@ class CustomIcons {
   static const IconData appIcon = Icons.security;
   static const IconData home = Icons.fire_hydrant_alt_outlined;
   static const IconData applications = Icons.app_registration;
-  static const IconData logs = Icons.filter_list;
+  static const IconData logs = Icons.list;
   static const IconData active = Icons.security;
   static const IconData inactive = Icons.local_fire_department_outlined;
   static const IconData scan = Icons.document_scanner_outlined;
@@ -15,6 +15,8 @@ class CustomIcons {
   static const IconData import = Icons.download_for_offline_outlined;
   static const IconData block = Icons.front_hand; // Icons.gpp_bad_outlined; // alternative: Icons.front_hand_outlined;
   static const IconData allow = Icons.verified_user_outlined;
+  static const IconData pie = Icons.pie_chart;
+  static const IconData bar = Icons.bar_chart;
 
   static const IconData infoPositive = Icons.verified;
   static const IconData infoNegative = Icons.error_outline;

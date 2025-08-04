@@ -1968,7 +1968,7 @@ public class NativeBridge {
     Boolean isRunning();
 
     @Nullable 
-    String getSession();
+    VpnConfig getSession();
 
     void updateSettings(@NonNull VpnConfig settings);
 
@@ -2059,7 +2059,7 @@ public class NativeBridge {
               (message, reply) -> {
                 ArrayList<Object> wrapped = new ArrayList<>();
                 try {
-                  String output = api.getSession();
+                  VpnConfig output = api.getSession();
                   wrapped.add(0, output);
                 }
  catch (Throwable exception) {
@@ -2177,13 +2177,13 @@ public class NativeBridge {
             } 
           });
     }
-    public void updateVpnState(@Nullable String sessionIdArg, @NonNull VoidResult result) {
+    public void updateVpnState(@Nullable VpnConfig sessionArg, @NonNull VoidResult result) {
       final String channelName = "dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState" + messageChannelSuffix;
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, channelName, getCodec());
       channel.send(
-          new ArrayList<>(Collections.singletonList(sessionIdArg)),
+          new ArrayList<>(Collections.singletonList(sessionArg)),
           channelReply -> {
             if (channelReply instanceof List) {
               List<Object> listReply = (List<Object>) channelReply;

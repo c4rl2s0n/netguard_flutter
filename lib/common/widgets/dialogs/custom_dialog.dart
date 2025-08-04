@@ -28,40 +28,37 @@ class CustomDialog<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SelectionArea(
-      contextMenuBuilder: (_, __) => const SizedBox.shrink(),
-      child: AlertDialog(
-        backgroundColor: context.colors.surfaceContainerHighest,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: borderColor ?? context.colors.primary, width: 2),
-          borderRadius: ThemeConstants.borderRadius,
-        ),
-        insetPadding: const EdgeInsets.all(ThemeConstants.spacing),
-        contentPadding: const EdgeInsets.all(ThemeConstants.spacing),
-        content: Builder(
-          builder: (context) {
-            MediaQueryData mediaQuery = MediaQuery.of(context);
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildTitle(context),
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.all(ThemeConstants.smallSpacing),
-                  child: expand
-                      ? Expanded(child: content)
-                      : Container(
-                          constraints: BoxConstraints(
-                            maxHeight: mediaQuery.size.height * 0.6,
-                          ),
-                          child: content,
+    return AlertDialog(
+      backgroundColor: context.colors.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: borderColor ?? context.colors.primary, width: 2),
+        borderRadius: ThemeConstants.borderRadius,
+      ),
+      insetPadding: const EdgeInsets.all(ThemeConstants.spacing),
+      contentPadding: const EdgeInsets.all(ThemeConstants.spacing),
+      content: Builder(
+        builder: (context) {
+          MediaQueryData mediaQuery = MediaQuery.of(context);
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTitle(context),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.all(ThemeConstants.smallSpacing),
+                child: expand
+                    ? Expanded(child: content)
+                    : Container(
+                        constraints: BoxConstraints(
+                          maxHeight: mediaQuery.size.height * 0.6,
                         ),
-                ),
-                if (actions != null) ..._buildActions(context),
-              ],
-            );
-          },
-        ),
+                        child: content,
+                      ),
+              ),
+              if (actions != null) ..._buildActions(context),
+            ],
+          );
+        },
       ),
     );
   }

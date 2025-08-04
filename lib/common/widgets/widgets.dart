@@ -1,6 +1,7 @@
 export 'buttons/buttons.dart';
 export 'container/container.dart';
 export 'dialogs/dialogs.dart';
+export 'dropdown/dropdown.dart';
 export 'factories/factories.dart';
 export 'lists/lists.dart';
 export 'misc/misc.dart';

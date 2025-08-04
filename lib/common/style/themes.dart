@@ -34,12 +34,18 @@ ThemeData getTheme(
   );
   var textTheme = theme.textTheme;
   TextStyle? menuItemTextStyle = textTheme.labelLarge;
+
+  var inputDecorationTheme = InputDecorationTheme(
+    border: UnderlineInputBorder(borderSide: BorderSide(color: colors.onSurface.light)),
+    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: colors.onSurface.light)),
+  );
   var menuButtonTheme = MenuButtonThemeData(
     style: theme.menuButtonTheme.style?.copyWith(
       textStyle: WidgetStateProperty.all(menuItemTextStyle),
     ),
   );
   var dropdownMenuTheme = theme.dropdownMenuTheme.copyWith(
+    inputDecorationTheme: inputDecorationTheme,
     textStyle: menuItemTextStyle,
   );
   var pageTransitionsTheme = const PageTransitionsTheme(
@@ -57,6 +63,7 @@ ThemeData getTheme(
   return theme.copyWith(
     menuButtonTheme: menuButtonTheme,
     dropdownMenuTheme: dropdownMenuTheme,
+    inputDecorationTheme: inputDecorationTheme,
     pageTransitionsTheme: pageTransitionsTheme,
     navigationRailTheme: _navigationRailTheme(theme, colors, iconTheme),
     iconTheme: iconTheme,

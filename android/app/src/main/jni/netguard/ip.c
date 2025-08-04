@@ -327,7 +327,7 @@ void handle_ip(const struct arguments *args,
         // check if QUIC should be blocked for current application (UDP Port 443)
         allowed = 0;
         blockedQuic = 1;
-    } else if (protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload)) {
+    } else if (false && protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload)) {
         allowed = 1; // could be a lingering/blocked session
     } else if (false && protocol == IPPROTO_TCP && (!syn || (uid <= 0 && dport == 53)) &&
                *server_name == 0) { // TODO: not sure if this still makes sense for me, maybe skip it

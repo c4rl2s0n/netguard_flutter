@@ -54,8 +54,8 @@ public class VpnApiImpl implements VpnController {
 
     @Nullable
     @Override
-    public String getSession() {
-        return MyVpnService.getSessionId();
+    public VpnConfig getSession() {
+        return MyVpnService.getSessionConfig();
     }
 
     @Override

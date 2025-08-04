@@ -1,20 +1,24 @@
 import 'dart:async';
 
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:netguard/common/common.dart';
-import 'package:netguard/data/data.dart';
+import 'package:netguard/netguard.dart';
 
 part 'session_cubit.freezed.dart';
 
 class SessionCubit extends Cubit<SessionState> {
   SessionCubit()
-    : super(SessionState(sessionLogState: SessionLogsState.empty()));
+    : super(SessionState(sessionAnalysis: SessionLogAnalysisCubit()));
 
   Future load() async {
     await loadApplications();
-    emit(state.copyWith(sessionId: await vpnController.getSession()));
+    emit(state.copyWith(sessionConfig: await vpnController.getSession()));
+  }
+
+  @override
+  Future<void> close() async {
+    await state.sessionAnalysis.close();
+    return super.close();
   }
 
   Future loadApplications() async {
@@ -73,51 +77,45 @@ class SessionCubit extends Cubit<SessionState> {
     VpnConfig vpnConfig = await VpnTools.getConfig(settings);
     await vpnController.startVpn(vpnConfig);
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
-    emit(
-      state.copyWith(
-        sessionId: vpnConfig.session,
-        sessionLogState: state.sessionLogState.clear(),
-      ),
-    );
+    state.sessionAnalysis.clear();
+    emit(state.copyWith(sessionConfig: vpnConfig));
   }
 
   Future stopVpn() async {
     if (!state.running) return;
     await vpnController.stopVpn();
     await trafficLogListener?.cancel();
-    emit(state.copyWith(sessionId: null));
+    emit(state.copyWith(sessionConfig: null));
   }
 
-  void setVpnSession(String? sessionId) =>
-      emit(state.copyWith(sessionId: sessionId));
+  void setVpnSession(VpnConfig? session) =>
+      emit(state.copyWith(sessionConfig: session));
 
   void _onTrafficLog(TrafficLog event) {
-    emit(
-      state.copyWith(sessionLogState: state.sessionLogState.addEvent(event)),
-    );
+    state.sessionAnalysis.insert(event, state.applicationsMap);
   }
 }
 
 @freezed
 class SessionState with _$SessionState {
   const SessionState({
-    this.sessionId,
-    required this.sessionLogState,
+    this.sessionConfig,
+    required this.sessionAnalysis,
     this.systemApplicationsMap = const {},
     this.thirdPartyApplicationsMap = const {},
   });
 
   @override
-  final String? sessionId;
+  final VpnConfig? sessionConfig;
   @override
-  final SessionLogsState sessionLogState;
+  final SessionLogAnalysisCubit sessionAnalysis;
   @override
   final Map<String, Application> systemApplicationsMap;
   @override
   final Map<String, Application> thirdPartyApplicationsMap;
 
-  bool get running => sessionId.notEmpty;
-  bool get hasLogs => sessionLogState.hasLogs;
+  bool get running => sessionConfig != null;
+  bool get hasLogs => sessionAnalysis.hasLogs;
 
   Map<String, Application> get applicationsMap => {
     ...thirdPartyApplicationsMap,
@@ -131,43 +129,4 @@ class SessionState with _$SessionState {
     ...systemApplications,
     ...thirdPartyApplications,
   ];
-}
-
-@freezed
-class SessionLogsState with _$SessionLogsState {
-  const SessionLogsState._({
-    this.sessionTrafficLog = const IListConst([]),
-    this.sessionTrafficLogByApp = const IMapConst({}),
-    required this.sessionTrafficLogGroups,
-  });
-  factory SessionLogsState.empty() =>
-      SessionLogsState._(sessionTrafficLogGroups: TrafficLogGroups());
-
-  @override
-  final IList<TrafficLog> sessionTrafficLog;
-  @override
-  final IMap<String?, IList<TrafficLog>> sessionTrafficLogByApp;
-  @override
-  final TrafficLogGroups sessionTrafficLogGroups;
-
-  bool get hasLogs => sessionTrafficLog.notEmpty;
-
-  SessionLogsState clear() {
-    return SessionLogsState.empty();
-  }
-
-  SessionLogsState addEvent(TrafficLog event) {
-    IMap<String?, IList<TrafficLog>> logByApp = sessionTrafficLogByApp;
-    IList<TrafficLog> appLog =
-        logByApp.get(event.packageName) ?? IList<TrafficLog>();
-
-    sessionTrafficLogGroups.insert(event);
-    return copyWith(
-      sessionTrafficLog: sessionTrafficLog.add(event),
-      sessionTrafficLogByApp: logByApp.add(
-        event.packageName,
-        appLog.add(event),
-      ),
-    );
-  }
 }

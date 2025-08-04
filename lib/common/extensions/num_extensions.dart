@@ -8,7 +8,7 @@ extension FileFormatter on num {
   // From: https://pub.dev/documentation/dart_numerics/latest/dart_numerics/log10.html
   double log10(num x) => log(x) / ln10;
 
-  String readableFileSize({bool base1024 = true}) {
+  String readableFileSize({bool base1024 = false}) {
     if (this <= 0) return "0";
 
     final base = base1024 ? 1024 : 1000;

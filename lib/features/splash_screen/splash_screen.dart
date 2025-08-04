@@ -96,6 +96,7 @@ class SplashScreen extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => sessionCubit),
         BlocProvider(create: (_) => settingsCubit),
+        BlocProvider(create: (_) => sessionCubit.state.sessionAnalysis),
       ],
       child: child,
     );

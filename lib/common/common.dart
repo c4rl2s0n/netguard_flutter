@@ -5,5 +5,6 @@ export 'native/native.dart';
 export 'service_locator/accessors.dart';
 export 'style/style.dart';
 
+export 'constants.dart';
 export 'helper.dart';
 export 'keys.dart';

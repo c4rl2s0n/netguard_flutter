@@ -48,4 +48,22 @@ class ConfirmationDialog extends StatelessWidget {
       ),
     );
   }
+  static Future<bool?> askOptional(
+    BuildContext context, {
+    String? title,
+    String? content,
+    String? declineText,
+    String? confirmText,
+  }) async {
+    return await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => ConfirmationDialog(
+        title: title ?? "Are you sure?",
+        content: content ?? "Please confirm!",
+        declineText: declineText,
+        confirmText: confirmText,
+      ),
+    );
+  }
 }

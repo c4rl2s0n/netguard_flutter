@@ -1,24 +1,6 @@
+import 'package:netguard/common/common.dart';
 import 'package:netguard/common/native/native_bridge.g.dart';
-import 'package:netguard/features/session_logs/logic/session_logs_filter_cubit.dart';
-
-// abstract class TrafficLogGroup {
-//   TrafficLogGroup._({
-//     required this.allowed,
-//     required this.latest,
-//     required this.count,
-//     required this.size,
-//   });
-//   final bool allowed;
-//   int latest;
-//   int count;
-//   int size;
-//
-//   void add(TrafficLog log) {
-//     count++;
-//     size += log.size;
-//     if (log.time > latest) latest = log.time;
-//   }
-// }
+import 'package:netguard/common/constants.dart';
 
 class TrafficLogGroup {
   TrafficLogGroup._({
@@ -82,7 +64,7 @@ class TrafficLogGroups {
     group.add(event);
   }
 
-  List<TrafficLogGroup> list({String? packageName}) {
+  List<TrafficLogGroup> list({List<String?>? packageNames}) {
     List<TrafficLogGroup> groups = [];
     void addByPackage(Map<String, Map<int, TrafficLogGroup>> byPackage) {
       for (var byDest in byPackage.values) {
@@ -90,9 +72,12 @@ class TrafficLogGroups {
       }
     }
 
-    if (packageName != null && packageName != FilterStrings.all) {
-      if (packageName == FilterStrings.unknown) packageName = null;
-      if (_groups.containsKey(packageName)) addByPackage(_groups[packageName]!);
+    if (packageNames.notEmpty) {
+      for(var packageName in packageNames!) {
+        if (_groups.containsKey(packageName)) {
+          addByPackage(_groups[packageName]!);
+        }
+      }
     } else {
       for (Map<String, Map<int, TrafficLogGroup>> byPackage in _groups.values) {
         addByPackage(byPackage);

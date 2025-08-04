@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,10 +12,16 @@ class PageComponentFactory {
     required AppBar appBar,
     required Widget body,
     bool withPadding = true,
+    Widget? bottomNavigationBar,
+    Widget? floatingActionButton,
+    FloatingActionButtonLocation? fabLocation,
   }) {
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: appBar,
+      bottomNavigationBar: bottomNavigationBar,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: fabLocation,
       drawer: NavDrawer(),
       body: Padding(
         padding: withPadding
@@ -48,7 +55,6 @@ class PageComponentFactory {
       actionsPadding: EdgeInsets.zero, // TODO: check
       actions: [_sessionButton(), ...actions ?? []],
       iconTheme: iconTheme.copyWith(size: 20),
-
       backgroundColor: background,
     );
   }

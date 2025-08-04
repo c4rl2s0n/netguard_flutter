@@ -14,7 +14,7 @@ abstract class VpnController {
   void startVpn(VpnConfig settings);
   void stopVpn();
   bool isRunning();
-  String? getSession();
+  VpnConfig? getSession();
   void updateSettings(VpnConfig settings);
   List<Application> getApplications();
 }
@@ -23,7 +23,7 @@ abstract class VpnController {
 abstract class VpnEventHandler {
   void logText(String message);
   void logError(String errorCode, String message, Object details);
-  void updateVpnState(String? sessionId);
+  void updateVpnState(VpnConfig? session);
   @async
   void logTraffic(TrafficLog log);
 }

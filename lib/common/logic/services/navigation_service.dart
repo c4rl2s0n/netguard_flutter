@@ -26,6 +26,15 @@ class NavigationService {
     );
   }
 
+  void replaceCurrent(Widget destination, {String? name}){
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (ctx) => destination,
+        settings: RouteSettings(name: name),
+      ),
+    );
+  }
+
   void navigateTo(Widget destination, {String? name}) {
     Navigator.of(context).push(
       MaterialPageRoute(

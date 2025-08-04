@@ -857,7 +857,7 @@ class VpnController {
     }
   }
 
-  Future<String?> getSession() async {
+  Future<VpnConfig?> getSession() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.pigeon_example_package.VpnController.getSession$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -876,7 +876,7 @@ class VpnController {
         details: pigeonVar_replyList[2],
       );
     } else {
-      return (pigeonVar_replyList[0] as String?);
+      return (pigeonVar_replyList[0] as VpnConfig?);
     }
   }
 
@@ -939,7 +939,7 @@ abstract class VpnEventHandler {
 
   void logError(String errorCode, String message, Object details);
 
-  void updateVpnState(String? sessionId);
+  void updateVpnState(VpnConfig? session);
 
   Future<void> logTraffic(TrafficLog log);
 
@@ -1012,9 +1012,9 @@ abstract class VpnEventHandler {
           assert(message != null,
           'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final String? arg_sessionId = (args[0] as String?);
+          final VpnConfig? arg_session = (args[0] as VpnConfig?);
           try {
-            api.updateVpnState(arg_sessionId);
+            api.updateVpnState(arg_session);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

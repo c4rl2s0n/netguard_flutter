@@ -85,8 +85,8 @@ public class MyVpnService extends VpnService {
     public static boolean isRunning() {
         return running;
     }
-    public static String getSessionId() {
-        if(running) return vpnConfig.getSession();
+    public static VpnConfig getSessionConfig() {
+        if(running) return vpnConfig;
         return null;
     }
 
@@ -193,7 +193,7 @@ public class MyVpnService extends VpnService {
             } else {
                 Log.i(TAG, "VPN interface established");
                 running = true;
-                logHandler.vpnStarted(vpnConfig.getSession());
+                logHandler.vpnStarted(vpnConfig);
                 startNative(vpnInterface);
                 return;
             }

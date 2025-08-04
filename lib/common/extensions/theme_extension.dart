@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netguard/common/common.dart';
 
 extension ThemeDataExtension on ThemeData {}
 
@@ -17,4 +18,11 @@ extension IconThemeExtension on IconThemeData? {
   IconThemeData? withOpacity(double opacity) =>
       this?.copyWith(color: this?.color?.withOpacity(opacity));
   IconThemeData? withColor(Color? color) => this?.copyWith(color: color);
+}
+
+
+extension ColorExtension on Color{
+  Color get light => withAlpha(ThemeConstants.lightColorOpacityAlpha);
+  Color get medium => withAlpha(ThemeConstants.mediumColorOpacityAlpha);
+  Color get strong => withAlpha(ThemeConstants.strongColorOpacityAlpha);
 }

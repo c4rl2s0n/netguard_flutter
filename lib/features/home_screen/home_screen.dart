@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:netguard/features/session_logs/session_logs.dart';
 import 'package:netguard/netguard.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -100,10 +99,10 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _showLogsBtn(BuildContext context) {
-    return BlocBuilder<SessionCubit, SessionState>(
+    return BlocBuilder<SessionLogAnalysisCubit, SessionLogAnalysisState>(
       buildWhen: (oldState, state) =>
-          oldState.sessionLogState != state.sessionLogState,
-      builder: (context, state) => state.sessionLogState.hasLogs
+          oldState.hasLogs != state.hasLogs,
+      builder: (context, state) => state.hasLogs
           ? IconTextButton(
               icon: Icon(CustomIcons.logs),
               text: "Session Logs",

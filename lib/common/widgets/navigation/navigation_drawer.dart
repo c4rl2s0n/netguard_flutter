@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:netguard/common/common.dart';
-import 'package:netguard/features/applications_view/applications_view.dart';
-import 'package:netguard/features/features.dart';
-import 'package:netguard/features/session_logs/session_logs.dart';
+import 'package:netguard/netguard.dart';
 
 import 'nav_drawer_entry.dart';
 
@@ -54,9 +51,9 @@ class NavDrawer extends StatelessWidget {
       ),
       if (session.hasLogs) ...[
         NavDrawerEntry(
-          title: "Session Logs",
-          icon: CustomIcons.logs,
-          buildDestination: (_) => const SessionLogs(),
+          title: "Session Analysis",
+          icon: CustomIcons.analysis,
+          buildDestination: (_) => const SessionAnalysisView(),
         ),
       ],
       NavDrawerEntry(

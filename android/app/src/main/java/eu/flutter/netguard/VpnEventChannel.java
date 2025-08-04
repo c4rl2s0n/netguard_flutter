@@ -1,6 +1,7 @@
 package eu.flutter.netguard;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import eu.flutter.netguard.NativeBridge.*;
@@ -26,9 +27,9 @@ public class VpnEventChannel {
         _vpnEventHandler.logError(errorCode, message, details, _voidResult);
     }
 
-    public static void updateVpnState(String sessionId){
+    public static void updateVpnState(@Nullable VpnConfig session){
         if(notInitialized()) return;
-        _vpnEventHandler.updateVpnState(sessionId, _voidResult);
+        _vpnEventHandler.updateVpnState(session, _voidResult);
     }
 
     public static void logTraffic(TrafficLog log){

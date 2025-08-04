@@ -1,3 +1,4 @@
+export 'comparison_tools.dart';
 export 'id_tools.dart';
 export 'logging_tools.dart';
 export 'networking_tools.dart';

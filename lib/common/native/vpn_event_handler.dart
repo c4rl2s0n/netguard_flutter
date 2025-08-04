@@ -22,7 +22,7 @@ class VpnEventHandlerImpl extends VpnEventHandler {
 
 
   @override
-  void updateVpnState(String? session) {
+  void updateVpnState(VpnConfig? session) {
     accessor.sessionCubit.setVpnSession(session);
   }
 
