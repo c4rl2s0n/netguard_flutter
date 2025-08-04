@@ -33,6 +33,7 @@ class AppDatabase extends _$AppDatabase {
       onCreate: (m) async => await m.createAll(),
       //onUpgrade: stepByStep(),
       beforeOpen: (details) async {
+        await customStatement('PRAGMA journal_mode=WAL;');
         if (!details.hadUpgrade && !details.wasCreated) return;
         bool reachedTarget(int target) =>
             (details.wasCreated ||
@@ -95,7 +96,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   static QueryExecutor _openConnection() {
-    if (true) {
+    if (false) {
       try {
         File(databaseFilepath).deleteSync();
       } catch (_) {}

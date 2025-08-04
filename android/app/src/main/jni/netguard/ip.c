@@ -348,7 +348,7 @@ void handle_ip(const struct arguments *args,
         } else if (protocol == IPPROTO_UDP) {
             handle_udp(args, pkt, length, payload, uid, epoll_fd);
         } else if (protocol == IPPROTO_TCP) {
-            handle_tcp(args, pkt, length, payload, uid, allowed, epoll_fd);
+            handle_tcp(args, pkt, length, payload, uid, true, epoll_fd);
         }
     } else {
         if (protocol == IPPROTO_UDP)

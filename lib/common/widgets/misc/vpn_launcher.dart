@@ -15,13 +15,13 @@ class VpnLauncher extends StatelessWidget {
 
   Future _launchVpn(BuildContext context) async {
     if (settingsCubit.state.observeOnly &&
-        await ConfirmationDialog.ask(
+        !await ConfirmationDialog.ask(
           context,
           title: "Observation-Mode enabled",
           content:
-              "In observation mode, the traffic will NOT be filtered! Do you want to turn observation mode OFF for real protection?",
-          declineText: "No",
-          confirmText: "Turn OFF",
+              "In observation mode, the traffic will NOT be filtered! Do you want to start the firewall in observation mode?",
+          declineText: "Turn OFF",
+          confirmText: "Continue",
         )) {
       settingsCubit.setObserveOnly(false);
     }

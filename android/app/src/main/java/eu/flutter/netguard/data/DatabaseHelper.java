@@ -37,6 +37,8 @@ import eu.flutter.netguard.NativeBridge.*;
 public class DatabaseHelper {
     private static final String TAG = "NetGuard.Database";
 
+    // TODO: seems to crash sometimes...
+
     private final Handler queryHandler;
     private final SQLiteDatabase db;
 
@@ -47,11 +49,11 @@ public class DatabaseHelper {
         db = SQLiteDatabase.openDatabase(
                 dbPath,
                 null,
-                SQLiteDatabase.OPEN_READWRITE
+                SQLiteDatabase.OPEN_READONLY
         );
 
         // prepare SQLiteStatements
-        String sql = "SELECT EXISTS(SELECT 1 FROM hosts_table WHERE rule_id = NULL and type = 'host' and target = ?)";
+        String sql = "SELECT EXISTS(SELECT 1 FROM hosts_table WHERE rule_id IS NULL and type = 'host' and target = ?)";
         genericBlacklistContainsHost = db.compileStatement(sql);
 
         sql = "SELECT EXISTS(SELECT 1 FROM hosts_table WHERE rule_id IS NULL and type = 'ip' and target = ?)";
