@@ -612,6 +612,7 @@ public class MyVpnService extends VpnService {
         if(!mapUidRules.containsKey(uid)) return new RuleCheckResult(false);
         List<Rule> rules = mapUidRules.get(uid);
         assert rules != null;
+        // NOTE: simply looping through the rules should work, because whitelist is added BEFORE blacklist in DatabaseHelper
         for(var rule : rules){
             Map<String, Boolean> ruleMap = null;
             switch (target){
