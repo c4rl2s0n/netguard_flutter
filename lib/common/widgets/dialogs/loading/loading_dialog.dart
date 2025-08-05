@@ -35,7 +35,6 @@ class LoadingDialog extends StatelessWidget {
                 ? const Icon(CustomIcons.infoPositive)
                 : const Icon(CustomIcons.loading),
             borderColor: state.hasError ? context.colors.error : null,
-            expand: false,
             actions: _buildActions(context, state),
             content: BlocConsumer<LoadingCubit, LoadingState>(
               listenWhen: (oldState, state) =>

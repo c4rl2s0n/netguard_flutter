@@ -43,8 +43,10 @@ Future configureDependencies(
   getIt.registerCachedFactory<ITrafficLogRepository>(() => TrafficLogRepository(db));
 
   // Global Cubits
-  getIt.registerSingleton(SettingsCubit(settingsRepository));
-  getIt.registerSingleton(SessionCubit());
+  var settingsCubit = SettingsCubit(settingsRepository);
+  await settingsCubit.ensureLoaded();
+  getIt.registerSingleton(settingsCubit);
+  getIt.registerSingleton(SessionCubit(settingsCubit));
 
   // SnackBarService
   getIt.registerLazySingleton(() => SnackBarService(messengerKey));

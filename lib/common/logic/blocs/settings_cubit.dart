@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -10,8 +12,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     _load();
   }
 
+  final Completer<bool> _initialized = Completer();
   Future _load() async {
     emit(SettingsState.fromSettings(await _settingsRepository.get()));
+    _initialized.complete(true);
+  }
+  Future ensureLoaded() async {
+    return _initialized.isCompleted || await _initialized.future;
   }
 
   final ISettingsRepository _settingsRepository;
@@ -31,18 +38,45 @@ class SettingsCubit extends Cubit<SettingsState> {
     saveSettings();
   }
 
-
   // VPN SETTINGS
   void setIncludeSystemApps(bool includeSystem) {
     emit(state.copyWith(includeSystemApps: includeSystem));
     saveSettings();
   }
+
   void toggleLogTraffic() {
     emit(state.copyWith(logTraffic: !state.logTraffic));
     saveSettings();
   }
-  void setObserveOnly(bool observeOnly){
+
+  void setObserveOnly(bool observeOnly) {
     emit(state.copyWith(observeOnly: observeOnly));
+    saveSettings();
+  }
+
+  // ANALYSIS
+  void setAnalysisVolumeType(VolumeType analysisVolumeType) {
+    emit(state.copyWith(analysisVolumeType: analysisVolumeType));
+    saveSettings();
+  }
+
+  void setAnalysisChartGroupType(GroupType analysisChartGroupType) {
+    emit(state.copyWith(analysisChartGroupType: analysisChartGroupType));
+    saveSettings();
+  }
+
+  void setAnalysisChartType(ChartType analysisChartType) {
+    emit(state.copyWith(analysisChartType: analysisChartType));
+    saveSettings();
+  }
+
+  void setAnalysisChartSorting(LogSorting analysisChartSorting) {
+    emit(state.copyWith(analysisChartSorting: analysisChartSorting));
+    saveSettings();
+  }
+
+  void setAnalysisChartSingleBar(bool analysisChartSingleBar) {
+    emit(state.copyWith(analysisChartSingleBar: analysisChartSingleBar));
     saveSettings();
   }
 
@@ -52,6 +86,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit(state.copyWith(logCompactView: logCompact));
     saveSettings();
   }
+
   void setLastBlacklistUpdate() {
     emit(state.copyWith(lastHostlistUpdate: DateTime.now()));
   }
@@ -67,6 +102,11 @@ class SettingsState with _$SettingsState {
     required this.observeOnly,
     required this.logCompactView,
     this.lastHostlistUpdate,
+    required this.analysisVolumeType,
+    required this.analysisChartGroupType,
+    required this.analysisChartType,
+    required this.analysisChartSorting,
+    required this.analysisChartSingleBar,
   });
 
   @override
@@ -87,6 +127,12 @@ class SettingsState with _$SettingsState {
   @override
   final DateTime? lastHostlistUpdate;
 
+  final VolumeType analysisVolumeType;
+  final GroupType analysisChartGroupType;
+  final ChartType analysisChartType;
+  final LogSorting analysisChartSorting;
+  final bool analysisChartSingleBar;
+
   SettingsState.empty() : this.fromSettings(Settings());
   SettingsState.fromSettings(Settings settings)
     : this(
@@ -97,6 +143,11 @@ class SettingsState with _$SettingsState {
         observeOnly: settings.observeOnly,
         logCompactView: settings.logCompactView,
         lastHostlistUpdate: settings.lastHostlistUpdate,
+        analysisVolumeType: settings.analysisSettingsVolumeType,
+        analysisChartGroupType: settings.chartSettingsGroupType,
+        analysisChartType: settings.chartSettingsChartType,
+        analysisChartSorting: settings.chartSettingsSorting,
+        analysisChartSingleBar: settings.chartSettingsSingleBar,
       );
 
   Settings get settings => Settings(
@@ -107,6 +158,10 @@ class SettingsState with _$SettingsState {
     observeOnly: observeOnly,
     logCompactView: logCompactView,
     lastHostlistUpdate: lastHostlistUpdate,
+    analysisSettingsVolumeType: analysisVolumeType,
+    chartSettingsGroupType: analysisChartGroupType,
+    chartSettingsChartType: analysisChartType,
+    chartSettingsSorting: analysisChartSorting,
+    chartSettingsSingleBar: analysisChartSingleBar,
   );
-
 }

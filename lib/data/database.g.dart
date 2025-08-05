@@ -915,6 +915,68 @@ class $SettingsTableTable extends SettingsTable
         requiredDuringInsert: false,
       );
   @override
+  late final GeneratedColumnWithTypeConverter<VolumeType, String>
+  analysisSettingsVolumeType =
+      GeneratedColumn<String>(
+        'analysis_settings_volume_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<VolumeType>(
+        $SettingsTableTable.$converteranalysisSettingsVolumeType,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<LogSorting, String>
+  chartSettingsSorting =
+      GeneratedColumn<String>(
+        'chart_settings_sorting',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<LogSorting>(
+        $SettingsTableTable.$converterchartSettingsSorting,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<ChartType, String>
+  chartSettingsChartType =
+      GeneratedColumn<String>(
+        'chart_settings_chart_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<ChartType>(
+        $SettingsTableTable.$converterchartSettingsChartType,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<GroupType, String>
+  chartSettingsGroupType =
+      GeneratedColumn<String>(
+        'chart_settings_group_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<GroupType>(
+        $SettingsTableTable.$converterchartSettingsGroupType,
+      );
+  static const VerificationMeta _chartSettingsSingleBarMeta =
+      const VerificationMeta('chartSettingsSingleBar');
+  @override
+  late final GeneratedColumn<bool> chartSettingsSingleBar =
+      GeneratedColumn<bool>(
+        'chart_settings_single_bar',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("chart_settings_single_bar" IN (0, 1))',
+        ),
+      );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     darkMode,
@@ -924,6 +986,11 @@ class $SettingsTableTable extends SettingsTable
     observeOnly,
     logCompactView,
     lastHostlistUpdate,
+    analysisSettingsVolumeType,
+    chartSettingsSorting,
+    chartSettingsChartType,
+    chartSettingsGroupType,
+    chartSettingsSingleBar,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -998,6 +1065,17 @@ class $SettingsTableTable extends SettingsTable
         ),
       );
     }
+    if (data.containsKey('chart_settings_single_bar')) {
+      context.handle(
+        _chartSettingsSingleBarMeta,
+        chartSettingsSingleBar.isAcceptableOrUnknown(
+          data['chart_settings_single_bar']!,
+          _chartSettingsSingleBarMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_chartSettingsSingleBarMeta);
+    }
     return context;
   }
 
@@ -1041,6 +1119,41 @@ class $SettingsTableTable extends SettingsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_hostlist_update'],
       ),
+      analysisSettingsVolumeType: $SettingsTableTable
+          .$converteranalysisSettingsVolumeType
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}analysis_settings_volume_type'],
+            )!,
+          ),
+      chartSettingsSorting: $SettingsTableTable.$converterchartSettingsSorting
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}chart_settings_sorting'],
+            )!,
+          ),
+      chartSettingsChartType: $SettingsTableTable
+          .$converterchartSettingsChartType
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}chart_settings_chart_type'],
+            )!,
+          ),
+      chartSettingsGroupType: $SettingsTableTable
+          .$converterchartSettingsGroupType
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}chart_settings_group_type'],
+            )!,
+          ),
+      chartSettingsSingleBar: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}chart_settings_single_bar'],
+      )!,
     );
   }
 
@@ -1051,6 +1164,22 @@ class $SettingsTableTable extends SettingsTable
 
   static JsonTypeConverter2<FlexScheme, String, String> $convertercolorScheme =
       const EnumNameConverter<FlexScheme>(FlexScheme.values);
+  static JsonTypeConverter2<VolumeType, String, String>
+  $converteranalysisSettingsVolumeType = const EnumNameConverter<VolumeType>(
+    VolumeType.values,
+  );
+  static JsonTypeConverter2<LogSorting, String, String>
+  $converterchartSettingsSorting = const EnumNameConverter<LogSorting>(
+    LogSorting.values,
+  );
+  static JsonTypeConverter2<ChartType, String, String>
+  $converterchartSettingsChartType = const EnumNameConverter<ChartType>(
+    ChartType.values,
+  );
+  static JsonTypeConverter2<GroupType, String, String>
+  $converterchartSettingsGroupType = const EnumNameConverter<GroupType>(
+    GroupType.values,
+  );
 }
 
 class SettingsTableCompanion extends UpdateCompanion<Settings> {
@@ -1062,6 +1191,11 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
   final Value<bool> observeOnly;
   final Value<bool> logCompactView;
   final Value<DateTime?> lastHostlistUpdate;
+  final Value<VolumeType> analysisSettingsVolumeType;
+  final Value<LogSorting> chartSettingsSorting;
+  final Value<ChartType> chartSettingsChartType;
+  final Value<GroupType> chartSettingsGroupType;
+  final Value<bool> chartSettingsSingleBar;
   const SettingsTableCompanion({
     this.id = const Value.absent(),
     this.darkMode = const Value.absent(),
@@ -1071,6 +1205,11 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     this.observeOnly = const Value.absent(),
     this.logCompactView = const Value.absent(),
     this.lastHostlistUpdate = const Value.absent(),
+    this.analysisSettingsVolumeType = const Value.absent(),
+    this.chartSettingsSorting = const Value.absent(),
+    this.chartSettingsChartType = const Value.absent(),
+    this.chartSettingsGroupType = const Value.absent(),
+    this.chartSettingsSingleBar = const Value.absent(),
   });
   SettingsTableCompanion.insert({
     this.id = const Value.absent(),
@@ -1081,12 +1220,22 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     required bool observeOnly,
     required bool logCompactView,
     this.lastHostlistUpdate = const Value.absent(),
+    required VolumeType analysisSettingsVolumeType,
+    required LogSorting chartSettingsSorting,
+    required ChartType chartSettingsChartType,
+    required GroupType chartSettingsGroupType,
+    required bool chartSettingsSingleBar,
   }) : darkMode = Value(darkMode),
        colorScheme = Value(colorScheme),
        includeSystemApps = Value(includeSystemApps),
        logTraffic = Value(logTraffic),
        observeOnly = Value(observeOnly),
-       logCompactView = Value(logCompactView);
+       logCompactView = Value(logCompactView),
+       analysisSettingsVolumeType = Value(analysisSettingsVolumeType),
+       chartSettingsSorting = Value(chartSettingsSorting),
+       chartSettingsChartType = Value(chartSettingsChartType),
+       chartSettingsGroupType = Value(chartSettingsGroupType),
+       chartSettingsSingleBar = Value(chartSettingsSingleBar);
   static Insertable<Settings> custom({
     Expression<int>? id,
     Expression<bool>? darkMode,
@@ -1096,6 +1245,11 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     Expression<bool>? observeOnly,
     Expression<bool>? logCompactView,
     Expression<DateTime>? lastHostlistUpdate,
+    Expression<String>? analysisSettingsVolumeType,
+    Expression<String>? chartSettingsSorting,
+    Expression<String>? chartSettingsChartType,
+    Expression<String>? chartSettingsGroupType,
+    Expression<bool>? chartSettingsSingleBar,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1107,6 +1261,16 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
       if (logCompactView != null) 'log_compact_view': logCompactView,
       if (lastHostlistUpdate != null)
         'last_hostlist_update': lastHostlistUpdate,
+      if (analysisSettingsVolumeType != null)
+        'analysis_settings_volume_type': analysisSettingsVolumeType,
+      if (chartSettingsSorting != null)
+        'chart_settings_sorting': chartSettingsSorting,
+      if (chartSettingsChartType != null)
+        'chart_settings_chart_type': chartSettingsChartType,
+      if (chartSettingsGroupType != null)
+        'chart_settings_group_type': chartSettingsGroupType,
+      if (chartSettingsSingleBar != null)
+        'chart_settings_single_bar': chartSettingsSingleBar,
     });
   }
 
@@ -1119,6 +1283,11 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     Value<bool>? observeOnly,
     Value<bool>? logCompactView,
     Value<DateTime?>? lastHostlistUpdate,
+    Value<VolumeType>? analysisSettingsVolumeType,
+    Value<LogSorting>? chartSettingsSorting,
+    Value<ChartType>? chartSettingsChartType,
+    Value<GroupType>? chartSettingsGroupType,
+    Value<bool>? chartSettingsSingleBar,
   }) {
     return SettingsTableCompanion(
       id: id ?? this.id,
@@ -1129,6 +1298,15 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
       observeOnly: observeOnly ?? this.observeOnly,
       logCompactView: logCompactView ?? this.logCompactView,
       lastHostlistUpdate: lastHostlistUpdate ?? this.lastHostlistUpdate,
+      analysisSettingsVolumeType:
+          analysisSettingsVolumeType ?? this.analysisSettingsVolumeType,
+      chartSettingsSorting: chartSettingsSorting ?? this.chartSettingsSorting,
+      chartSettingsChartType:
+          chartSettingsChartType ?? this.chartSettingsChartType,
+      chartSettingsGroupType:
+          chartSettingsGroupType ?? this.chartSettingsGroupType,
+      chartSettingsSingleBar:
+          chartSettingsSingleBar ?? this.chartSettingsSingleBar,
     );
   }
 
@@ -1163,6 +1341,39 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
         lastHostlistUpdate.value,
       );
     }
+    if (analysisSettingsVolumeType.present) {
+      map['analysis_settings_volume_type'] = Variable<String>(
+        $SettingsTableTable.$converteranalysisSettingsVolumeType.toSql(
+          analysisSettingsVolumeType.value,
+        ),
+      );
+    }
+    if (chartSettingsSorting.present) {
+      map['chart_settings_sorting'] = Variable<String>(
+        $SettingsTableTable.$converterchartSettingsSorting.toSql(
+          chartSettingsSorting.value,
+        ),
+      );
+    }
+    if (chartSettingsChartType.present) {
+      map['chart_settings_chart_type'] = Variable<String>(
+        $SettingsTableTable.$converterchartSettingsChartType.toSql(
+          chartSettingsChartType.value,
+        ),
+      );
+    }
+    if (chartSettingsGroupType.present) {
+      map['chart_settings_group_type'] = Variable<String>(
+        $SettingsTableTable.$converterchartSettingsGroupType.toSql(
+          chartSettingsGroupType.value,
+        ),
+      );
+    }
+    if (chartSettingsSingleBar.present) {
+      map['chart_settings_single_bar'] = Variable<bool>(
+        chartSettingsSingleBar.value,
+      );
+    }
     return map;
   }
 
@@ -1176,7 +1387,12 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
           ..write('logTraffic: $logTraffic, ')
           ..write('observeOnly: $observeOnly, ')
           ..write('logCompactView: $logCompactView, ')
-          ..write('lastHostlistUpdate: $lastHostlistUpdate')
+          ..write('lastHostlistUpdate: $lastHostlistUpdate, ')
+          ..write('analysisSettingsVolumeType: $analysisSettingsVolumeType, ')
+          ..write('chartSettingsSorting: $chartSettingsSorting, ')
+          ..write('chartSettingsChartType: $chartSettingsChartType, ')
+          ..write('chartSettingsGroupType: $chartSettingsGroupType, ')
+          ..write('chartSettingsSingleBar: $chartSettingsSingleBar')
           ..write(')'))
         .toString();
   }
@@ -2973,6 +3189,11 @@ typedef $$SettingsTableTableCreateCompanionBuilder =
       required bool observeOnly,
       required bool logCompactView,
       Value<DateTime?> lastHostlistUpdate,
+      required VolumeType analysisSettingsVolumeType,
+      required LogSorting chartSettingsSorting,
+      required ChartType chartSettingsChartType,
+      required GroupType chartSettingsGroupType,
+      required bool chartSettingsSingleBar,
     });
 typedef $$SettingsTableTableUpdateCompanionBuilder =
     SettingsTableCompanion Function({
@@ -2984,6 +3205,11 @@ typedef $$SettingsTableTableUpdateCompanionBuilder =
       Value<bool> observeOnly,
       Value<bool> logCompactView,
       Value<DateTime?> lastHostlistUpdate,
+      Value<VolumeType> analysisSettingsVolumeType,
+      Value<LogSorting> chartSettingsSorting,
+      Value<ChartType> chartSettingsChartType,
+      Value<GroupType> chartSettingsGroupType,
+      Value<bool> chartSettingsSingleBar,
     });
 
 class $$SettingsTableTableFilterComposer
@@ -3033,6 +3259,35 @@ class $$SettingsTableTableFilterComposer
 
   ColumnFilters<DateTime> get lastHostlistUpdate => $composableBuilder(
     column: $table.lastHostlistUpdate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<VolumeType, VolumeType, String>
+  get analysisSettingsVolumeType => $composableBuilder(
+    column: $table.analysisSettingsVolumeType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<LogSorting, LogSorting, String>
+  get chartSettingsSorting => $composableBuilder(
+    column: $table.chartSettingsSorting,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ChartType, ChartType, String>
+  get chartSettingsChartType => $composableBuilder(
+    column: $table.chartSettingsChartType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<GroupType, GroupType, String>
+  get chartSettingsGroupType => $composableBuilder(
+    column: $table.chartSettingsGroupType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get chartSettingsSingleBar => $composableBuilder(
+    column: $table.chartSettingsSingleBar,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3085,6 +3340,31 @@ class $$SettingsTableTableOrderingComposer
     column: $table.lastHostlistUpdate,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get analysisSettingsVolumeType => $composableBuilder(
+    column: $table.analysisSettingsVolumeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chartSettingsSorting => $composableBuilder(
+    column: $table.chartSettingsSorting,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chartSettingsChartType => $composableBuilder(
+    column: $table.chartSettingsChartType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chartSettingsGroupType => $composableBuilder(
+    column: $table.chartSettingsGroupType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get chartSettingsSingleBar => $composableBuilder(
+    column: $table.chartSettingsSingleBar,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SettingsTableTableAnnotationComposer
@@ -3132,6 +3412,35 @@ class $$SettingsTableTableAnnotationComposer
     column: $table.lastHostlistUpdate,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<VolumeType, String>
+  get analysisSettingsVolumeType => $composableBuilder(
+    column: $table.analysisSettingsVolumeType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<LogSorting, String>
+  get chartSettingsSorting => $composableBuilder(
+    column: $table.chartSettingsSorting,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<ChartType, String>
+  get chartSettingsChartType => $composableBuilder(
+    column: $table.chartSettingsChartType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<GroupType, String>
+  get chartSettingsGroupType => $composableBuilder(
+    column: $table.chartSettingsGroupType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get chartSettingsSingleBar => $composableBuilder(
+    column: $table.chartSettingsSingleBar,
+    builder: (column) => column,
+  );
 }
 
 class $$SettingsTableTableTableManager
@@ -3173,6 +3482,12 @@ class $$SettingsTableTableTableManager
                 Value<bool> observeOnly = const Value.absent(),
                 Value<bool> logCompactView = const Value.absent(),
                 Value<DateTime?> lastHostlistUpdate = const Value.absent(),
+                Value<VolumeType> analysisSettingsVolumeType =
+                    const Value.absent(),
+                Value<LogSorting> chartSettingsSorting = const Value.absent(),
+                Value<ChartType> chartSettingsChartType = const Value.absent(),
+                Value<GroupType> chartSettingsGroupType = const Value.absent(),
+                Value<bool> chartSettingsSingleBar = const Value.absent(),
               }) => SettingsTableCompanion(
                 id: id,
                 darkMode: darkMode,
@@ -3182,6 +3497,11 @@ class $$SettingsTableTableTableManager
                 observeOnly: observeOnly,
                 logCompactView: logCompactView,
                 lastHostlistUpdate: lastHostlistUpdate,
+                analysisSettingsVolumeType: analysisSettingsVolumeType,
+                chartSettingsSorting: chartSettingsSorting,
+                chartSettingsChartType: chartSettingsChartType,
+                chartSettingsGroupType: chartSettingsGroupType,
+                chartSettingsSingleBar: chartSettingsSingleBar,
               ),
           createCompanionCallback:
               ({
@@ -3193,6 +3513,11 @@ class $$SettingsTableTableTableManager
                 required bool observeOnly,
                 required bool logCompactView,
                 Value<DateTime?> lastHostlistUpdate = const Value.absent(),
+                required VolumeType analysisSettingsVolumeType,
+                required LogSorting chartSettingsSorting,
+                required ChartType chartSettingsChartType,
+                required GroupType chartSettingsGroupType,
+                required bool chartSettingsSingleBar,
               }) => SettingsTableCompanion.insert(
                 id: id,
                 darkMode: darkMode,
@@ -3202,6 +3527,11 @@ class $$SettingsTableTableTableManager
                 observeOnly: observeOnly,
                 logCompactView: logCompactView,
                 lastHostlistUpdate: lastHostlistUpdate,
+                analysisSettingsVolumeType: analysisSettingsVolumeType,
+                chartSettingsSorting: chartSettingsSorting,
+                chartSettingsChartType: chartSettingsChartType,
+                chartSettingsGroupType: chartSettingsGroupType,
+                chartSettingsSingleBar: chartSettingsSingleBar,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

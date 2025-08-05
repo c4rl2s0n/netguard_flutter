@@ -1,4 +1,5 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'enums.dart';
 
 class Settings {
   Settings({
@@ -10,6 +11,11 @@ class Settings {
     this.observeOnly = false,
     this.logCompactView = false,
     this.lastHostlistUpdate,
+    this.analysisSettingsVolumeType = VolumeType.count,
+    this.chartSettingsSorting = LogSorting.time,
+    this.chartSettingsChartType = ChartType.pie,
+    this.chartSettingsGroupType = GroupType.application,
+    this.chartSettingsSingleBar = false,
   });
   int id;
   bool darkMode;
@@ -19,4 +25,9 @@ class Settings {
   bool observeOnly;
   bool logCompactView;
   DateTime? lastHostlistUpdate;
+  VolumeType analysisSettingsVolumeType;
+  LogSorting chartSettingsSorting;
+  ChartType chartSettingsChartType;
+  GroupType chartSettingsGroupType;
+  bool chartSettingsSingleBar;
 }

@@ -21,7 +21,6 @@ class InfoDialog extends StatelessWidget {
       icon: icon,
       content: SingleChildScrollView(child: Text(content, softWrap: true)),
       actions: const [ConfirmButton()],
-      expand: false,
     );
   }
 

@@ -14,6 +14,7 @@ class CustomIcons {
   static const IconData addFromClipboard = Icons.assignment_add;
   static const IconData import = Icons.download_for_offline_outlined;
   static const IconData block = Icons.front_hand; // Icons.gpp_bad_outlined; // alternative: Icons.front_hand_outlined;
+  static const IconData blockObserve = Icons.front_hand_outlined; // Icons.gpp_bad_outlined; // alternative: Icons.front_hand_outlined;
   static const IconData allow = Icons.verified_user_outlined;
   static const IconData pie = Icons.pie_chart;
   static const IconData bar = Icons.bar_chart;

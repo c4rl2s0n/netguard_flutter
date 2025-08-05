@@ -20,7 +20,6 @@ class HostsEditDialog extends StatelessWidget {
         icon: Icon(CustomIcons.edit),
         content: _hosts(),
         actions: [_cancel(), _confirm()],
-        expand: false,
       ),
     );
   }

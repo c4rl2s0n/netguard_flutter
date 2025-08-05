@@ -7,8 +7,8 @@ import 'package:netguard/netguard.dart';
 part 'session_cubit.freezed.dart';
 
 class SessionCubit extends Cubit<SessionState> {
-  SessionCubit()
-    : super(SessionState(sessionAnalysis: SessionLogAnalysisCubit()));
+  SessionCubit(SettingsCubit settings)
+    : super(SessionState(sessionAnalysis: SessionLogAnalysisCubit(settings)));
 
   Future load() async {
     await loadApplications();

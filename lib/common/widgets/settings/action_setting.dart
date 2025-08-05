@@ -19,16 +19,26 @@ class ActionSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool enabled = action != null;
     TextStyle titleStyle = context.textTheme.titleMedium ?? const TextStyle();
+    TextStyle descriptionStyle =
+        context.textTheme.labelMedium ?? const TextStyle();
+    if (!enabled) {
+      titleStyle = titleStyle.withColor(context.colors.disabledContent)!;
+      descriptionStyle = descriptionStyle.withColor(context.colors.disabledContent)!;
+    }
     return TapContainer(
-      enabled: action != null,
+      enabled: enabled,
       padding: EdgeInsets.all(ThemeConstants.smallSpacing),
       onTap: (_) => action?.call(context),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if(leading != null) ...[leading!,const Margin.horizontal(ThemeConstants.smallSpacing)],
+          if (leading != null) ...[
+            leading!,
+            const Margin.horizontal(ThemeConstants.smallSpacing),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,12 +46,12 @@ class ActionSetting extends StatelessWidget {
               children: [
                 Text(name, style: titleStyle),
                 if (description != null) ...[
-                  Text(description!, style: context.textTheme.labelMedium),
+                  Text(description!, style: descriptionStyle),
                 ],
               ],
             ),
           ),
-          if(trailing != null) trailing!,
+          if (trailing != null) trailing!,
         ],
       ),
     );

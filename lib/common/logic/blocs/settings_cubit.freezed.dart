@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsState {
 
- bool get darkMode; FlexScheme get colorScheme; bool get includeSystemApps; bool get logTraffic; bool get observeOnly; bool get logCompactView; DateTime? get lastHostlistUpdate;
+ bool get darkMode; FlexScheme get colorScheme; bool get includeSystemApps; bool get logTraffic; bool get observeOnly; bool get logCompactView; DateTime? get lastHostlistUpdate; VolumeType get analysisVolumeType; GroupType get analysisChartGroupType; ChartType get analysisChartType; LogSorting get analysisChartSorting; bool get analysisChartSingleBar;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SettingsStateCopyWith<SettingsState> get copyWith => _$SettingsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.includeSystemApps, includeSystemApps) || other.includeSystemApps == includeSystemApps)&&(identical(other.logTraffic, logTraffic) || other.logTraffic == logTraffic)&&(identical(other.observeOnly, observeOnly) || other.observeOnly == observeOnly)&&(identical(other.logCompactView, logCompactView) || other.logCompactView == logCompactView)&&(identical(other.lastHostlistUpdate, lastHostlistUpdate) || other.lastHostlistUpdate == lastHostlistUpdate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.darkMode, darkMode) || other.darkMode == darkMode)&&(identical(other.colorScheme, colorScheme) || other.colorScheme == colorScheme)&&(identical(other.includeSystemApps, includeSystemApps) || other.includeSystemApps == includeSystemApps)&&(identical(other.logTraffic, logTraffic) || other.logTraffic == logTraffic)&&(identical(other.observeOnly, observeOnly) || other.observeOnly == observeOnly)&&(identical(other.logCompactView, logCompactView) || other.logCompactView == logCompactView)&&(identical(other.lastHostlistUpdate, lastHostlistUpdate) || other.lastHostlistUpdate == lastHostlistUpdate)&&(identical(other.analysisVolumeType, analysisVolumeType) || other.analysisVolumeType == analysisVolumeType)&&(identical(other.analysisChartGroupType, analysisChartGroupType) || other.analysisChartGroupType == analysisChartGroupType)&&(identical(other.analysisChartType, analysisChartType) || other.analysisChartType == analysisChartType)&&(identical(other.analysisChartSorting, analysisChartSorting) || other.analysisChartSorting == analysisChartSorting)&&(identical(other.analysisChartSingleBar, analysisChartSingleBar) || other.analysisChartSingleBar == analysisChartSingleBar));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,darkMode,colorScheme,includeSystemApps,logTraffic,observeOnly,logCompactView,lastHostlistUpdate);
+int get hashCode => Object.hash(runtimeType,darkMode,colorScheme,includeSystemApps,logTraffic,observeOnly,logCompactView,lastHostlistUpdate,analysisVolumeType,analysisChartGroupType,analysisChartType,analysisChartSorting,analysisChartSingleBar);
 
 @override
 String toString() {
-  return 'SettingsState(darkMode: $darkMode, colorScheme: $colorScheme, includeSystemApps: $includeSystemApps, logTraffic: $logTraffic, observeOnly: $observeOnly, logCompactView: $logCompactView, lastHostlistUpdate: $lastHostlistUpdate)';
+  return 'SettingsState(darkMode: $darkMode, colorScheme: $colorScheme, includeSystemApps: $includeSystemApps, logTraffic: $logTraffic, observeOnly: $observeOnly, logCompactView: $logCompactView, lastHostlistUpdate: $lastHostlistUpdate, analysisVolumeType: $analysisVolumeType, analysisChartGroupType: $analysisChartGroupType, analysisChartType: $analysisChartType, analysisChartSorting: $analysisChartSorting, analysisChartSingleBar: $analysisChartSingleBar)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- bool darkMode, FlexScheme colorScheme, bool includeSystemApps, bool logTraffic, bool observeOnly, bool logCompactView, DateTime? lastHostlistUpdate
+ bool darkMode, FlexScheme colorScheme, bool includeSystemApps, bool logTraffic, bool observeOnly, bool logCompactView, DateTime? lastHostlistUpdate, VolumeType analysisVolumeType, GroupType analysisChartGroupType, ChartType analysisChartType, LogSorting analysisChartSorting, bool analysisChartSingleBar
 });
 
 
@@ -62,7 +62,7 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? darkMode = null,Object? colorScheme = null,Object? includeSystemApps = null,Object? logTraffic = null,Object? observeOnly = null,Object? logCompactView = null,Object? lastHostlistUpdate = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? darkMode = null,Object? colorScheme = null,Object? includeSystemApps = null,Object? logTraffic = null,Object? observeOnly = null,Object? logCompactView = null,Object? lastHostlistUpdate = freezed,Object? analysisVolumeType = null,Object? analysisChartGroupType = null,Object? analysisChartType = null,Object? analysisChartSorting = null,Object? analysisChartSingleBar = null,}) {
   return _then(SettingsState(
 darkMode: null == darkMode ? _self.darkMode : darkMode // ignore: cast_nullable_to_non_nullable
 as bool,colorScheme: null == colorScheme ? _self.colorScheme : colorScheme // ignore: cast_nullable_to_non_nullable
@@ -71,7 +71,12 @@ as bool,logTraffic: null == logTraffic ? _self.logTraffic : logTraffic // ignore
 as bool,observeOnly: null == observeOnly ? _self.observeOnly : observeOnly // ignore: cast_nullable_to_non_nullable
 as bool,logCompactView: null == logCompactView ? _self.logCompactView : logCompactView // ignore: cast_nullable_to_non_nullable
 as bool,lastHostlistUpdate: freezed == lastHostlistUpdate ? _self.lastHostlistUpdate : lastHostlistUpdate // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,analysisVolumeType: null == analysisVolumeType ? _self.analysisVolumeType : analysisVolumeType // ignore: cast_nullable_to_non_nullable
+as VolumeType,analysisChartGroupType: null == analysisChartGroupType ? _self.analysisChartGroupType : analysisChartGroupType // ignore: cast_nullable_to_non_nullable
+as GroupType,analysisChartType: null == analysisChartType ? _self.analysisChartType : analysisChartType // ignore: cast_nullable_to_non_nullable
+as ChartType,analysisChartSorting: null == analysisChartSorting ? _self.analysisChartSorting : analysisChartSorting // ignore: cast_nullable_to_non_nullable
+as LogSorting,analysisChartSingleBar: null == analysisChartSingleBar ? _self.analysisChartSingleBar : analysisChartSingleBar // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

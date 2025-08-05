@@ -8,5 +8,6 @@ export 'misc/misc.dart';
 export 'navigation/navigation.dart';
 export 'settings/settings.dart';
 export 'switches/switches.dart';
+export 'text/text.dart';
 export 'text_fields/dropdown_text_field.dart';
 export 'text_fields/text_fields.dart';

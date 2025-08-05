@@ -3,7 +3,7 @@ import 'package:netguard/common/common.dart';
 
 extension ThemeDataExtension on ThemeData {}
 
-extension TextStyleExtension on TextStyle? {
+extension NullableTextStyleExtension on TextStyle? {
   TextStyle? withOpacity(double opacity) =>
       this?.copyWith(color: this?.color?.withOpacity(opacity));
   TextStyle? withColor(Color? color) => this?.copyWith(color: color);

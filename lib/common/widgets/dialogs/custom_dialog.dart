@@ -11,7 +11,6 @@ class CustomDialog<T> extends StatelessWidget {
     this.actions,
     this.titleTextStyle,
     this.borderColor,
-    this.expand = true,
     super.key,
   });
 
@@ -22,7 +21,6 @@ class CustomDialog<T> extends StatelessWidget {
   final List<Widget>? actions;
   final TextStyle? titleTextStyle;
   final Color? borderColor;
-  final bool expand;
 
   final double maxTitleWidgetHeight = 28;
 
@@ -31,7 +29,10 @@ class CustomDialog<T> extends StatelessWidget {
     return AlertDialog(
       backgroundColor: context.colors.surfaceContainerHighest,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: borderColor ?? context.colors.primary, width: 2),
+        side: BorderSide(
+          color: borderColor ?? context.colors.primary,
+          width: 2,
+        ),
         borderRadius: ThemeConstants.borderRadius,
       ),
       insetPadding: const EdgeInsets.all(ThemeConstants.spacing),
@@ -39,24 +40,18 @@ class CustomDialog<T> extends StatelessWidget {
       content: Builder(
         builder: (context) {
           MediaQueryData mediaQuery = MediaQuery.of(context);
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTitle(context),
-              const Divider(),
-              Padding(
-                padding: const EdgeInsets.all(ThemeConstants.smallSpacing),
-                child: expand
-                    ? Expanded(child: content)
-                    : Container(
-                        constraints: BoxConstraints(
-                          maxHeight: mediaQuery.size.height * 0.6,
-                        ),
-                        child: content,
-                      ),
-              ),
-              if (actions != null) ..._buildActions(context),
-            ],
+          return IntrinsicHeight(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTitle(context),
+                const Divider(),
+                Flexible(
+                  child: SingleChildScrollView(child: content),
+                ),
+                if (actions != null) ..._buildActions(context),
+              ],
+            ),
           );
         },
       ),

@@ -12,6 +12,13 @@ class SettingsTable extends Table {
   BoolColumn get observeOnly => boolean()();
   BoolColumn get logCompactView => boolean()();
   DateTimeColumn get lastHostlistUpdate => dateTime().nullable()();
+  TextColumn get analysisSettingsVolumeType => textEnum<VolumeType>()();
+  TextColumn get chartSettingsSorting => textEnum<LogSorting>()();
+  TextColumn get chartSettingsChartType => textEnum<ChartType>()();
+  TextColumn get chartSettingsGroupType => textEnum<GroupType>()();
+  BoolColumn get chartSettingsSingleBar => boolean()();
+
+
 
   @override
   Set<Column<Object>> get primaryKey => {id};

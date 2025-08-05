@@ -59,6 +59,11 @@ extension SettingsToCompanion on Settings {
     logTraffic: logTraffic,
     observeOnly: observeOnly,
     logCompactView: logCompactView,
+    analysisSettingsVolumeType: analysisSettingsVolumeType,
+    chartSettingsSorting: chartSettingsSorting,
+    chartSettingsChartType: chartSettingsChartType,
+    chartSettingsGroupType: chartSettingsGroupType,
+    chartSettingsSingleBar: chartSettingsSingleBar,
   );
 }
 

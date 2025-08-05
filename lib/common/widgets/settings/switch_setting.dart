@@ -5,6 +5,7 @@ class SwitchSetting extends StatelessWidget {
   const SwitchSetting({
     required this.name,
     required this.value,
+    this.enabled = true,
     this.description,
     this.leading,
     this.onChanged,
@@ -16,6 +17,7 @@ class SwitchSetting extends StatelessWidget {
   final String? description;
   final Widget? leading;
   final bool value;
+  final bool enabled;
   final Function(bool)? onChanged;
   final String? warning;
   @override
@@ -24,8 +26,10 @@ class SwitchSetting extends StatelessWidget {
       name: name,
       description: description,
       leading: leading,
-      trailing: Switch(value: value, onChanged: onChanged),
-      action: onChanged != null ? (_) => onChanged?.call(!value) : null,
+      trailing: Switch(value: value, onChanged: enabled ? onChanged : null),
+      action: enabled && onChanged != null
+          ? (_) => onChanged?.call(!value)
+          : null,
     );
   }
 }

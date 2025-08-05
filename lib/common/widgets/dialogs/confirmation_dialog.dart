@@ -26,7 +26,6 @@ class ConfirmationDialog extends StatelessWidget {
         DeclineButton(text: declineText),
         ConfirmButton(text: confirmText),
       ],
-      expand: false,
     );
   }
 
