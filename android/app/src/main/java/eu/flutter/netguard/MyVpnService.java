@@ -69,7 +69,7 @@ public class MyVpnService extends VpnService {
 
     private Map<String, Boolean> mapGlobalBlockedHosts = new HashMap<>();
     private Map<String, Boolean> mapGlobalBlockedIPs = new HashMap<>();
-    private Map<Long, Rule> mapUidRules = new HashMap<>();
+    private Map<Long, List<Rule>> mapUidRules = new HashMap<>();
     private Set<Long> setUidBlockAll = new HashSet<>();
     private Set<Long> setUidBlockQuic = new HashSet<>();
     private Map<Long, String> mapUidPackageName = new HashMap<>();
@@ -384,13 +384,15 @@ public class MyVpnService extends VpnService {
 
             // lookup the uid of a packageName
             long uid = Util.packageNameToUid(this, packageName);
+            if(uid < 0) continue;
             mapUidPackageName.put(uid, packageName);
 
-            // check if a rule is available for the package
-            Rule rule = database.getPackageRule(packageName);
-            if(rule == null || uid < 0) continue;
 
-            mapUidRules.put(uid, rule);
+            // check if a rule is available for the package
+            List<Rule> rules = database.getPackageRule(packageName);
+            if(rules == null || rules.isEmpty()) continue;
+
+            mapUidRules.put(uid, rules);
         }
 
         lock.writeLock().unlock();
@@ -466,12 +468,9 @@ public class MyVpnService extends VpnService {
         // check if the uid is fully blocked
         boolean blocked = setUidBlockAll.contains((long) uid);
 
-
         // if not, check if the domain is blocked for the given application
-        if(!blocked && uid > 0 && mapUidRules.containsKey((long) uid)){
-            Rule rule = mapUidRules.get((long) uid);
-            assert rule != null;
-            var result = blockedByRule(rule, name, uid, rule.getHosts());
+        if(!blocked && uid > 0){
+            RuleCheckResult result = blockedByRule(uid, name, CheckRuleTarget.host);
             blocked = result.blocked;
             if(result.checkFinished){
                 lock.readLock().unlock();
@@ -530,21 +529,14 @@ public class MyVpnService extends VpnService {
             // Log.w(TAG, "Allowing self " + packet);
         } else {
             String ip = packet.getDaddr();
-
-            boolean blocked = false;
-
             long uid = packet.getUid();
 
             // check if IP is blocked for given package
-            if (mapUidRules.containsKey(uid)) {
-                Rule rule = mapUidRules.get(uid);
-                assert rule != null;
-                var result = blockedByRule(rule, ip, uid, rule.getIps());
-                blocked = result.blocked;
-                if(result.checkFinished){
-                    lock.readLock().unlock();
-                    return blocked;
-                }
+            RuleCheckResult result = blockedByRule(uid, ip, CheckRuleTarget.ip);
+            boolean blocked = result.blocked;
+            if(result.checkFinished){
+                lock.readLock().unlock();
+                return blocked;
             }
 
             // lookup domain and check if that might be blocked
@@ -615,22 +607,36 @@ public class MyVpnService extends VpnService {
             this.checkFinished = checkFinished;
         }
     }
-    private RuleCheckResult blockedByRule(Rule rule, String value, long uid, Map<String, Boolean> list){
-        boolean valueListed = list.containsKey(value);
-        switch (rule.getType()){
-            case BLACKLIST:
-                return new RuleCheckResult(valueListed);
-            case WHITELIST:
-                // the whitelist only applies, when values are provided! otherwise, the application can still be fully blocked
-                if(!list.isEmpty()){
-                    if(valueListed){
+    private enum CheckRuleTarget{ip, host};
+    private RuleCheckResult blockedByRule(long uid, String value, CheckRuleTarget target){
+        if(!mapUidRules.containsKey(uid)) return new RuleCheckResult(false);
+        List<Rule> rules = mapUidRules.get(uid);
+        assert rules != null;
+        for(var rule : rules){
+            Map<String, Boolean> ruleMap = null;
+            switch (target){
+                case ip:
+                    ruleMap = rule.getIps();
+                    break;
+                case host:
+                    ruleMap = rule.getHosts();
+                    break;
+            };
+            if(ruleMap == null || ruleMap.isEmpty()) continue;
+            boolean valueListed = ruleMap.containsKey(value);
+            switch (rule.getType()) {
+                case BLACKLIST:
+                    return new RuleCheckResult(valueListed);
+                case WHITELIST:
+                    // the whitelist only applies, when values are provided! otherwise, the application can still be fully blocked
+                    if (valueListed) {
                         // if the domain is whitelisted, it is automatically allowed
                         return new RuleCheckResult(false, true);
-                    }else if(rule.getWhitelistExclusive()){
+                    } else if (rule.getWhitelistExclusive()) {
                         // if the domain is not in the whitelist, we block only if the whitelist is exclusive (allowing no other domains)
                         return new RuleCheckResult(true);
                     }
-                }
+            }
         }
         return new RuleCheckResult(false);
     }

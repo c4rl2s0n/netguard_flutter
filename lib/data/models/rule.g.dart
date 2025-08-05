@@ -14,6 +14,7 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => Rule(
   active: json['active'] as bool? ?? true,
   type: $enumDecode(_$RuleTypeEnumMap, json['type']),
   shouldBlockQuic: json['shouldBlockQuic'] as bool? ?? false,
+  whitelistExclusive: json['whitelistExclusive'] as bool? ?? true,
   packageName: json['packageName'] as String?,
   hosts:
       (json['hosts'] as Map<String, dynamic>?)?.map(
@@ -31,6 +32,7 @@ Map<String, dynamic> _$RuleToJson(Rule instance) => <String, dynamic>{
   'packageName': instance.packageName,
   'type': _$RuleTypeEnumMap[instance.type]!,
   'shouldBlockQuic': instance.shouldBlockQuic,
+  'whitelistExclusive': instance.whitelistExclusive,
   'hosts': instance.hosts,
   'ips': instance.ips,
   'id': instance.id,

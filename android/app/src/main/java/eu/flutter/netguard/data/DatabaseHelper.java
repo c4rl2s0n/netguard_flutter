@@ -116,7 +116,7 @@ public class DatabaseHelper {
                 break;
         }
     }
-    public Rule getPackageRule(String packageName){
+    public List<Rule> getPackageRule(String packageName){
         String[] args = new String[1];
         args[0] = packageName;
 
@@ -153,15 +153,19 @@ public class DatabaseHelper {
         }
         cursor.close();
 
+        ArrayList<Rule> rules = new ArrayList<>();
+
         // if whitelist exists, we only use the whitelist
         if(!(whitelist.getIps().isEmpty() && whitelist.getHosts().isEmpty())){
-            return whitelist;
+            rules.add(whitelist);
         }
+        boolean canUseBlacklist = rules.isEmpty() || !whitelist.getWhitelistExclusive();
         // otherwise, if blacklist exists, we use that
-        if(!(blacklist.getIps().isEmpty() && blacklist.getHosts().isEmpty())){
-            return blacklist;
+        if(canUseBlacklist
+            && !(blacklist.getIps().isEmpty() && blacklist.getHosts().isEmpty())){
+            rules.add(blacklist);
         }
-        return null;
+        return rules;
     }
 
     private interface QueryTask<T> {
