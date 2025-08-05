@@ -412,6 +412,7 @@ class Rule {
     this.packageName,
     required this.type,
     required this.shouldBlockQuic,
+    required this.whitelistExclusive,
     required this.hosts,
     required this.ips,
   });
@@ -422,6 +423,8 @@ class Rule {
 
   bool shouldBlockQuic;
 
+  bool whitelistExclusive;
+
   Map<String, bool> hosts;
 
   Map<String, bool> ips;
@@ -431,6 +434,7 @@ class Rule {
       packageName,
       type,
       shouldBlockQuic,
+      whitelistExclusive,
       hosts,
       ips,
     ];
@@ -445,8 +449,9 @@ class Rule {
       packageName: result[0] as String?,
       type: result[1]! as RuleType,
       shouldBlockQuic: result[2]! as bool,
-      hosts: (result[3] as Map<Object?, Object?>?)!.cast<String, bool>(),
-      ips: (result[4] as Map<Object?, Object?>?)!.cast<String, bool>(),
+      whitelistExclusive: result[3]! as bool,
+      hosts: (result[4] as Map<Object?, Object?>?)!.cast<String, bool>(),
+      ips: (result[5] as Map<Object?, Object?>?)!.cast<String, bool>(),
     );
   }
 

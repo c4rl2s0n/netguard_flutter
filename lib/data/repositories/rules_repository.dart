@@ -111,6 +111,11 @@ class RulesRepository extends IRulesRepository {
   }
 
   @override
+  Future<void> updateWhitelistExclusive(String id, bool exclusive) async {
+    await _updateRule(id).write(RulesTableCompanion(whitelistExclusive: Value(exclusive)));
+  }
+
+  @override
   Future<void> updateHosts(String id, List<HostEntry> hosts) async {
     // clear the host-list for the rule, in case an update takes place. The rules will be inserted afterwards
     await db.hostsTable.deleteWhere((t) => t.ruleId.equals(id));

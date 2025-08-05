@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RuleState {
 
- String get id; set id(String value); String? get name; set name(String? value); String? get packageName; set packageName(String? value); String? get description; set description(String? value); String? get targetVersion; set targetVersion(String? value); RuleType get type; set type(RuleType value); bool get active; set active(bool value); bool get shouldBlockQuic; set shouldBlockQuic(bool value); List<String> get hosts; set hosts(List<String> value); List<String> get ips; set ips(List<String> value);
+ String get id; set id(String value); String? get name; set name(String? value); String? get packageName; set packageName(String? value); String? get description; set description(String? value); String? get targetVersion; set targetVersion(String? value); RuleType get type; set type(RuleType value); bool get active; set active(bool value); bool get shouldBlockQuic; set shouldBlockQuic(bool value); bool get whitelistExclusive; set whitelistExclusive(bool value); List<String> get hosts; set hosts(List<String> value); List<String> get ips; set ips(List<String> value);
 /// Create a copy of RuleState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $RuleStateCopyWith<RuleState> get copyWith => _$RuleStateCopyWithImpl<RuleState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RuleState&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.packageName, packageName) || other.packageName == packageName)&&(identical(other.description, description) || other.description == description)&&(identical(other.targetVersion, targetVersion) || other.targetVersion == targetVersion)&&(identical(other.type, type) || other.type == type)&&(identical(other.active, active) || other.active == active)&&(identical(other.shouldBlockQuic, shouldBlockQuic) || other.shouldBlockQuic == shouldBlockQuic)&&const DeepCollectionEquality().equals(other.hosts, hosts)&&const DeepCollectionEquality().equals(other.ips, ips));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RuleState&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.packageName, packageName) || other.packageName == packageName)&&(identical(other.description, description) || other.description == description)&&(identical(other.targetVersion, targetVersion) || other.targetVersion == targetVersion)&&(identical(other.type, type) || other.type == type)&&(identical(other.active, active) || other.active == active)&&(identical(other.shouldBlockQuic, shouldBlockQuic) || other.shouldBlockQuic == shouldBlockQuic)&&(identical(other.whitelistExclusive, whitelistExclusive) || other.whitelistExclusive == whitelistExclusive)&&const DeepCollectionEquality().equals(other.hosts, hosts)&&const DeepCollectionEquality().equals(other.ips, ips));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,packageName,description,targetVersion,type,active,shouldBlockQuic,const DeepCollectionEquality().hash(hosts),const DeepCollectionEquality().hash(ips));
+int get hashCode => Object.hash(runtimeType,id,name,packageName,description,targetVersion,type,active,shouldBlockQuic,whitelistExclusive,const DeepCollectionEquality().hash(hosts),const DeepCollectionEquality().hash(ips));
 
 @override
 String toString() {
-  return 'RuleState(id: $id, name: $name, packageName: $packageName, description: $description, targetVersion: $targetVersion, type: $type, active: $active, shouldBlockQuic: $shouldBlockQuic, hosts: $hosts, ips: $ips)';
+  return 'RuleState(id: $id, name: $name, packageName: $packageName, description: $description, targetVersion: $targetVersion, type: $type, active: $active, shouldBlockQuic: $shouldBlockQuic, whitelistExclusive: $whitelistExclusive, hosts: $hosts, ips: $ips)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $RuleStateCopyWith<$Res>  {
   factory $RuleStateCopyWith(RuleState value, $Res Function(RuleState) _then) = _$RuleStateCopyWithImpl;
 @useResult
 $Res call({
- String id, String? packageName, String? name, String? description, String? targetVersion, RuleType type, bool active, bool shouldBlockQuic, List<String> hosts, List<String> ips
+ String id, String? packageName, String? name, String? description, String? targetVersion, RuleType type, bool active, bool shouldBlockQuic, bool whitelistExclusive, List<String> hosts, List<String> ips
 });
 
 
@@ -62,7 +62,7 @@ class _$RuleStateCopyWithImpl<$Res>
 
 /// Create a copy of RuleState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? packageName = freezed,Object? name = freezed,Object? description = freezed,Object? targetVersion = freezed,Object? type = null,Object? active = null,Object? shouldBlockQuic = null,Object? hosts = null,Object? ips = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? packageName = freezed,Object? name = freezed,Object? description = freezed,Object? targetVersion = freezed,Object? type = null,Object? active = null,Object? shouldBlockQuic = null,Object? whitelistExclusive = null,Object? hosts = null,Object? ips = null,}) {
   return _then(RuleState(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,packageName: freezed == packageName ? _self.packageName : packageName // ignore: cast_nullable_to_non_nullable
@@ -72,6 +72,7 @@ as String?,targetVersion: freezed == targetVersion ? _self.targetVersion : targe
 as String?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as RuleType,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool,shouldBlockQuic: null == shouldBlockQuic ? _self.shouldBlockQuic : shouldBlockQuic // ignore: cast_nullable_to_non_nullable
+as bool,whitelistExclusive: null == whitelistExclusive ? _self.whitelistExclusive : whitelistExclusive // ignore: cast_nullable_to_non_nullable
 as bool,hosts: null == hosts ? _self.hosts : hosts // ignore: cast_nullable_to_non_nullable
 as List<String>,ips: null == ips ? _self.ips : ips // ignore: cast_nullable_to_non_nullable
 as List<String>,

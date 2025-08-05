@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ApplicationEntryState {
 
- Application get app; bool get filter; bool get blockAll; bool get blockQuic; List<RuleCubit> get rules;
+ Application get app; bool get filter; bool get blockAll; bool get blockQuic; List<RuleCubit> get rules; List<RuleState> get ruleStates;
 /// Create a copy of ApplicationEntryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ApplicationEntryStateCopyWith<ApplicationEntryState> get copyWith => _$Applicat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApplicationEntryState&&(identical(other.app, app) || other.app == app)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.blockAll, blockAll) || other.blockAll == blockAll)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&const DeepCollectionEquality().equals(other.rules, rules));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApplicationEntryState&&(identical(other.app, app) || other.app == app)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.blockAll, blockAll) || other.blockAll == blockAll)&&(identical(other.blockQuic, blockQuic) || other.blockQuic == blockQuic)&&const DeepCollectionEquality().equals(other.rules, rules)&&const DeepCollectionEquality().equals(other.ruleStates, ruleStates));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,app,filter,blockAll,blockQuic,const DeepCollectionEquality().hash(rules));
+int get hashCode => Object.hash(runtimeType,app,filter,blockAll,blockQuic,const DeepCollectionEquality().hash(rules),const DeepCollectionEquality().hash(ruleStates));
 
 @override
 String toString() {
-  return 'ApplicationEntryState(app: $app, filter: $filter, blockAll: $blockAll, blockQuic: $blockQuic, rules: $rules)';
+  return 'ApplicationEntryState(app: $app, filter: $filter, blockAll: $blockAll, blockQuic: $blockQuic, rules: $rules, ruleStates: $ruleStates)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ApplicationEntryStateCopyWith<$Res>  {
   factory $ApplicationEntryStateCopyWith(ApplicationEntryState value, $Res Function(ApplicationEntryState) _then) = _$ApplicationEntryStateCopyWithImpl;
 @useResult
 $Res call({
- Application app, bool filter, bool blockAll, bool blockQuic, List<RuleCubit> rules
+ Application app, bool filter, bool blockAll, bool blockQuic, List<RuleCubit> rules, List<RuleState> ruleStates
 });
 
 
@@ -62,14 +62,15 @@ class _$ApplicationEntryStateCopyWithImpl<$Res>
 
 /// Create a copy of ApplicationEntryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? app = null,Object? filter = null,Object? blockAll = null,Object? blockQuic = null,Object? rules = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? app = null,Object? filter = null,Object? blockAll = null,Object? blockQuic = null,Object? rules = null,Object? ruleStates = null,}) {
   return _then(ApplicationEntryState(
 app: null == app ? _self.app : app // ignore: cast_nullable_to_non_nullable
 as Application,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as bool,blockAll: null == blockAll ? _self.blockAll : blockAll // ignore: cast_nullable_to_non_nullable
 as bool,blockQuic: null == blockQuic ? _self.blockQuic : blockQuic // ignore: cast_nullable_to_non_nullable
 as bool,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
-as List<RuleCubit>,
+as List<RuleCubit>,ruleStates: null == ruleStates ? _self.ruleStates : ruleStates // ignore: cast_nullable_to_non_nullable
+as List<RuleState>,
   ));
 }
 

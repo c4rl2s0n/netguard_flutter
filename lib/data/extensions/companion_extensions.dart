@@ -47,6 +47,7 @@ extension RuleToCompanion on Rule {
     active: Value(active),
     type: Value(type),
     shouldBlockQuic: Value(shouldBlockQuic),
+    whitelistExclusive: Value(whitelistExclusive),
   );
 }
 

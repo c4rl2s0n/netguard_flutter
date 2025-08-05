@@ -1186,6 +1186,19 @@ public class NativeBridge {
       this.shouldBlockQuic = setterArg;
     }
 
+    private @NonNull Boolean whitelistExclusive;
+
+    public @NonNull Boolean getWhitelistExclusive() {
+      return whitelistExclusive;
+    }
+
+    public void setWhitelistExclusive(@NonNull Boolean setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"whitelistExclusive\" is null.");
+      }
+      this.whitelistExclusive = setterArg;
+    }
+
     private @NonNull Map<String, Boolean> hosts;
 
     public @NonNull Map<String, Boolean> getHosts() {
@@ -1220,12 +1233,12 @@ public class NativeBridge {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
       Rule that = (Rule) o;
-      return Objects.equals(packageName, that.packageName) && type.equals(that.type) && shouldBlockQuic.equals(that.shouldBlockQuic) && hosts.equals(that.hosts) && ips.equals(that.ips);
+      return Objects.equals(packageName, that.packageName) && type.equals(that.type) && shouldBlockQuic.equals(that.shouldBlockQuic) && whitelistExclusive.equals(that.whitelistExclusive) && hosts.equals(that.hosts) && ips.equals(that.ips);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(packageName, type, shouldBlockQuic, hosts, ips);
+      return Objects.hash(packageName, type, shouldBlockQuic, whitelistExclusive, hosts, ips);
     }
 
     public static final class Builder {
@@ -1254,6 +1267,14 @@ public class NativeBridge {
         return this;
       }
 
+      private @Nullable Boolean whitelistExclusive;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setWhitelistExclusive(@NonNull Boolean setterArg) {
+        this.whitelistExclusive = setterArg;
+        return this;
+      }
+
       private @Nullable Map<String, Boolean> hosts;
 
       @CanIgnoreReturnValue
@@ -1275,6 +1296,7 @@ public class NativeBridge {
         pigeonReturn.setPackageName(packageName);
         pigeonReturn.setType(type);
         pigeonReturn.setShouldBlockQuic(shouldBlockQuic);
+        pigeonReturn.setWhitelistExclusive(whitelistExclusive);
         pigeonReturn.setHosts(hosts);
         pigeonReturn.setIps(ips);
         return pigeonReturn;
@@ -1283,10 +1305,11 @@ public class NativeBridge {
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(5);
+      ArrayList<Object> toListResult = new ArrayList<>(6);
       toListResult.add(packageName);
       toListResult.add(type);
       toListResult.add(shouldBlockQuic);
+      toListResult.add(whitelistExclusive);
       toListResult.add(hosts);
       toListResult.add(ips);
       return toListResult;
@@ -1300,9 +1323,11 @@ public class NativeBridge {
       pigeonResult.setType((RuleType) type);
       Object shouldBlockQuic = pigeonVar_list.get(2);
       pigeonResult.setShouldBlockQuic((Boolean) shouldBlockQuic);
-      Object hosts = pigeonVar_list.get(3);
+      Object whitelistExclusive = pigeonVar_list.get(3);
+      pigeonResult.setWhitelistExclusive((Boolean) whitelistExclusive);
+      Object hosts = pigeonVar_list.get(4);
       pigeonResult.setHosts((Map<String, Boolean>) hosts);
-      Object ips = pigeonVar_list.get(4);
+      Object ips = pigeonVar_list.get(5);
       pigeonResult.setIps((Map<String, Boolean>) ips);
       return pigeonResult;
     }

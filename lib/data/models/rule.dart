@@ -14,6 +14,7 @@ class Rule extends native.Rule {
     this.active = true,
     required super.type,
     super.shouldBlockQuic = false,
+    super.whitelistExclusive = true,
     super.packageName,
     super.hosts = const <String, bool>{},
     super.ips = const <String, bool>{},

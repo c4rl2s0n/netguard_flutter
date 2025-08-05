@@ -54,7 +54,7 @@ class _ExpanderState extends State<Expander> {
 
   @override
   Widget build(BuildContext context) {
-    Color color = widget.color ?? context.colors.tertiaryContainer;
+    Color color = widget.color ?? context.colors.primary;
     return Theme(
       data: context.themeData.copyWith(hoverColor: color),
       child: ExpansionTile(

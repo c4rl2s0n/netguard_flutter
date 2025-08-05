@@ -13,7 +13,7 @@ class ExpanderSimple extends StatelessWidget {
 
   final String title;
   final String? subtitle;
-  final IconData? leadingIcon;
+  final Widget? leadingIcon;
   final List<Widget> children;
   final Color? color;
 
@@ -22,7 +22,7 @@ class ExpanderSimple extends StatelessWidget {
     return Expander(
       buildTitle: (context, _) => Text(title), //_title(context),
       buildSubtitle: (_, __) => subtitle.notEmpty ? Text(subtitle!) : null,
-      buildLeading: (_,__) => Icon(leadingIcon),
+      buildLeading: leadingIcon != null ? (_,__) => leadingIcon : null,
       color: color,
       children: children,
     );

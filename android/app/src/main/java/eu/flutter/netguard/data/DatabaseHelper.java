@@ -120,7 +120,7 @@ public class DatabaseHelper {
         String[] args = new String[1];
         args[0] = packageName;
 
-        String sql = "SELECT r.package_name, r.type as rule_type, r.active, h.target, h.type as host_type " +
+        String sql = "SELECT r.package_name, r.type as rule_type, r.active, r.whitelist_exclusive, h.target, h.type as host_type " +
                 "FROM rules_table as r " +
                 "LEFT JOIN hosts_table as h ON r.id = h.rule_id " +
                 "WHERE r.active and r.package_name = ?";
@@ -132,12 +132,16 @@ public class DatabaseHelper {
         Cursor cursor = db.rawQuery(sql, args);
         while(cursor.moveToNext()) {
             String ruleType = cursor.getString(1);
-            String target = cursor.getString(3);
-            String hostType = cursor.getString(4);
+            boolean whitelistExclusive = cursor.getLong(3) != 0;
+            String target = cursor.getString(4);
+            String hostType = cursor.getString(5);
             Rule rule;
             switch(ruleType){
                 case "whitelist":
                     rule = whitelist;
+                    if(whitelistExclusive && !rule.getWhitelistExclusive()){
+                        rule.setWhitelistExclusive(true);
+                    }
                     break;
                 case "blacklist":
                     rule = blacklist;

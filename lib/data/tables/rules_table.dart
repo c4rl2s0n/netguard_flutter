@@ -11,4 +11,5 @@ class RulesTable extends Table with IdExtension {
   BoolColumn get active => boolean()();
   TextColumn get type => textEnum<RuleType>()();
   BoolColumn get shouldBlockQuic => boolean()();
+  BoolColumn get whitelistExclusive => boolean()();
 }

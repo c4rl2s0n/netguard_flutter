@@ -144,12 +144,14 @@ class Rule {
   Rule({
     required this.type,
     required this.shouldBlockQuic,
+    required this.whitelistExclusive,
     required this.hosts,
     required this.ips,
   });
   String? packageName;
   RuleType type;
   bool shouldBlockQuic;
+  bool whitelistExclusive;
   Map<String, bool> hosts;
   Map<String, bool> ips;
 }

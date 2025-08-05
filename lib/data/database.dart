@@ -31,7 +31,13 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (m) async => await m.createAll(),
-      //onUpgrade: stepByStep(),
+      // onUpgrade: stepByStep(
+      //     from1To2: (m, schema) async {
+      //       // Write your migrations here
+      //       m.alterTable(TableMigration(schema.rulesTable, newColumns: [schema.rulesTable.whitelistExclusive]))
+      //       m.addColumn(schema.rulesTable, schema.rulesTable.whitelistExclusive);
+      //       schema.rulesTable.update().
+      //     }),
       beforeOpen: (details) async {
         await customStatement('PRAGMA journal_mode=WAL;');
         if (!details.hadUpgrade && !details.wasCreated) return;

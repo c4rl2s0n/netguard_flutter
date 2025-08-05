@@ -14,6 +14,7 @@ abstract class IRulesRepository extends RepositoryBase {
   Future<void> updateName(String id, String name);
   Future<void> updateDescription(String id, String description);
   Future<void> updateType(String id, RuleType type);
+  Future<void> updateWhitelistExclusive(String id, bool exclusive);
   Future<void> updateActive(String id, bool active);
   Future<void> updateHosts(String id, List<HostEntry> hosts);
   Future<void> insert(Rule entry);

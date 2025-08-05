@@ -23,6 +23,10 @@ class RuleCubit extends Cubit<RuleState> {
     await rulesRepository.updateType(state.id, type);
   }
 
+  Future setWhitelistExclusive(bool whitelistExclusive) async {
+    emit(state.copyWith(whitelistExclusive: whitelistExclusive));
+    await rulesRepository.updateWhitelistExclusive(state.id, whitelistExclusive);
+  }
 
   Future setActive(bool active) async {
     emit(state.copyWith(active: active));
@@ -58,6 +62,7 @@ class RuleState with _$RuleState {
     this.type = RuleType.blacklist,
     this.active = true,
     this.shouldBlockQuic = false,
+    this.whitelistExclusive = true,
     this.hosts = const [],
     this.ips = const [],
   });
@@ -71,6 +76,7 @@ class RuleState with _$RuleState {
         type: rule.type,
         active: rule.active,
         shouldBlockQuic: rule.shouldBlockQuic,
+        whitelistExclusive: rule.whitelistExclusive,
         hosts: rule.hosts.keys.toList(),
         ips: rule.ips.keys.toList(),
       );
@@ -92,6 +98,8 @@ class RuleState with _$RuleState {
   @override
   bool shouldBlockQuic;
   @override
+  bool whitelistExclusive;
+  @override
   List<String> hosts;
   @override
   List<String> ips;
@@ -105,6 +113,7 @@ class RuleState with _$RuleState {
     type: type,
     active: active,
     shouldBlockQuic: shouldBlockQuic,
+    whitelistExclusive: whitelistExclusive,
     hosts: hosts.boolMap((_) => true),
     ips: ips.boolMap((_) => true),
   );

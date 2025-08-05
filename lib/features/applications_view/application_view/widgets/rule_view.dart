@@ -14,7 +14,11 @@ class RuleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(value: ruleCubit, child: _ruleExpander(context));
+    return BlocProvider.value(
+      key: Key(rule.id),
+      value: ruleCubit,
+      child: _ruleExpander(context),
+    );
   }
 
   Widget _ruleExpander(BuildContext context) {
@@ -87,12 +91,7 @@ class RuleView extends StatelessWidget {
           buildWhen: (oldState, state) =>
               oldState.shouldBlockQuic != state.shouldBlockQuic,
           builder: (context, state) => state.shouldBlockQuic
-              ? Text(
-                  "This rule suggests to block QUIC for this application",
-                  style: context.textTheme.labelSmall.withColor(
-                    context.colors.warning,
-                  ),
-                )
+              ? TInfo("This rule suggests to block QUIC for this application")
               : SizedBox.shrink(),
         ),
       ],
@@ -115,28 +114,44 @@ class RuleView extends StatelessWidget {
     );
     return BlocBuilder<RuleCubit, RuleState>(
       buildWhen: (oldState, state) => oldState.type != state.type,
-      builder: (context, state) => SimpleSetting(
-        name: "Type (${state.type.name})",
-        description: "Type of the rule",
-        action: DropdownMenu<RuleType>(
-          key: Key(state.type.name),
-          initialSelection: state.type,
-          requestFocusOnTap: false,
-          leadingIcon: Row(
-            children: [Expanded(child: labelWidget(state.type))],
+      builder: (context, state) => Column(
+        children: [
+          SimpleSetting(
+            name: "Type (${state.type.name})",
+            description: "Type of the rule",
+            action: DropdownMenu<RuleType>(
+              key: Key(state.type.name),
+              initialSelection: state.type,
+              requestFocusOnTap: false,
+              leadingIcon: Row(
+                children: [Expanded(child: labelWidget(state.type))],
+              ),
+              onSelected: (t) => t != null ? ruleCubit.setType(t) : null,
+              dropdownMenuEntries: RuleType.values
+                  .map(
+                    (d) => DropdownMenuEntry<RuleType>(
+                      value: d,
+                      label: d.name,
+                      leadingIcon: labelWidget(d),
+                      //labelWidget: labelWidget(d),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
-          onSelected: (t) => t != null ? ruleCubit.setType(t) : null,
-          dropdownMenuEntries: RuleType.values
-              .map(
-                (d) => DropdownMenuEntry<RuleType>(
-                  value: d,
-                  label: d.name,
-                  leadingIcon: labelWidget(d),
-                  //labelWidget: labelWidget(d),
-                ),
-              )
-              .toList(),
-        ),
+          if (state.type == RuleType.whitelist) _whitelistExclusive(),
+        ],
+      ),
+    );
+  }
+
+  Widget _whitelistExclusive() {
+    return BlocBuilder<RuleCubit, RuleState>(
+      builder: (context, state) => SwitchSetting(
+        name: "Whitelist Exclusive",
+        description: "If true, only entries from the whitelist will be allowed",
+        value: state.whitelistExclusive,
+        onChanged: ruleCubit.setWhitelistExclusive,
       ),
     );
   }

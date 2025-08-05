@@ -31,6 +31,7 @@ public class ModelBuilder {
         builder.setPackageName(packageName);
         builder.setType(type);
         builder.setShouldBlockQuic(false);
+        builder.setWhitelistExclusive(false);
         builder.setHosts(new HashMap<>());
         builder.setIps(new HashMap<>());
         return builder.build();

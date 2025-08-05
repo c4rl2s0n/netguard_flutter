@@ -331,6 +331,19 @@ class $RulesTableTable extends RulesTable
       'CHECK ("should_block_quic" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _whitelistExclusiveMeta =
+      const VerificationMeta('whitelistExclusive');
+  @override
+  late final GeneratedColumn<bool> whitelistExclusive = GeneratedColumn<bool>(
+    'whitelist_exclusive',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("whitelist_exclusive" IN (0, 1))',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -341,6 +354,7 @@ class $RulesTableTable extends RulesTable
     active,
     type,
     shouldBlockQuic,
+    whitelistExclusive,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -411,6 +425,17 @@ class $RulesTableTable extends RulesTable
     } else if (isInserting) {
       context.missing(_shouldBlockQuicMeta);
     }
+    if (data.containsKey('whitelist_exclusive')) {
+      context.handle(
+        _whitelistExclusiveMeta,
+        whitelistExclusive.isAcceptableOrUnknown(
+          data['whitelist_exclusive']!,
+          _whitelistExclusiveMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_whitelistExclusiveMeta);
+    }
     return context;
   }
 
@@ -450,6 +475,10 @@ class $RulesTableTable extends RulesTable
         DriftSqlType.bool,
         data['${effectivePrefix}should_block_quic'],
       )!,
+      whitelistExclusive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}whitelist_exclusive'],
+      )!,
       packageName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}package_name'],
@@ -475,6 +504,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
   final Value<bool> active;
   final Value<RuleType> type;
   final Value<bool> shouldBlockQuic;
+  final Value<bool> whitelistExclusive;
   final Value<int> rowid;
   const RulesTableCompanion({
     this.id = const Value.absent(),
@@ -485,6 +515,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     this.active = const Value.absent(),
     this.type = const Value.absent(),
     this.shouldBlockQuic = const Value.absent(),
+    this.whitelistExclusive = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RulesTableCompanion.insert({
@@ -496,11 +527,13 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     required bool active,
     required RuleType type,
     required bool shouldBlockQuic,
+    required bool whitelistExclusive,
     this.rowid = const Value.absent(),
   }) : packageName = Value(packageName),
        active = Value(active),
        type = Value(type),
-       shouldBlockQuic = Value(shouldBlockQuic);
+       shouldBlockQuic = Value(shouldBlockQuic),
+       whitelistExclusive = Value(whitelistExclusive);
   static Insertable<Rule> custom({
     Expression<String>? id,
     Expression<String>? packageName,
@@ -510,6 +543,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     Expression<bool>? active,
     Expression<String>? type,
     Expression<bool>? shouldBlockQuic,
+    Expression<bool>? whitelistExclusive,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -521,6 +555,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
       if (active != null) 'active': active,
       if (type != null) 'type': type,
       if (shouldBlockQuic != null) 'should_block_quic': shouldBlockQuic,
+      if (whitelistExclusive != null) 'whitelist_exclusive': whitelistExclusive,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -534,6 +569,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     Value<bool>? active,
     Value<RuleType>? type,
     Value<bool>? shouldBlockQuic,
+    Value<bool>? whitelistExclusive,
     Value<int>? rowid,
   }) {
     return RulesTableCompanion(
@@ -545,6 +581,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
       active: active ?? this.active,
       type: type ?? this.type,
       shouldBlockQuic: shouldBlockQuic ?? this.shouldBlockQuic,
+      whitelistExclusive: whitelistExclusive ?? this.whitelistExclusive,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -578,6 +615,9 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
     if (shouldBlockQuic.present) {
       map['should_block_quic'] = Variable<bool>(shouldBlockQuic.value);
     }
+    if (whitelistExclusive.present) {
+      map['whitelist_exclusive'] = Variable<bool>(whitelistExclusive.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -595,6 +635,7 @@ class RulesTableCompanion extends UpdateCompanion<Rule> {
           ..write('active: $active, ')
           ..write('type: $type, ')
           ..write('shouldBlockQuic: $shouldBlockQuic, ')
+          ..write('whitelistExclusive: $whitelistExclusive, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2521,6 +2562,7 @@ typedef $$RulesTableTableCreateCompanionBuilder =
       required bool active,
       required RuleType type,
       required bool shouldBlockQuic,
+      required bool whitelistExclusive,
       Value<int> rowid,
     });
 typedef $$RulesTableTableUpdateCompanionBuilder =
@@ -2533,6 +2575,7 @@ typedef $$RulesTableTableUpdateCompanionBuilder =
       Value<bool> active,
       Value<RuleType> type,
       Value<bool> shouldBlockQuic,
+      Value<bool> whitelistExclusive,
       Value<int> rowid,
     });
 
@@ -2606,6 +2649,11 @@ class $$RulesTableTableFilterComposer
 
   ColumnFilters<bool> get shouldBlockQuic => $composableBuilder(
     column: $table.shouldBlockQuic,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get whitelistExclusive => $composableBuilder(
+    column: $table.whitelistExclusive,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2683,6 +2731,11 @@ class $$RulesTableTableOrderingComposer
     column: $table.shouldBlockQuic,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get whitelistExclusive => $composableBuilder(
+    column: $table.whitelistExclusive,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RulesTableTableAnnotationComposer
@@ -2723,6 +2776,11 @@ class $$RulesTableTableAnnotationComposer
 
   GeneratedColumn<bool> get shouldBlockQuic => $composableBuilder(
     column: $table.shouldBlockQuic,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get whitelistExclusive => $composableBuilder(
+    column: $table.whitelistExclusive,
     builder: (column) => column,
   );
 
@@ -2788,6 +2846,7 @@ class $$RulesTableTableTableManager
                 Value<bool> active = const Value.absent(),
                 Value<RuleType> type = const Value.absent(),
                 Value<bool> shouldBlockQuic = const Value.absent(),
+                Value<bool> whitelistExclusive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RulesTableCompanion(
                 id: id,
@@ -2798,6 +2857,7 @@ class $$RulesTableTableTableManager
                 active: active,
                 type: type,
                 shouldBlockQuic: shouldBlockQuic,
+                whitelistExclusive: whitelistExclusive,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2810,6 +2870,7 @@ class $$RulesTableTableTableManager
                 required bool active,
                 required RuleType type,
                 required bool shouldBlockQuic,
+                required bool whitelistExclusive,
                 Value<int> rowid = const Value.absent(),
               }) => RulesTableCompanion.insert(
                 id: id,
@@ -2820,6 +2881,7 @@ class $$RulesTableTableTableManager
                 active: active,
                 type: type,
                 shouldBlockQuic: shouldBlockQuic,
+                whitelistExclusive: whitelistExclusive,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

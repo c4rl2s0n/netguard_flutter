@@ -38,7 +38,12 @@ class ApplicationView extends StatelessWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
-                      children: [...state.rules.map((r) => RuleView(r))],
+                      children: <Widget>[...state.rules.map((r) => RuleView(r))]
+                          .insertBetweenItems(
+                            () => const Margin.vertical(
+                              ThemeConstants.smallSpacing,
+                            ),
+                          ),
                     ),
                   ),
                 ),
@@ -52,17 +57,26 @@ class ApplicationView extends StatelessWidget {
 
   Widget _generic(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Todo(
-          "Show warning if multiple rules have different types or blockQUIC",
+        _warnings(),
+        ExpanderSimple(
+          title: 'Application Settings',
+          leadingIcon: app.image,
+          children: [_newRule(), _blockAll(), _blockQuic()],
         ),
-        _newRule(),
-        _blockAll(),
-        _blockQuic(),
+      ],
+    );
+  }
+
+  Widget _warnings() {
+    return Column(
+      children: [
+        _differentRuleTypesInfo(),
+        _differentWhitelistTypesInfo(),
+        _differentBlockQuicRequirementsInfo(),
         _sessionRunningInfo(),
       ],
-    ).withBorder();
+    );
   }
 
   Widget _newRule() {
@@ -94,14 +108,65 @@ class ApplicationView extends StatelessWidget {
         description: "When QUIC is blocked, applications may fallback to TLS",
         value: state.blockQuic,
         warning:
-          !state.blockQuic && state.rules.any((r) => r.state.shouldBlockQuic)
+            !state.blockQuic && state.rules.any((r) => r.state.shouldBlockQuic)
             ? "At least one rule suggests to block QUIC traffic!"
             : state.blockQuic &&
                   !state.rules.any((r) => r.state.shouldBlockQuic)
-              ? "No rule suggests to block QUIC."
-              : null,
+            ? "No rule suggests to block QUIC."
+            : null,
         onChanged: context.read<ApplicationEntryCubit>().setBlockQuic,
       ),
+    );
+  }
+
+  Widget _differentBlockQuicRequirementsInfo() {
+    return BlocBuilder<ApplicationEntryCubit, ApplicationEntryState>(
+      buildWhen: (oldState, state) =>
+          oldState.differentBlockQuicRequirements !=
+              state.differentBlockQuicRequirements ||
+          oldState.shouldBlockQuic != state.shouldBlockQuic ||
+          oldState.blockQuic != state.blockQuic,
+      builder: (context, state) {
+        String warning = "";
+        if (state.shouldBlockQuic && !state.blockQuic) {
+          warning += "Some active rules suggest to block QUIC traffic!";
+        }
+        if (state.differentBlockQuicRequirements) {
+          warning +=
+              "${warning.empty ? "" : "\n"}Multiple rules are active with different preferences about blocking QUIC";
+        }
+        return warning.empty ? SizedBox.shrink() : TWarning(warning);
+      },
+    );
+  }
+
+  Widget _differentRuleTypesInfo() {
+    return BlocBuilder<ApplicationEntryCubit, ApplicationEntryState>(
+      buildWhen: (oldState, state) =>
+          oldState.differentRuleTypes != state.differentRuleTypes ||
+          oldState.hasExclusiveWhitelist != state.hasExclusiveWhitelist,
+      builder: (context, state) {
+        String warning = "";
+        if (state.differentRuleTypes && state.hasExclusiveWhitelist) {
+          warning +=
+              "Different rule-types are active and at least one whitelist is exclusive. Blacklists will be ignored!";
+        }
+        return warning.empty ? SizedBox.shrink() : TWarning(warning);
+      },
+    );
+  }
+  Widget _differentWhitelistTypesInfo() {
+    return BlocBuilder<ApplicationEntryCubit, ApplicationEntryState>(
+      buildWhen: (oldState, state) =>
+          oldState.differentWhitelistTypes != state.differentWhitelistTypes,
+      builder: (context, state) {
+        String warning = "";
+        if (state.differentWhitelistTypes) {
+          warning +=
+              "Multiple whitelists have different values regarding exclusiveness. All whitelists will be applied as one exclusive list!";
+        }
+        return warning.empty ? SizedBox.shrink() : TWarning(warning);
+      },
     );
   }
 
@@ -109,11 +174,8 @@ class ApplicationView extends StatelessWidget {
     return BlocBuilder<SessionCubit, SessionState>(
       buildWhen: (oldState, state) => oldState.running != state.running,
       builder: (context, state) => state.running
-          ? Text(
-              "In order to modify these settings, you need to turn off the Firewall",
-              style: context.textTheme.bodyLarge?.copyWith(
-                color: context.colors.warning,
-              ),
+          ? TWarning(
+              "Changes in the firewall settings will be applied after the next restart",
             )
           : SizedBox.shrink(),
     );
