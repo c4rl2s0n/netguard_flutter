@@ -21,7 +21,7 @@ class GlobalRulesCubit extends Cubit<GlobalRulesState> {
       loadingCubit,
       ScanSourcesTaskArgument(await databaseConnection, state.sources),
     );
-    settingsCubit.setLastBlacklistUpdate();
+    settingsCubit.setLastHostlistUpdate();
   }
 
   Future removeSource(GlobalRuleSource source) async {

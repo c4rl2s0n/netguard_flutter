@@ -1017,6 +1017,75 @@ class $SettingsTableTable extends SettingsTable
           'CHECK ("chart_settings_single_bar" IN (0, 1))',
         ),
       );
+  static const VerificationMeta _overallPacketCountMeta =
+      const VerificationMeta('overallPacketCount');
+  @override
+  late final GeneratedColumn<int> overallPacketCount = GeneratedColumn<int>(
+    'overall_packet_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: () => 0,
+  );
+  static const VerificationMeta _overallPacketSizeMeta = const VerificationMeta(
+    'overallPacketSize',
+  );
+  @override
+  late final GeneratedColumn<int> overallPacketSize = GeneratedColumn<int>(
+    'overall_packet_size',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: () => 0,
+  );
+  static const VerificationMeta _overallPacketBlockedCountMeta =
+      const VerificationMeta('overallPacketBlockedCount');
+  @override
+  late final GeneratedColumn<int> overallPacketBlockedCount =
+      GeneratedColumn<int>(
+        'overall_packet_blocked_count',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        clientDefault: () => 0,
+      );
+  static const VerificationMeta _overallPacketBlockedSizeMeta =
+      const VerificationMeta('overallPacketBlockedSize');
+  @override
+  late final GeneratedColumn<int> overallPacketBlockedSize =
+      GeneratedColumn<int>(
+        'overall_packet_blocked_size',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        clientDefault: () => 0,
+      );
+  static const VerificationMeta _packageNameMostTrafficMeta =
+      const VerificationMeta('packageNameMostTraffic');
+  @override
+  late final GeneratedColumn<String> packageNameMostTraffic =
+      GeneratedColumn<String>(
+        'package_name_most_traffic',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _packageNameMostTrafficBlockedMeta =
+      const VerificationMeta('packageNameMostTrafficBlocked');
+  @override
+  late final GeneratedColumn<String> packageNameMostTrafficBlocked =
+      GeneratedColumn<String>(
+        'package_name_most_traffic_blocked',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1032,6 +1101,12 @@ class $SettingsTableTable extends SettingsTable
     chartSettingsChartType,
     chartSettingsGroupType,
     chartSettingsSingleBar,
+    overallPacketCount,
+    overallPacketSize,
+    overallPacketBlockedCount,
+    overallPacketBlockedSize,
+    packageNameMostTraffic,
+    packageNameMostTrafficBlocked,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1116,6 +1191,60 @@ class $SettingsTableTable extends SettingsTable
       );
     } else if (isInserting) {
       context.missing(_chartSettingsSingleBarMeta);
+    }
+    if (data.containsKey('overall_packet_count')) {
+      context.handle(
+        _overallPacketCountMeta,
+        overallPacketCount.isAcceptableOrUnknown(
+          data['overall_packet_count']!,
+          _overallPacketCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('overall_packet_size')) {
+      context.handle(
+        _overallPacketSizeMeta,
+        overallPacketSize.isAcceptableOrUnknown(
+          data['overall_packet_size']!,
+          _overallPacketSizeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('overall_packet_blocked_count')) {
+      context.handle(
+        _overallPacketBlockedCountMeta,
+        overallPacketBlockedCount.isAcceptableOrUnknown(
+          data['overall_packet_blocked_count']!,
+          _overallPacketBlockedCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('overall_packet_blocked_size')) {
+      context.handle(
+        _overallPacketBlockedSizeMeta,
+        overallPacketBlockedSize.isAcceptableOrUnknown(
+          data['overall_packet_blocked_size']!,
+          _overallPacketBlockedSizeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('package_name_most_traffic')) {
+      context.handle(
+        _packageNameMostTrafficMeta,
+        packageNameMostTraffic.isAcceptableOrUnknown(
+          data['package_name_most_traffic']!,
+          _packageNameMostTrafficMeta,
+        ),
+      );
+    }
+    if (data.containsKey('package_name_most_traffic_blocked')) {
+      context.handle(
+        _packageNameMostTrafficBlockedMeta,
+        packageNameMostTrafficBlocked.isAcceptableOrUnknown(
+          data['package_name_most_traffic_blocked']!,
+          _packageNameMostTrafficBlockedMeta,
+        ),
+      );
     }
     return context;
   }
@@ -1237,6 +1366,12 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
   final Value<ChartType> chartSettingsChartType;
   final Value<GroupType> chartSettingsGroupType;
   final Value<bool> chartSettingsSingleBar;
+  final Value<int> overallPacketCount;
+  final Value<int> overallPacketSize;
+  final Value<int> overallPacketBlockedCount;
+  final Value<int> overallPacketBlockedSize;
+  final Value<String?> packageNameMostTraffic;
+  final Value<String?> packageNameMostTrafficBlocked;
   const SettingsTableCompanion({
     this.id = const Value.absent(),
     this.darkMode = const Value.absent(),
@@ -1251,6 +1386,12 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     this.chartSettingsChartType = const Value.absent(),
     this.chartSettingsGroupType = const Value.absent(),
     this.chartSettingsSingleBar = const Value.absent(),
+    this.overallPacketCount = const Value.absent(),
+    this.overallPacketSize = const Value.absent(),
+    this.overallPacketBlockedCount = const Value.absent(),
+    this.overallPacketBlockedSize = const Value.absent(),
+    this.packageNameMostTraffic = const Value.absent(),
+    this.packageNameMostTrafficBlocked = const Value.absent(),
   });
   SettingsTableCompanion.insert({
     this.id = const Value.absent(),
@@ -1266,6 +1407,12 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     required ChartType chartSettingsChartType,
     required GroupType chartSettingsGroupType,
     required bool chartSettingsSingleBar,
+    this.overallPacketCount = const Value.absent(),
+    this.overallPacketSize = const Value.absent(),
+    this.overallPacketBlockedCount = const Value.absent(),
+    this.overallPacketBlockedSize = const Value.absent(),
+    this.packageNameMostTraffic = const Value.absent(),
+    this.packageNameMostTrafficBlocked = const Value.absent(),
   }) : darkMode = Value(darkMode),
        colorScheme = Value(colorScheme),
        includeSystemApps = Value(includeSystemApps),
@@ -1291,6 +1438,12 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     Expression<String>? chartSettingsChartType,
     Expression<String>? chartSettingsGroupType,
     Expression<bool>? chartSettingsSingleBar,
+    Expression<int>? overallPacketCount,
+    Expression<int>? overallPacketSize,
+    Expression<int>? overallPacketBlockedCount,
+    Expression<int>? overallPacketBlockedSize,
+    Expression<String>? packageNameMostTraffic,
+    Expression<String>? packageNameMostTrafficBlocked,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1312,6 +1465,17 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
         'chart_settings_group_type': chartSettingsGroupType,
       if (chartSettingsSingleBar != null)
         'chart_settings_single_bar': chartSettingsSingleBar,
+      if (overallPacketCount != null)
+        'overall_packet_count': overallPacketCount,
+      if (overallPacketSize != null) 'overall_packet_size': overallPacketSize,
+      if (overallPacketBlockedCount != null)
+        'overall_packet_blocked_count': overallPacketBlockedCount,
+      if (overallPacketBlockedSize != null)
+        'overall_packet_blocked_size': overallPacketBlockedSize,
+      if (packageNameMostTraffic != null)
+        'package_name_most_traffic': packageNameMostTraffic,
+      if (packageNameMostTrafficBlocked != null)
+        'package_name_most_traffic_blocked': packageNameMostTrafficBlocked,
     });
   }
 
@@ -1329,6 +1493,12 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
     Value<ChartType>? chartSettingsChartType,
     Value<GroupType>? chartSettingsGroupType,
     Value<bool>? chartSettingsSingleBar,
+    Value<int>? overallPacketCount,
+    Value<int>? overallPacketSize,
+    Value<int>? overallPacketBlockedCount,
+    Value<int>? overallPacketBlockedSize,
+    Value<String?>? packageNameMostTraffic,
+    Value<String?>? packageNameMostTrafficBlocked,
   }) {
     return SettingsTableCompanion(
       id: id ?? this.id,
@@ -1348,6 +1518,16 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
           chartSettingsGroupType ?? this.chartSettingsGroupType,
       chartSettingsSingleBar:
           chartSettingsSingleBar ?? this.chartSettingsSingleBar,
+      overallPacketCount: overallPacketCount ?? this.overallPacketCount,
+      overallPacketSize: overallPacketSize ?? this.overallPacketSize,
+      overallPacketBlockedCount:
+          overallPacketBlockedCount ?? this.overallPacketBlockedCount,
+      overallPacketBlockedSize:
+          overallPacketBlockedSize ?? this.overallPacketBlockedSize,
+      packageNameMostTraffic:
+          packageNameMostTraffic ?? this.packageNameMostTraffic,
+      packageNameMostTrafficBlocked:
+          packageNameMostTrafficBlocked ?? this.packageNameMostTrafficBlocked,
     );
   }
 
@@ -1415,6 +1595,32 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
         chartSettingsSingleBar.value,
       );
     }
+    if (overallPacketCount.present) {
+      map['overall_packet_count'] = Variable<int>(overallPacketCount.value);
+    }
+    if (overallPacketSize.present) {
+      map['overall_packet_size'] = Variable<int>(overallPacketSize.value);
+    }
+    if (overallPacketBlockedCount.present) {
+      map['overall_packet_blocked_count'] = Variable<int>(
+        overallPacketBlockedCount.value,
+      );
+    }
+    if (overallPacketBlockedSize.present) {
+      map['overall_packet_blocked_size'] = Variable<int>(
+        overallPacketBlockedSize.value,
+      );
+    }
+    if (packageNameMostTraffic.present) {
+      map['package_name_most_traffic'] = Variable<String>(
+        packageNameMostTraffic.value,
+      );
+    }
+    if (packageNameMostTrafficBlocked.present) {
+      map['package_name_most_traffic_blocked'] = Variable<String>(
+        packageNameMostTrafficBlocked.value,
+      );
+    }
     return map;
   }
 
@@ -1433,7 +1639,15 @@ class SettingsTableCompanion extends UpdateCompanion<Settings> {
           ..write('chartSettingsSorting: $chartSettingsSorting, ')
           ..write('chartSettingsChartType: $chartSettingsChartType, ')
           ..write('chartSettingsGroupType: $chartSettingsGroupType, ')
-          ..write('chartSettingsSingleBar: $chartSettingsSingleBar')
+          ..write('chartSettingsSingleBar: $chartSettingsSingleBar, ')
+          ..write('overallPacketCount: $overallPacketCount, ')
+          ..write('overallPacketSize: $overallPacketSize, ')
+          ..write('overallPacketBlockedCount: $overallPacketBlockedCount, ')
+          ..write('overallPacketBlockedSize: $overallPacketBlockedSize, ')
+          ..write('packageNameMostTraffic: $packageNameMostTraffic, ')
+          ..write(
+            'packageNameMostTrafficBlocked: $packageNameMostTrafficBlocked',
+          )
           ..write(')'))
         .toString();
   }
@@ -2260,6 +2474,266 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
   }
 }
 
+class $PackageStatisticsTableTable extends PackageStatisticsTable
+    with TableInfo<$PackageStatisticsTableTable, PackageStatistics> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PackageStatisticsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _packageNameMeta = const VerificationMeta(
+    'packageName',
+  );
+  @override
+  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
+    'package_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _packetCountAllowedMeta =
+      const VerificationMeta('packetCountAllowed');
+  @override
+  late final GeneratedColumn<int> packetCountAllowed = GeneratedColumn<int>(
+    'packet_count_allowed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: () => 0,
+  );
+  static const VerificationMeta _packetSizeAllowedMeta = const VerificationMeta(
+    'packetSizeAllowed',
+  );
+  @override
+  late final GeneratedColumn<int> packetSizeAllowed = GeneratedColumn<int>(
+    'packet_size_allowed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: () => 0,
+  );
+  static const VerificationMeta _packetCountBlockedMeta =
+      const VerificationMeta('packetCountBlocked');
+  @override
+  late final GeneratedColumn<int> packetCountBlocked = GeneratedColumn<int>(
+    'packet_count_blocked',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: () => 0,
+  );
+  static const VerificationMeta _packetSizeBlockedMeta = const VerificationMeta(
+    'packetSizeBlocked',
+  );
+  @override
+  late final GeneratedColumn<int> packetSizeBlocked = GeneratedColumn<int>(
+    'packet_size_blocked',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: () => 0,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    packageName,
+    packetCountAllowed,
+    packetSizeAllowed,
+    packetCountBlocked,
+    packetSizeBlocked,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'package_statistics_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PackageStatistics> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('package_name')) {
+      context.handle(
+        _packageNameMeta,
+        packageName.isAcceptableOrUnknown(
+          data['package_name']!,
+          _packageNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_packageNameMeta);
+    }
+    if (data.containsKey('packet_count_allowed')) {
+      context.handle(
+        _packetCountAllowedMeta,
+        packetCountAllowed.isAcceptableOrUnknown(
+          data['packet_count_allowed']!,
+          _packetCountAllowedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('packet_size_allowed')) {
+      context.handle(
+        _packetSizeAllowedMeta,
+        packetSizeAllowed.isAcceptableOrUnknown(
+          data['packet_size_allowed']!,
+          _packetSizeAllowedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('packet_count_blocked')) {
+      context.handle(
+        _packetCountBlockedMeta,
+        packetCountBlocked.isAcceptableOrUnknown(
+          data['packet_count_blocked']!,
+          _packetCountBlockedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('packet_size_blocked')) {
+      context.handle(
+        _packetSizeBlockedMeta,
+        packetSizeBlocked.isAcceptableOrUnknown(
+          data['packet_size_blocked']!,
+          _packetSizeBlockedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {packageName};
+  @override
+  PackageStatistics map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PackageStatistics(
+      packageName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}package_name'],
+      )!,
+      packetCountBlocked: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}packet_count_blocked'],
+      )!,
+      packetSizeBlocked: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}packet_size_blocked'],
+      )!,
+    );
+  }
+
+  @override
+  $PackageStatisticsTableTable createAlias(String alias) {
+    return $PackageStatisticsTableTable(attachedDatabase, alias);
+  }
+}
+
+class PackageStatisticsTableCompanion
+    extends UpdateCompanion<PackageStatistics> {
+  final Value<String> packageName;
+  final Value<int> packetCountAllowed;
+  final Value<int> packetSizeAllowed;
+  final Value<int> packetCountBlocked;
+  final Value<int> packetSizeBlocked;
+  final Value<int> rowid;
+  const PackageStatisticsTableCompanion({
+    this.packageName = const Value.absent(),
+    this.packetCountAllowed = const Value.absent(),
+    this.packetSizeAllowed = const Value.absent(),
+    this.packetCountBlocked = const Value.absent(),
+    this.packetSizeBlocked = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PackageStatisticsTableCompanion.insert({
+    required String packageName,
+    this.packetCountAllowed = const Value.absent(),
+    this.packetSizeAllowed = const Value.absent(),
+    this.packetCountBlocked = const Value.absent(),
+    this.packetSizeBlocked = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : packageName = Value(packageName);
+  static Insertable<PackageStatistics> custom({
+    Expression<String>? packageName,
+    Expression<int>? packetCountAllowed,
+    Expression<int>? packetSizeAllowed,
+    Expression<int>? packetCountBlocked,
+    Expression<int>? packetSizeBlocked,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (packageName != null) 'package_name': packageName,
+      if (packetCountAllowed != null)
+        'packet_count_allowed': packetCountAllowed,
+      if (packetSizeAllowed != null) 'packet_size_allowed': packetSizeAllowed,
+      if (packetCountBlocked != null)
+        'packet_count_blocked': packetCountBlocked,
+      if (packetSizeBlocked != null) 'packet_size_blocked': packetSizeBlocked,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PackageStatisticsTableCompanion copyWith({
+    Value<String>? packageName,
+    Value<int>? packetCountAllowed,
+    Value<int>? packetSizeAllowed,
+    Value<int>? packetCountBlocked,
+    Value<int>? packetSizeBlocked,
+    Value<int>? rowid,
+  }) {
+    return PackageStatisticsTableCompanion(
+      packageName: packageName ?? this.packageName,
+      packetCountAllowed: packetCountAllowed ?? this.packetCountAllowed,
+      packetSizeAllowed: packetSizeAllowed ?? this.packetSizeAllowed,
+      packetCountBlocked: packetCountBlocked ?? this.packetCountBlocked,
+      packetSizeBlocked: packetSizeBlocked ?? this.packetSizeBlocked,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (packageName.present) {
+      map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (packetCountAllowed.present) {
+      map['packet_count_allowed'] = Variable<int>(packetCountAllowed.value);
+    }
+    if (packetSizeAllowed.present) {
+      map['packet_size_allowed'] = Variable<int>(packetSizeAllowed.value);
+    }
+    if (packetCountBlocked.present) {
+      map['packet_count_blocked'] = Variable<int>(packetCountBlocked.value);
+    }
+    if (packetSizeBlocked.present) {
+      map['packet_size_blocked'] = Variable<int>(packetSizeBlocked.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PackageStatisticsTableCompanion(')
+          ..write('packageName: $packageName, ')
+          ..write('packetCountAllowed: $packetCountAllowed, ')
+          ..write('packetSizeAllowed: $packetSizeAllowed, ')
+          ..write('packetCountBlocked: $packetCountBlocked, ')
+          ..write('packetSizeBlocked: $packetSizeBlocked, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2275,6 +2749,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TrafficLogTableTable trafficLogTable = $TrafficLogTableTable(
     this,
   );
+  late final $PackageStatisticsTableTable packageStatisticsTable =
+      $PackageStatisticsTableTable(this);
   late final Index hostRuleIndex = Index(
     'hostRuleIndex',
     'CREATE INDEX hostRuleIndex ON hosts_table (rule_id)',
@@ -2335,6 +2811,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     resourceRecordTable,
     globalRuleSourceTable,
     trafficLogTable,
+    packageStatisticsTable,
     hostRuleIndex,
     hostTypeIndex,
     package,
@@ -3256,6 +3733,12 @@ typedef $$SettingsTableTableCreateCompanionBuilder =
       required ChartType chartSettingsChartType,
       required GroupType chartSettingsGroupType,
       required bool chartSettingsSingleBar,
+      Value<int> overallPacketCount,
+      Value<int> overallPacketSize,
+      Value<int> overallPacketBlockedCount,
+      Value<int> overallPacketBlockedSize,
+      Value<String?> packageNameMostTraffic,
+      Value<String?> packageNameMostTrafficBlocked,
     });
 typedef $$SettingsTableTableUpdateCompanionBuilder =
     SettingsTableCompanion Function({
@@ -3272,6 +3755,12 @@ typedef $$SettingsTableTableUpdateCompanionBuilder =
       Value<ChartType> chartSettingsChartType,
       Value<GroupType> chartSettingsGroupType,
       Value<bool> chartSettingsSingleBar,
+      Value<int> overallPacketCount,
+      Value<int> overallPacketSize,
+      Value<int> overallPacketBlockedCount,
+      Value<int> overallPacketBlockedSize,
+      Value<String?> packageNameMostTraffic,
+      Value<String?> packageNameMostTrafficBlocked,
     });
 
 class $$SettingsTableTableFilterComposer
@@ -3352,6 +3841,36 @@ class $$SettingsTableTableFilterComposer
     column: $table.chartSettingsSingleBar,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<int> get overallPacketCount => $composableBuilder(
+    column: $table.overallPacketCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overallPacketSize => $composableBuilder(
+    column: $table.overallPacketSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overallPacketBlockedCount => $composableBuilder(
+    column: $table.overallPacketBlockedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overallPacketBlockedSize => $composableBuilder(
+    column: $table.overallPacketBlockedSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packageNameMostTraffic => $composableBuilder(
+    column: $table.packageNameMostTraffic,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packageNameMostTrafficBlocked => $composableBuilder(
+    column: $table.packageNameMostTrafficBlocked,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$SettingsTableTableOrderingComposer
@@ -3427,6 +3946,37 @@ class $$SettingsTableTableOrderingComposer
     column: $table.chartSettingsSingleBar,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get overallPacketCount => $composableBuilder(
+    column: $table.overallPacketCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overallPacketSize => $composableBuilder(
+    column: $table.overallPacketSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overallPacketBlockedCount => $composableBuilder(
+    column: $table.overallPacketBlockedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overallPacketBlockedSize => $composableBuilder(
+    column: $table.overallPacketBlockedSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packageNameMostTraffic => $composableBuilder(
+    column: $table.packageNameMostTraffic,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packageNameMostTrafficBlocked =>
+      $composableBuilder(
+        column: $table.packageNameMostTrafficBlocked,
+        builder: (column) => ColumnOrderings(column),
+      );
 }
 
 class $$SettingsTableTableAnnotationComposer
@@ -3503,6 +4053,37 @@ class $$SettingsTableTableAnnotationComposer
     column: $table.chartSettingsSingleBar,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get overallPacketCount => $composableBuilder(
+    column: $table.overallPacketCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overallPacketSize => $composableBuilder(
+    column: $table.overallPacketSize,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overallPacketBlockedCount => $composableBuilder(
+    column: $table.overallPacketBlockedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overallPacketBlockedSize => $composableBuilder(
+    column: $table.overallPacketBlockedSize,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get packageNameMostTraffic => $composableBuilder(
+    column: $table.packageNameMostTraffic,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get packageNameMostTrafficBlocked =>
+      $composableBuilder(
+        column: $table.packageNameMostTrafficBlocked,
+        builder: (column) => column,
+      );
 }
 
 class $$SettingsTableTableTableManager
@@ -3550,6 +4131,13 @@ class $$SettingsTableTableTableManager
                 Value<ChartType> chartSettingsChartType = const Value.absent(),
                 Value<GroupType> chartSettingsGroupType = const Value.absent(),
                 Value<bool> chartSettingsSingleBar = const Value.absent(),
+                Value<int> overallPacketCount = const Value.absent(),
+                Value<int> overallPacketSize = const Value.absent(),
+                Value<int> overallPacketBlockedCount = const Value.absent(),
+                Value<int> overallPacketBlockedSize = const Value.absent(),
+                Value<String?> packageNameMostTraffic = const Value.absent(),
+                Value<String?> packageNameMostTrafficBlocked =
+                    const Value.absent(),
               }) => SettingsTableCompanion(
                 id: id,
                 darkMode: darkMode,
@@ -3564,6 +4152,12 @@ class $$SettingsTableTableTableManager
                 chartSettingsChartType: chartSettingsChartType,
                 chartSettingsGroupType: chartSettingsGroupType,
                 chartSettingsSingleBar: chartSettingsSingleBar,
+                overallPacketCount: overallPacketCount,
+                overallPacketSize: overallPacketSize,
+                overallPacketBlockedCount: overallPacketBlockedCount,
+                overallPacketBlockedSize: overallPacketBlockedSize,
+                packageNameMostTraffic: packageNameMostTraffic,
+                packageNameMostTrafficBlocked: packageNameMostTrafficBlocked,
               ),
           createCompanionCallback:
               ({
@@ -3580,6 +4174,13 @@ class $$SettingsTableTableTableManager
                 required ChartType chartSettingsChartType,
                 required GroupType chartSettingsGroupType,
                 required bool chartSettingsSingleBar,
+                Value<int> overallPacketCount = const Value.absent(),
+                Value<int> overallPacketSize = const Value.absent(),
+                Value<int> overallPacketBlockedCount = const Value.absent(),
+                Value<int> overallPacketBlockedSize = const Value.absent(),
+                Value<String?> packageNameMostTraffic = const Value.absent(),
+                Value<String?> packageNameMostTrafficBlocked =
+                    const Value.absent(),
               }) => SettingsTableCompanion.insert(
                 id: id,
                 darkMode: darkMode,
@@ -3594,6 +4195,12 @@ class $$SettingsTableTableTableManager
                 chartSettingsChartType: chartSettingsChartType,
                 chartSettingsGroupType: chartSettingsGroupType,
                 chartSettingsSingleBar: chartSettingsSingleBar,
+                overallPacketCount: overallPacketCount,
+                overallPacketSize: overallPacketSize,
+                overallPacketBlockedCount: overallPacketBlockedCount,
+                overallPacketBlockedSize: overallPacketBlockedSize,
+                packageNameMostTraffic: packageNameMostTraffic,
+                packageNameMostTrafficBlocked: packageNameMostTrafficBlocked,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -4314,6 +4921,235 @@ typedef $$TrafficLogTableTableProcessedTableManager =
       TrafficLog,
       PrefetchHooks Function()
     >;
+typedef $$PackageStatisticsTableTableCreateCompanionBuilder =
+    PackageStatisticsTableCompanion Function({
+      required String packageName,
+      Value<int> packetCountAllowed,
+      Value<int> packetSizeAllowed,
+      Value<int> packetCountBlocked,
+      Value<int> packetSizeBlocked,
+      Value<int> rowid,
+    });
+typedef $$PackageStatisticsTableTableUpdateCompanionBuilder =
+    PackageStatisticsTableCompanion Function({
+      Value<String> packageName,
+      Value<int> packetCountAllowed,
+      Value<int> packetSizeAllowed,
+      Value<int> packetCountBlocked,
+      Value<int> packetSizeBlocked,
+      Value<int> rowid,
+    });
+
+class $$PackageStatisticsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PackageStatisticsTableTable> {
+  $$PackageStatisticsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get packetCountAllowed => $composableBuilder(
+    column: $table.packetCountAllowed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get packetSizeAllowed => $composableBuilder(
+    column: $table.packetSizeAllowed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get packetCountBlocked => $composableBuilder(
+    column: $table.packetCountBlocked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get packetSizeBlocked => $composableBuilder(
+    column: $table.packetSizeBlocked,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PackageStatisticsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PackageStatisticsTableTable> {
+  $$PackageStatisticsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get packetCountAllowed => $composableBuilder(
+    column: $table.packetCountAllowed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get packetSizeAllowed => $composableBuilder(
+    column: $table.packetSizeAllowed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get packetCountBlocked => $composableBuilder(
+    column: $table.packetCountBlocked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get packetSizeBlocked => $composableBuilder(
+    column: $table.packetSizeBlocked,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PackageStatisticsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PackageStatisticsTableTable> {
+  $$PackageStatisticsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get packetCountAllowed => $composableBuilder(
+    column: $table.packetCountAllowed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get packetSizeAllowed => $composableBuilder(
+    column: $table.packetSizeAllowed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get packetCountBlocked => $composableBuilder(
+    column: $table.packetCountBlocked,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get packetSizeBlocked => $composableBuilder(
+    column: $table.packetSizeBlocked,
+    builder: (column) => column,
+  );
+}
+
+class $$PackageStatisticsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PackageStatisticsTableTable,
+          PackageStatistics,
+          $$PackageStatisticsTableTableFilterComposer,
+          $$PackageStatisticsTableTableOrderingComposer,
+          $$PackageStatisticsTableTableAnnotationComposer,
+          $$PackageStatisticsTableTableCreateCompanionBuilder,
+          $$PackageStatisticsTableTableUpdateCompanionBuilder,
+          (
+            PackageStatistics,
+            BaseReferences<
+              _$AppDatabase,
+              $PackageStatisticsTableTable,
+              PackageStatistics
+            >,
+          ),
+          PackageStatistics,
+          PrefetchHooks Function()
+        > {
+  $$PackageStatisticsTableTableTableManager(
+    _$AppDatabase db,
+    $PackageStatisticsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PackageStatisticsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PackageStatisticsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PackageStatisticsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> packageName = const Value.absent(),
+                Value<int> packetCountAllowed = const Value.absent(),
+                Value<int> packetSizeAllowed = const Value.absent(),
+                Value<int> packetCountBlocked = const Value.absent(),
+                Value<int> packetSizeBlocked = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PackageStatisticsTableCompanion(
+                packageName: packageName,
+                packetCountAllowed: packetCountAllowed,
+                packetSizeAllowed: packetSizeAllowed,
+                packetCountBlocked: packetCountBlocked,
+                packetSizeBlocked: packetSizeBlocked,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String packageName,
+                Value<int> packetCountAllowed = const Value.absent(),
+                Value<int> packetSizeAllowed = const Value.absent(),
+                Value<int> packetCountBlocked = const Value.absent(),
+                Value<int> packetSizeBlocked = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PackageStatisticsTableCompanion.insert(
+                packageName: packageName,
+                packetCountAllowed: packetCountAllowed,
+                packetSizeAllowed: packetSizeAllowed,
+                packetCountBlocked: packetCountBlocked,
+                packetSizeBlocked: packetSizeBlocked,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PackageStatisticsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PackageStatisticsTableTable,
+      PackageStatistics,
+      $$PackageStatisticsTableTableFilterComposer,
+      $$PackageStatisticsTableTableOrderingComposer,
+      $$PackageStatisticsTableTableAnnotationComposer,
+      $$PackageStatisticsTableTableCreateCompanionBuilder,
+      $$PackageStatisticsTableTableUpdateCompanionBuilder,
+      (
+        PackageStatistics,
+        BaseReferences<
+          _$AppDatabase,
+          $PackageStatisticsTableTable,
+          PackageStatistics
+        >,
+      ),
+      PackageStatistics,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4335,4 +5171,9 @@ class $AppDatabaseManager {
       $$GlobalRuleSourceTableTableTableManager(_db, _db.globalRuleSourceTable);
   $$TrafficLogTableTableTableManager get trafficLogTable =>
       $$TrafficLogTableTableTableManager(_db, _db.trafficLogTable);
+  $$PackageStatisticsTableTableTableManager get packageStatisticsTable =>
+      $$PackageStatisticsTableTableTableManager(
+        _db,
+        _db.packageStatisticsTable,
+      );
 }

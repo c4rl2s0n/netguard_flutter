@@ -73,7 +73,7 @@ class TrafficLogGroups {
     }
 
     if (packageNames.notEmpty) {
-      for(var packageName in packageNames!) {
+      for (var packageName in packageNames!) {
         if (_groups.containsKey(packageName)) {
           addByPackage(_groups[packageName]!);
         }

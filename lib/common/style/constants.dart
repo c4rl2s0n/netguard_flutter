@@ -10,11 +10,11 @@ class ThemeConstants {
   static const double smallSpacing = 6;
   static const double infoContainerActionButtonPadding = 2;
   static const double lightColorOpacity = 0.3;
-  static int get lightColorOpacityAlpha => opacityToAlpha(lightColorOpacity);
+  static int get lightColorOpacityAlpha => Color.getAlphaFromOpacity(lightColorOpacity);
   static const double mediumColorOpacity = 0.5;
-  static int get mediumColorOpacityAlpha => opacityToAlpha(mediumColorOpacity);
+  static int get mediumColorOpacityAlpha => Color.getAlphaFromOpacity(mediumColorOpacity);
   static const double strongColorOpacity = 0.7;
-  static int get strongColorOpacityAlpha => opacityToAlpha(strongColorOpacity);
+  static int get strongColorOpacityAlpha => Color.getAlphaFromOpacity(strongColorOpacity);
   static const double statusMarkerSize = 20;
   static const double listTileHeight = 60;
   static const double listTileImageMargin = 10;
@@ -22,10 +22,4 @@ class ThemeConstants {
   static const double dividerHeight = 5;
   static const double appIconSize = 26;
 
-
-  static int opacityToAlpha(double o) {
-    if (o < 0) o = 0;
-    if (o > 1) o = 1;
-    return (255 * o).toInt();
-  }
 }

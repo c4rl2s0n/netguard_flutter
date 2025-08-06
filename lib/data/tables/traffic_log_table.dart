@@ -8,7 +8,7 @@ import 'package:netguard/netguard.dart';
 @TableIndex(name: "trafficLogPackageAllowed", columns: {#packageName, #allowed})
 @TableIndex(name: "trafficLogAllowed", columns: {#allowed})
 @TableIndex(name: "trafficLogSessionTime", columns: {#session, #time})
-class TrafficLogTable extends Table with IdExtension{
+class TrafficLogTable extends Table with IdExtension {
   IntColumn get time => integer()();
   TextColumn get session => text()();
   IntColumn get protocol => integer()();

@@ -87,7 +87,7 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
 
   Future _setupBlocs() async {
 
-    await sessionCubit.loadApplications();
+    await sessionCubit.load();
 
     // _settingsCubit = getIt<SettingsCubit>();
     //

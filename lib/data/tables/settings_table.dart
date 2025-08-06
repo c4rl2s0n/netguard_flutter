@@ -17,8 +17,12 @@ class SettingsTable extends Table {
   TextColumn get chartSettingsChartType => textEnum<ChartType>()();
   TextColumn get chartSettingsGroupType => textEnum<GroupType>()();
   BoolColumn get chartSettingsSingleBar => boolean()();
-
-
+  IntColumn get overallPacketCount => integer().clientDefault(() => 0)();
+  IntColumn get overallPacketSize => integer().clientDefault(() => 0)();
+  IntColumn get overallPacketBlockedCount => integer().clientDefault(() => 0)();
+  IntColumn get overallPacketBlockedSize => integer().clientDefault(() => 0)();
+  TextColumn get packageNameMostTraffic => text().nullable()();
+  TextColumn get packageNameMostTrafficBlocked => text().nullable()();
 
   @override
   Set<Column<Object>> get primaryKey => {id};

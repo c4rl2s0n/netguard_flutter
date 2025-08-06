@@ -1,10 +1,11 @@
 package eu.flutter.netguard.data;
 
+import android.os.Bundle;
+
 import java.util.HashMap;
 
-import eu.flutter.netguard.NativeBridge;
 import eu.flutter.netguard.NativeBridge.*;
-import io.flutter.Log;
+import eu.flutter.netguard.utils.Values;
 
 public class ModelBuilder {
     public static Application Application(long uid, String packageName, String label, String version, byte[] icon, boolean system){
@@ -51,5 +52,25 @@ public class ModelBuilder {
         return builder.build();
     }
 
+    public static Bundle toBundle(SessionStatistics statistics){
+        var bundle = new Bundle();
+        bundle.putLong(Values.Intent.Extras.SessionStatistics.packetCountAllowed, statistics.getPacketCountAllowed());
+        bundle.putLong(Values.Intent.Extras.SessionStatistics.packetSizeAllowed, statistics.getPacketSizeAllowed());
+        bundle.putLong(Values.Intent.Extras.SessionStatistics.packetCountBlocked, statistics.getPacketCountBlocked());
+        bundle.putLong(Values.Intent.Extras.SessionStatistics.packetSizeBlocked, statistics.getPacketSizeBlocked());
+        bundle.putString(Values.Intent.Extras.SessionStatistics.mostTrafficPackage, statistics.getMostTrafficPackage());
+        bundle.putString(Values.Intent.Extras.SessionStatistics.mostBlockedPackage, statistics.getMostBlockedPackage());
+        return bundle;
+    }
+    public static SessionStatistics SessionStatisticsFromBundle(Bundle bundle){
+        SessionStatistics.Builder builder = new SessionStatistics.Builder();
+        builder.setPacketCountAllowed(bundle.getLong(Values.Intent.Extras.SessionStatistics.packetCountAllowed));
+        builder.setPacketSizeAllowed(bundle.getLong(Values.Intent.Extras.SessionStatistics.packetSizeAllowed));
+        builder.setPacketCountBlocked(bundle.getLong(Values.Intent.Extras.SessionStatistics.packetCountBlocked));
+        builder.setPacketSizeBlocked(bundle.getLong(Values.Intent.Extras.SessionStatistics.packetSizeBlocked));
+        builder.setMostTrafficPackage(bundle.getString(Values.Intent.Extras.SessionStatistics.mostTrafficPackage));
+        builder.setMostBlockedPackage(bundle.getString(Values.Intent.Extras.SessionStatistics.mostBlockedPackage));
+        return builder.build();
+    }
 
 }

@@ -9,6 +9,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.VpnService;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -49,7 +50,7 @@ public class MyVpnService extends VpnService {
     private static long jni_context = 0;
     private native long jni_init(int sdk);
     private native void jni_start(long context, int loglevel);
-    private native void jni_run(long context, int tun, boolean logTraffic, boolean observeOnly, int rcode);
+    private native void jni_run(long context, int tun, boolean logTraffic, boolean observeOnly);
     private native void jni_stop(long context);
     private native void jni_clear(long context);
     private native int jni_get_mtu();
@@ -139,21 +140,32 @@ public class MyVpnService extends VpnService {
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("MyVpnService", "VPN starting...");
-        if (intent != null) {
-            String action = intent.getAction();
+        if (intent == null) return START_STICKY;
+        Log.i(TAG, "onStartCommand...");
 
-            switch (action) {
-                case Values.Intent.Actions.START:
-                    startVpn();
-                    break;
-                case Values.Intent.Actions.RELOAD:
+        String action = intent.getAction();
+        if(action == null) action = "";
+
+        switch (action) {
+            case Values.Intent.Actions.START:
+                if(isRunning())
                     reloadVpn();
-                    break;
-                case Values.Intent.Actions.STOP:
-                    stopVpn();
-                    break;
-            }
+                else
+                    startVpn();
+                break;
+            case Values.Intent.Actions.RELOAD:
+                reloadVpn();
+                break;
+            case Values.Intent.Actions.STOP:
+                stopVpn();
+                break;
+            case Values.Intent.Actions.PUSH_STATS:
+                Bundle bundle = intent.getExtras();
+                if(bundle != null) {
+                    SessionStatistics sessionStatistics = ModelBuilder.SessionStatisticsFromBundle(bundle);
+                    updateStatsNotification(sessionStatistics);
+                }
+                break;
         }
 
         return START_STICKY;
@@ -168,6 +180,10 @@ public class MyVpnService extends VpnService {
         if(isRunning()){
             reload(context, "Update Config");
         }
+    }
+
+    void updateStatsNotification(SessionStatistics sessionStatistics){
+        notification.updateStatsNotification(sessionStatistics);
     }
     private void startVpn(){
         if (vpnInterface != null) return;
@@ -204,12 +220,12 @@ public class MyVpnService extends VpnService {
     }
     private void reloadVpn(){
         Log.i(TAG, "Restarting VPN");
-        stopVpn();
+        if(isRunning()) stopVpn();
         startVpn();
     }
     private void stopVpn(){
         stopNative();
-        database.close();
+        if(database != null) database.close();
         if (vpnInterface != null) {
             try {
                 vpnInterface.close();
@@ -221,6 +237,7 @@ public class MyVpnService extends VpnService {
         networkMonitor.closeListener();
 
         stopForeground(true);
+        notification.hideStatsNotification();
 
         // release WakeLock
         WakeLock.releaseLock(this);
@@ -311,7 +328,6 @@ public class MyVpnService extends VpnService {
         prepareApplicationSettings();
 
         int prio = vpnConfig.getLogLevel().intValue();
-        final int rcode = 3; // TODO: not sure if this is necessary, related to DNS... original: Integer.parseInt(prefs.getString("rcode", "3"));
 
         if (tunnelThread == null) {
             Log.i(TAG, "Starting tunnel thread context=" + jni_context);
@@ -324,8 +340,7 @@ public class MyVpnService extends VpnService {
                     jni_run(jni_context,
                             vpn.getFd(),
                             vpnConfig.getLogTraffic(),
-                            vpnConfig.getObserveOnly(),
-                            rcode);
+                            vpnConfig.getObserveOnly());
                     Log.i(TAG, "Tunnel exited");
                     tunnelThread = null;
                 }

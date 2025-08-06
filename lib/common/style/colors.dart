@@ -65,7 +65,7 @@ class ColorAccessor {
       onSurface.withAlpha(Color.getAlphaFromOpacity(0.38));
   Color get disabledContainer =>
       onSurface.withAlpha(Color.getAlphaFromOpacity(0.12));
-  Color get background => surfaceContainerLowest;
+  Color get background => surfaceContainer;
   Color get onBackground => onSurface;
   Color get controlBorder => outline;
   Color get divider => outlineVariant;
@@ -75,12 +75,19 @@ class ColorAccessor {
 
   // Custom colors
   Color get favorite => defaultColors?.favorite ?? Colors.yellowAccent;
-  Color get warning => defaultColors?.warning ?? Colors.orange;
-  Color get onWarning => defaultColors?.onWarning ?? black;
-  Color get positive => defaultColors?.positive ?? Colors.lightGreen;
-  Color get onPositive => defaultColors?.onPositive ?? black;
-  Color get negative => defaultColors?.negative ?? Colors.red;
-  Color get onNegative => defaultColors?.onNegative ?? black;
+  Color get warning => tertiary;
+  Color get onWarning => onTertiary;
+  Color get positive => primary;
+  Color get onPositive => onPrimary;
+  Color get negative => secondary;
+  Color get onNegative => onSecondary;
+  // Color get favorite => defaultColors?.favorite ?? Colors.yellowAccent;
+  // Color get warning => defaultColors?.warning ?? Colors.orange;
+  // Color get onWarning => defaultColors?.onWarning ?? black;
+  // Color get positive => defaultColors?.positive ?? Colors.lightGreen;
+  // Color get onPositive => defaultColors?.onPositive ?? black;
+  // Color get negative => defaultColors?.negative ?? Colors.red;
+  // Color get onNegative => defaultColors?.onNegative ?? black;
 }
 
 @TailorMixin(themeGetter: ThemeGetter.none)

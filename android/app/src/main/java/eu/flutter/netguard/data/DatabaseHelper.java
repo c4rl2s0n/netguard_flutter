@@ -63,7 +63,7 @@ public class DatabaseHelper {
 
 
     public void close(){
-        db.close();
+        if(db != null) db.close();
     }
 
     private final SQLiteStatement genericBlacklistContainsHost;

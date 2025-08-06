@@ -69,6 +69,7 @@ android {
 dependencies{
     implementation("androidx.preference:preference:1.2.1")
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }
 
 flutter {

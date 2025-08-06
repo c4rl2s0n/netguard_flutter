@@ -30,65 +30,66 @@ class SettingsCubit extends Cubit<SettingsState> {
   // THEME SETTINGS
   void toggleDarkMode() {
     emit(state.copyWith(darkMode: !state.darkMode));
-    saveSettings();
+    _settingsRepository.updateDarkMode(state.darkMode);
   }
 
   void setColorScheme(FlexScheme colorScheme) {
     emit(state.copyWith(colorScheme: colorScheme));
-    saveSettings();
+    _settingsRepository.updateColorScheme(colorScheme);
   }
 
   // VPN SETTINGS
   void setIncludeSystemApps(bool includeSystem) {
     emit(state.copyWith(includeSystemApps: includeSystem));
-    saveSettings();
+    _settingsRepository.updateIncludeSystemApps(includeSystem);
   }
 
   void toggleLogTraffic() {
     emit(state.copyWith(logTraffic: !state.logTraffic));
-    saveSettings();
+    _settingsRepository.updateLogTraffic(state.logTraffic);
   }
 
   void setObserveOnly(bool observeOnly) {
     emit(state.copyWith(observeOnly: observeOnly));
-    saveSettings();
+    _settingsRepository.updateObserveOnly(observeOnly);
   }
 
   // ANALYSIS
   void setAnalysisVolumeType(VolumeType analysisVolumeType) {
     emit(state.copyWith(analysisVolumeType: analysisVolumeType));
-    saveSettings();
+    _settingsRepository.updateAnalysisSettingsVolumeType(analysisVolumeType);
   }
 
   void setAnalysisChartGroupType(GroupType analysisChartGroupType) {
     emit(state.copyWith(analysisChartGroupType: analysisChartGroupType));
-    saveSettings();
+    _settingsRepository.updateChartSettingsGroupType(analysisChartGroupType);
   }
 
   void setAnalysisChartType(ChartType analysisChartType) {
     emit(state.copyWith(analysisChartType: analysisChartType));
-    saveSettings();
+    _settingsRepository.updateChartSettingsChartType(analysisChartType);
   }
 
   void setAnalysisChartSorting(LogSorting analysisChartSorting) {
     emit(state.copyWith(analysisChartSorting: analysisChartSorting));
-    saveSettings();
+    _settingsRepository.updateChartSettingsSorting(analysisChartSorting);
   }
 
   void setAnalysisChartSingleBar(bool analysisChartSingleBar) {
     emit(state.copyWith(analysisChartSingleBar: analysisChartSingleBar));
-    saveSettings();
+    _settingsRepository.updateChartSettingsSingleBar(analysisChartSingleBar);
   }
 
   // MISC
 
   void setLogCompactView(bool logCompact) {
     emit(state.copyWith(logCompactView: logCompact));
-    saveSettings();
+    _settingsRepository.updateLogCompactView(logCompact);
   }
 
-  void setLastBlacklistUpdate() {
+  void setLastHostlistUpdate() {
     emit(state.copyWith(lastHostlistUpdate: DateTime.now()));
+    _settingsRepository.updateLastHostlistUpdate(state.lastHostlistUpdate);
   }
 }
 

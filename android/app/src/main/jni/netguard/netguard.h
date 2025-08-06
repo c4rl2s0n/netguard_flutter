@@ -89,7 +89,6 @@ struct arguments {
     int tun;
     jboolean logTraffic;
     jboolean observeOnly;
-    jint rcode;
     struct context *ctx;
 };
 

@@ -37,6 +37,7 @@ Future configureDependencies(
   getIt.registerCachedFactory<IApplicationSettingsRepository>(() => ApplicationSettingsRepository(db));
   getIt.registerCachedFactory<IHostsRepository>(() => HostsRepository(db));
   getIt.registerCachedFactory<IGlobalRuleSourceRepository>(() => GlobalRuleSourceRepository(db));
+  getIt.registerCachedFactory<IPackageStatisticsRepository>(() => PackageStatisticsRepository(db));
   getIt.registerCachedFactory<IResourceRecordRepository>(() => ResourceRecordRepository(db));
   getIt.registerCachedFactory<IRulesRepository>(() => RulesRepository(db));
   getIt.registerCachedFactory<ISettingsRepository>(() => SettingsRepository(db));

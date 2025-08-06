@@ -26,6 +26,17 @@ extension GlobalRuleSourceToCompanion on GlobalRuleSource {
       GlobalRuleSourceTableCompanion(source: Value(source), type: Value(type));
 }
 
+extension PackageStatisticsToCompanion on PackageStatistics {
+  PackageStatisticsTableCompanion get companion =>
+      PackageStatisticsTableCompanion(
+        packageName: Value(packageName),
+        packetCountAllowed: Value(packetCountAllowed),
+        packetSizeAllowed: Value(packetSizeAllowed),
+        packetCountBlocked: Value(packetCountBlocked),
+        packetSizeBlocked: Value(packetSizeBlocked),
+      );
+}
+
 extension ResourceRecordToCompanion on ResourceRecord {
   ResourceRecordTableCompanion get companion => ResourceRecordTableCompanion(
     time: Value(time),
@@ -40,7 +51,9 @@ extension ResourceRecordToCompanion on ResourceRecord {
 extension RuleToCompanion on Rule {
   RulesTableCompanion get companion => RulesTableCompanion(
     id: Value(id),
-    packageName: packageName.notEmpty ? Value(packageName!) : Value(""), // TODO: check this...
+    packageName: packageName.notEmpty
+        ? Value(packageName!)
+        : Value(""), // TODO: check this...
     targetVersion: Value(targetVersion),
     name: Value(name),
     description: Value(description),
@@ -60,6 +73,7 @@ extension SettingsToCompanion on Settings {
     logTraffic: logTraffic,
     observeOnly: observeOnly,
     logCompactView: logCompactView,
+    lastHostlistUpdate: Value(lastHostlistUpdate),
     analysisSettingsVolumeType: analysisSettingsVolumeType,
     chartSettingsSorting: chartSettingsSorting,
     chartSettingsChartType: chartSettingsChartType,

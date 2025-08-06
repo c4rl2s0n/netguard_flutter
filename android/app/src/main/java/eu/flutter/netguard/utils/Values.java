@@ -1,17 +1,14 @@
 package eu.flutter.netguard.utils;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.util.TypedValue;
-
-import androidx.core.app.NotificationCompat;
 
 public class Values {
     public static class Paths{
-        public static final String database = "app_flutter/netguard/netguard.db";
+        public static final String flutter_base = "app_flutter/netguard/";
+        public static final String database = flutter_base + "/netguard.db";
+        public static String statsImage(Context context) {
+            return context.getCacheDir()+"/"+ "stats.png";
+        }
         public static String database(Context context) {
             return context.getApplicationInfo().dataDir+"/"+ database;
         }
@@ -21,6 +18,19 @@ public class Values {
             public static final String START = "START";
             public static final String RELOAD = "RELOAD";
             public static final String STOP = "STOP";
+            public static final String PUSH_STATS = "PUSH_STATS";
+        }
+        public static class Extras{
+            public static class SessionStatistics {
+                public static final String packetCountAllowed = "packetCount";
+                public static final String packetSizeAllowed = "packetSize";
+                public static final String packetCountBlocked = "packetCountBlocked";
+                public static final String packetSizeBlocked = "packetSizeBlocked";
+                public static final String mostTrafficPackage = "mostTrafficPackage";
+                public static final String mostBlockedPackage = "mostBlockedPackage";
+
+            }
+
         }
     }
 }

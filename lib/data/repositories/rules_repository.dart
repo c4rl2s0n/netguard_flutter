@@ -88,7 +88,8 @@ class RulesRepository extends IRulesRepository {
     await db.rulesTable.deleteWhere((t) => t.id.equals(id));
   }
 
-  UpdateStatement<$RulesTableTable, Rule> _updateRule(String id) => db.rulesTable.update()..where((t) => t.id.equals(id));
+  UpdateStatement<$RulesTableTable, Rule> _updateRule(String id) =>
+      db.rulesTable.update()..where((t) => t.id.equals(id));
 
   @override
   Future<void> updateName(String id, String name) async {
@@ -102,7 +103,9 @@ class RulesRepository extends IRulesRepository {
 
   @override
   Future<void> updateDescription(String id, String description) async {
-    await _updateRule(id).write(RulesTableCompanion(description: Value(description)));
+    await _updateRule(
+      id,
+    ).write(RulesTableCompanion(description: Value(description)));
   }
 
   @override
@@ -112,7 +115,9 @@ class RulesRepository extends IRulesRepository {
 
   @override
   Future<void> updateWhitelistExclusive(String id, bool exclusive) async {
-    await _updateRule(id).write(RulesTableCompanion(whitelistExclusive: Value(exclusive)));
+    await _updateRule(
+      id,
+    ).write(RulesTableCompanion(whitelistExclusive: Value(exclusive)));
   }
 
   @override
@@ -120,7 +125,9 @@ class RulesRepository extends IRulesRepository {
     // clear the host-list for the rule, in case an update takes place. The rules will be inserted afterwards
     await db.hostsTable.deleteWhere((t) => t.ruleId.equals(id));
     List<HostsTableCompanion> hostCompanions = [];
-    hostCompanions.addAll(hosts.map((h) => h.companion.copyWith(ruleId: Value(id))));
+    hostCompanions.addAll(
+      hosts.map((h) => h.companion.copyWith(ruleId: Value(id))),
+    );
     await db.batch((batch) {
       batch.insertAll(db.hostsTable, hostCompanions);
     });

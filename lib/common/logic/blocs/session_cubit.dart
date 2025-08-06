@@ -8,11 +8,26 @@ part 'session_cubit.freezed.dart';
 
 class SessionCubit extends Cubit<SessionState> {
   SessionCubit(SettingsCubit settings)
-    : super(SessionState(sessionAnalysis: SessionLogAnalysisCubit(settings)));
+    : super(
+        SessionState(
+          sessionAnalysis: SessionLogAnalysisCubit(settings),
+          sessionStatistics: SessionStatistics(),
+        ),
+      );
+
+  late final NotificationUpdateService _notificationService =
+      NotificationUpdateService(this, vpnController);
 
   Future load() async {
     await loadApplications();
-    emit(state.copyWith(sessionConfig: await vpnController.getSession()));
+    SessionStatistics statistics = await packageStatisticsRepository
+        .getOverallStatistics(state.applicationsMap.keys.toList());
+    emit(
+      state.copyWith(
+        sessionConfig: await vpnController.getSession(),
+        sessionStatistics: statistics,
+      ),
+    );
   }
 
   @override
@@ -78,13 +93,18 @@ class SessionCubit extends Cubit<SessionState> {
     await vpnController.startVpn(vpnConfig);
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
     state.sessionAnalysis.clear();
+    _notificationService.run();
     emit(state.copyWith(sessionConfig: vpnConfig));
   }
 
   Future stopVpn() async {
     if (!state.running) return;
     await vpnController.stopVpn();
+
+    _notificationService.stop();
     await trafficLogListener?.cancel();
+    trafficLogListener = null;
+
     emit(state.copyWith(sessionConfig: null));
   }
 
@@ -92,7 +112,12 @@ class SessionCubit extends Cubit<SessionState> {
       emit(state.copyWith(sessionConfig: session));
 
   void _onTrafficLog(TrafficLog event) {
+    state.sessionStatistics.addLog(event);
     state.sessionAnalysis.insert(event, state.applicationsMap);
+    state.sessionStatistics.updatePackageInfoFromMap(
+      state.sessionAnalysis.state.analysisByApplication.values,
+    );
+    packageStatisticsRepository.addLog(event);
   }
 }
 
@@ -103,6 +128,7 @@ class SessionState with _$SessionState {
     required this.sessionAnalysis,
     this.systemApplicationsMap = const {},
     this.thirdPartyApplicationsMap = const {},
+    required this.sessionStatistics,
   });
 
   @override
@@ -113,6 +139,8 @@ class SessionState with _$SessionState {
   final Map<String, Application> systemApplicationsMap;
   @override
   final Map<String, Application> thirdPartyApplicationsMap;
+
+  final SessionStatistics sessionStatistics;
 
   bool get running => sessionConfig != null;
   bool get hasLogs => sessionAnalysis.hasLogs;

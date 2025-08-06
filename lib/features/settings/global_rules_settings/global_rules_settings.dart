@@ -55,11 +55,8 @@ class GlobalRulesSettings extends StatelessWidget {
                     children: [
                       _lastScanIndication(),
                       if (session.running) ...[
-                        Text(
+                        TWarning(
                           "These settings will only be effective after restarting the VPN.",
-                          style: context.textTheme.labelMedium!.copyWith(
-                            color: context.colors.warning,
-                          ),
                         ),
                       ],
                       _online(context),

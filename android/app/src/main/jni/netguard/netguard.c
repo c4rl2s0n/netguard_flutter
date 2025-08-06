@@ -139,7 +139,7 @@ Java_eu_flutter_netguard_MyVpnService_jni_1start(
 
 JNIEXPORT void JNICALL
 Java_eu_flutter_netguard_MyVpnService_jni_1run(
-        JNIEnv *env, jobject instance, jlong context, jint tun, jboolean logTraffic, jboolean observeOnly, jint rcode) {
+        JNIEnv *env, jobject instance, jlong context, jint tun, jboolean logTraffic, jboolean observeOnly) {
     struct context *ctx = (struct context *) context;
 
     log_android(ANDROID_LOG_WARN, "Running tun %d logTraffic %d observeOnly %d level %d", tun, logTraffic, observeOnly, loglevel);
@@ -157,7 +157,6 @@ Java_eu_flutter_netguard_MyVpnService_jni_1run(
     args->tun = tun;
     args->logTraffic = logTraffic;
     args->observeOnly = observeOnly;
-    args->rcode = rcode;
     args->ctx = ctx;
     handle_events(args);
 }

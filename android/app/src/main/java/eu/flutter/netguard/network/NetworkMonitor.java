@@ -26,6 +26,7 @@ public class NetworkMonitor{
     }
 
     public void openListener(){
+        closeListener();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             try {
                 listenNetworkChanges();
@@ -54,6 +55,7 @@ public class NetworkMonitor{
                 networkMonitorCallback);
     }
     private void unlistenNetworkMonitor(){
+        if(networkMonitorCallback == null) return;
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         cm.unregisterNetworkCallback(networkMonitorCallback);
 

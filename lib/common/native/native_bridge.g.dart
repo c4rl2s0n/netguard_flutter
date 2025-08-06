@@ -575,6 +575,72 @@ class ErrorLog {
 ;
 }
 
+class SessionStatistics {
+  SessionStatistics({
+    this.packetCountAllowed = 0,
+    this.packetSizeAllowed = 0,
+    this.packetCountBlocked = 0,
+    this.packetSizeBlocked = 0,
+    this.mostBlockedPackage,
+    this.mostTrafficPackage,
+  });
+
+  int packetCountAllowed;
+
+  int packetSizeAllowed;
+
+  int packetCountBlocked;
+
+  int packetSizeBlocked;
+
+  String? mostBlockedPackage;
+
+  String? mostTrafficPackage;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      packetCountAllowed,
+      packetSizeAllowed,
+      packetCountBlocked,
+      packetSizeBlocked,
+      mostBlockedPackage,
+      mostTrafficPackage,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SessionStatistics decode(Object result) {
+    result as List<Object?>;
+    return SessionStatistics(
+      packetCountAllowed: result[0]! as int,
+      packetSizeAllowed: result[1]! as int,
+      packetCountBlocked: result[2]! as int,
+      packetSizeBlocked: result[3]! as int,
+      mostBlockedPackage: result[4] as String?,
+      mostTrafficPackage: result[5] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SessionStatistics || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 class TrafficLog {
   TrafficLog({
     required this.time,
@@ -732,11 +798,14 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is ErrorLog) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is TrafficLog) {
+    }    else if (value is SessionStatistics) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    }    else if (value is Version) {
+    }    else if (value is TrafficLog) {
       buffer.putUint8(139);
+      writeValue(buffer, value.encode());
+    }    else if (value is Version) {
+      buffer.putUint8(140);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -766,8 +835,10 @@ class _PigeonCodec extends StandardMessageCodec {
       case 137: 
         return ErrorLog.decode(readValue(buffer)!);
       case 138: 
-        return TrafficLog.decode(readValue(buffer)!);
+        return SessionStatistics.decode(readValue(buffer)!);
       case 139: 
+        return TrafficLog.decode(readValue(buffer)!);
+      case 140: 
         return Version.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -893,6 +964,29 @@ class VpnController {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[settings]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> updateStatsNotification(SessionStatistics statistics) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.pigeon_example_package.VpnController.updateStatsNotification$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[statistics]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {

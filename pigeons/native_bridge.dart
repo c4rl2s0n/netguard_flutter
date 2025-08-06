@@ -16,6 +16,7 @@ abstract class VpnController {
   bool isRunning();
   VpnConfig? getSession();
   void updateSettings(VpnConfig settings);
+  void updateStatsNotification(SessionStatistics statistics);
   List<Application> getApplications();
 }
 
@@ -184,6 +185,23 @@ class ErrorLog {
   int time;
   String session;
   String message;
+}
+
+class SessionStatistics {
+  SessionStatistics({
+    this.packetCountAllowed = 0,
+    this.packetSizeAllowed = 0,
+    this.packetCountBlocked = 0,
+    this.packetSizeBlocked = 0,
+    this.mostBlockedPackage,
+    this.mostTrafficPackage,
+  });
+  final int packetCountAllowed;
+  final int packetSizeAllowed;
+  final int packetCountBlocked;
+  final int packetSizeBlocked;
+  final String? mostBlockedPackage;
+  final String? mostTrafficPackage;
 }
 
 class TrafficLog {

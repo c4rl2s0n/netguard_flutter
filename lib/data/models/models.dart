@@ -7,6 +7,6 @@ export 'settings.dart';
 export 'package:netguard/common/native/native_bridge.g.dart'
     hide Application, Rule;
 export 'global_rule_source.dart';
-export 'traffic_log.dart';
 export 'traffic_log_aggregation.dart';
 export 'traffic_log_group.dart';
+export 'package_statistics.dart';

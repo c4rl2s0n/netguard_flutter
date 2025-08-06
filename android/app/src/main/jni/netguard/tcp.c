@@ -609,6 +609,10 @@ void check_tcp_socket(const struct arguments *args,
                             s->tcp.local_seq += bytes;
                             s->tcp.unconfirmed++;
                         }
+                        if(false && args->logTraffic){
+                            // TODO: read dest/source, length, uid, allowed
+                            log_traffic(args, s->tcp.version, s->protocol, "s->tcp.daddr", s->tcp.dest, 0, -1, true);
+                        }
                     }
                     ng_free(buffer, __FILE__, __LINE__);
                 }

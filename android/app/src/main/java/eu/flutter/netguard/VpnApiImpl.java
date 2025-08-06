@@ -6,9 +6,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +63,15 @@ public class VpnApiImpl implements VpnController {
     @Override
     public void updateSettings(@NonNull VpnConfig config) {
         MyVpnService.updateVpnConfig(context, config);
+    }
+
+    @Override
+    public void updateStatsNotification(@NonNull SessionStatistics sessionStatistics) {
+        Intent intent = new Intent(context, MyVpnService.class);
+        // Pass settings as extras in the intent (serialize as needed)
+        intent.setAction(Values.Intent.Actions.PUSH_STATS);
+        intent.putExtras(ModelBuilder.toBundle(sessionStatistics));
+        ContextCompat.startForegroundService(context, intent);
     }
 
     @NonNull
