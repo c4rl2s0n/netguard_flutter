@@ -130,6 +130,8 @@ class SessionCubit extends Cubit<SessionState> {
       state.sessionAnalysis.state.analysisByApplication.values,
     );
     packageStatisticsRepository.addLog(event);
+    // TODO: decide if trafficLog should be stored in repository (maybe not to save data)
+    // await trafficLogRepository.insert(log);
   }
 }
 

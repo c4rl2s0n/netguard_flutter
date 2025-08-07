@@ -32,6 +32,5 @@ class VpnEventHandlerImpl extends VpnEventHandler {
   @override
   Future<void> logTraffic(TrafficLog log) async {
     _trafficLog.add(log);
-    await trafficLogRepository.insert(log);
   }
 }
