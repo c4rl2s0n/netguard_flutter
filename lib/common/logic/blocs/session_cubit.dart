@@ -36,6 +36,11 @@ class SessionCubit extends Cubit<SessionState> {
     return super.close();
   }
 
+  Future resetStatistics() async {
+    await packageStatisticsRepository.resetStatistics();
+    emit(state.copyWith(sessionStatistics: SessionStatistics()));
+  }
+
   Future loadApplications() async {
     List<Application> applications = (await vpnController.getApplications())
         .map((a) => Application.fromNative(a))

@@ -19,6 +19,7 @@ class VpnSettings extends StatelessWidget {
           _logTraffic(),
           _globalRules(),
           _ruleImport(),
+          _resetStatistics(),
         ],
         info: session.running
             ? Text(
@@ -94,6 +95,18 @@ class VpnSettings extends StatelessWidget {
             await sessionCubit.loadApplications();
           });
         }
+      },
+    );
+  }
+
+  Widget _resetStatistics() {
+    return ActionSetting(
+      name: "Reset Statistics",
+      description: "Reset all statistic counter to zero",
+      trailing: Icon(CustomIcons.reset),
+      action: (context) async {
+        await sessionCubit.resetStatistics();
+        SnackBarFactory.showPositiveSnackBar("Statistics have been reset!");
       },
     );
   }
