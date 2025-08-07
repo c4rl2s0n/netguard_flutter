@@ -10,8 +10,6 @@ class TrafficLogGroup {
     required this.destination,
     required this.allowed,
     required this.latest,
-    required this.count,
-    required this.size,
   });
   TrafficLogGroup.fromLog(TrafficLog log)
     : this._(
@@ -21,21 +19,28 @@ class TrafficLogGroup {
         destination: log.host ?? log.ip,
         allowed: log.allowed,
         latest: log.time,
-        count: 0,
-        size: 0,
       );
   final String? packageName;
   final int protocol;
   final int dport;
   final String destination;
   final bool allowed;
-  int latest;
-  int count;
-  int size;
+  int latest = 0;
+  int countIn= 0;
+  int countOut= 0;
+  int get count => countIn + countOut;
+  int sizeIn= 0;
+  int sizeOut= 0;
+  int get size => sizeIn + sizeOut;
 
   void add(TrafficLog log) {
-    count++;
-    size += log.size;
+    if(log.outgoing) {
+      countOut++;
+      sizeOut += log.size;
+    }else{
+      countIn++;
+      sizeIn += log.size;
+    }
     if (log.time > latest) latest = log.time;
   }
 }

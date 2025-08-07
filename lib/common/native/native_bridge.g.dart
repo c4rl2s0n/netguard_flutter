@@ -480,57 +480,6 @@ class Rule {
 ;
 }
 
-class LogEntry {
-  LogEntry({
-    required this.time,
-    required this.session,
-    required this.data,
-  });
-
-  int time;
-
-  String session;
-
-  Object data;
-
-  List<Object?> _toList() {
-    return <Object?>[
-      time,
-      session,
-      data,
-    ];
-  }
-
-  Object encode() {
-    return _toList();  }
-
-  static LogEntry decode(Object result) {
-    result as List<Object?>;
-    return LogEntry(
-      time: result[0]! as int,
-      session: result[1]! as String,
-      data: result[2]!,
-    );
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (other is! LogEntry || other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return _deepEquals(encode(), other.encode());
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
-}
-
 class ErrorLog {
   ErrorLog({
     required this.time,
@@ -659,6 +608,7 @@ class TrafficLog {
     this.packageName,
     this.size = 0,
     required this.allowed,
+    required this.outgoing,
   });
 
   int time;
@@ -679,6 +629,8 @@ class TrafficLog {
 
   bool allowed;
 
+  bool outgoing;
+
   List<Object?> _toList() {
     return <Object?>[
       time,
@@ -690,6 +642,7 @@ class TrafficLog {
       packageName,
       size,
       allowed,
+      outgoing,
     ];
   }
 
@@ -708,6 +661,7 @@ class TrafficLog {
       packageName: result[6] as String?,
       size: result[7]! as int,
       allowed: result[8]! as bool,
+      outgoing: result[9]! as bool,
     );
   }
 
@@ -799,20 +753,17 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is Rule) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    }    else if (value is LogEntry) {
+    }    else if (value is ErrorLog) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    }    else if (value is ErrorLog) {
+    }    else if (value is SessionStatistics) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is SessionStatistics) {
+    }    else if (value is TrafficLog) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    }    else if (value is TrafficLog) {
-      buffer.putUint8(139);
-      writeValue(buffer, value.encode());
     }    else if (value is Version) {
-      buffer.putUint8(140);
+      buffer.putUint8(139);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -838,14 +789,12 @@ class _PigeonCodec extends StandardMessageCodec {
       case 135: 
         return Rule.decode(readValue(buffer)!);
       case 136: 
-        return LogEntry.decode(readValue(buffer)!);
-      case 137: 
         return ErrorLog.decode(readValue(buffer)!);
-      case 138: 
+      case 137: 
         return SessionStatistics.decode(readValue(buffer)!);
-      case 139: 
+      case 138: 
         return TrafficLog.decode(readValue(buffer)!);
-      case 140: 
+      case 139: 
         return Version.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);

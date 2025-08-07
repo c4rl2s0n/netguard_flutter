@@ -1361,119 +1361,6 @@ public class NativeBridge {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
-  public static final class LogEntry {
-    private @NonNull Long time;
-
-    public @NonNull Long getTime() {
-      return time;
-    }
-
-    public void setTime(@NonNull Long setterArg) {
-      if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"time\" is null.");
-      }
-      this.time = setterArg;
-    }
-
-    private @NonNull String session;
-
-    public @NonNull String getSession() {
-      return session;
-    }
-
-    public void setSession(@NonNull String setterArg) {
-      if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"session\" is null.");
-      }
-      this.session = setterArg;
-    }
-
-    private @NonNull Object data;
-
-    public @NonNull Object getData() {
-      return data;
-    }
-
-    public void setData(@NonNull Object setterArg) {
-      if (setterArg == null) {
-        throw new IllegalStateException("Nonnull field \"data\" is null.");
-      }
-      this.data = setterArg;
-    }
-
-    /** Constructor is non-public to enforce null safety; use Builder. */
-    LogEntry() {}
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) { return true; }
-      if (o == null || getClass() != o.getClass()) { return false; }
-      LogEntry that = (LogEntry) o;
-      return time.equals(that.time) && session.equals(that.session) && data.equals(that.data);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(time, session, data);
-    }
-
-    public static final class Builder {
-
-      private @Nullable Long time;
-
-      @CanIgnoreReturnValue
-      public @NonNull Builder setTime(@NonNull Long setterArg) {
-        this.time = setterArg;
-        return this;
-      }
-
-      private @Nullable String session;
-
-      @CanIgnoreReturnValue
-      public @NonNull Builder setSession(@NonNull String setterArg) {
-        this.session = setterArg;
-        return this;
-      }
-
-      private @Nullable Object data;
-
-      @CanIgnoreReturnValue
-      public @NonNull Builder setData(@NonNull Object setterArg) {
-        this.data = setterArg;
-        return this;
-      }
-
-      public @NonNull LogEntry build() {
-        LogEntry pigeonReturn = new LogEntry();
-        pigeonReturn.setTime(time);
-        pigeonReturn.setSession(session);
-        pigeonReturn.setData(data);
-        return pigeonReturn;
-      }
-    }
-
-    @NonNull
-    ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(3);
-      toListResult.add(time);
-      toListResult.add(session);
-      toListResult.add(data);
-      return toListResult;
-    }
-
-    static @NonNull LogEntry fromList(@NonNull ArrayList<Object> pigeonVar_list) {
-      LogEntry pigeonResult = new LogEntry();
-      Object time = pigeonVar_list.get(0);
-      pigeonResult.setTime((Long) time);
-      Object session = pigeonVar_list.get(1);
-      pigeonResult.setSession((String) session);
-      Object data = pigeonVar_list.get(2);
-      pigeonResult.setData(data);
-      return pigeonResult;
-    }
-  }
-
-  /** Generated class from Pigeon that represents data sent in messages. */
   public static final class ErrorLog {
     private @NonNull Long time;
 
@@ -1881,6 +1768,19 @@ public class NativeBridge {
       this.allowed = setterArg;
     }
 
+    private @NonNull Boolean outgoing;
+
+    public @NonNull Boolean getOutgoing() {
+      return outgoing;
+    }
+
+    public void setOutgoing(@NonNull Boolean setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"outgoing\" is null.");
+      }
+      this.outgoing = setterArg;
+    }
+
     /** Constructor is non-public to enforce null safety; use Builder. */
     TrafficLog() {}
 
@@ -1889,12 +1789,12 @@ public class NativeBridge {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
       TrafficLog that = (TrafficLog) o;
-      return time.equals(that.time) && session.equals(that.session) && protocol.equals(that.protocol) && dport.equals(that.dport) && ip.equals(that.ip) && Objects.equals(host, that.host) && Objects.equals(packageName, that.packageName) && size.equals(that.size) && allowed.equals(that.allowed);
+      return time.equals(that.time) && session.equals(that.session) && protocol.equals(that.protocol) && dport.equals(that.dport) && ip.equals(that.ip) && Objects.equals(host, that.host) && Objects.equals(packageName, that.packageName) && size.equals(that.size) && allowed.equals(that.allowed) && outgoing.equals(that.outgoing);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(time, session, protocol, dport, ip, host, packageName, size, allowed);
+      return Objects.hash(time, session, protocol, dport, ip, host, packageName, size, allowed, outgoing);
     }
 
     public static final class Builder {
@@ -1971,6 +1871,14 @@ public class NativeBridge {
         return this;
       }
 
+      private @Nullable Boolean outgoing;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setOutgoing(@NonNull Boolean setterArg) {
+        this.outgoing = setterArg;
+        return this;
+      }
+
       public @NonNull TrafficLog build() {
         TrafficLog pigeonReturn = new TrafficLog();
         pigeonReturn.setTime(time);
@@ -1982,13 +1890,14 @@ public class NativeBridge {
         pigeonReturn.setPackageName(packageName);
         pigeonReturn.setSize(size);
         pigeonReturn.setAllowed(allowed);
+        pigeonReturn.setOutgoing(outgoing);
         return pigeonReturn;
       }
     }
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(9);
+      ArrayList<Object> toListResult = new ArrayList<>(10);
       toListResult.add(time);
       toListResult.add(session);
       toListResult.add(protocol);
@@ -1998,6 +1907,7 @@ public class NativeBridge {
       toListResult.add(packageName);
       toListResult.add(size);
       toListResult.add(allowed);
+      toListResult.add(outgoing);
       return toListResult;
     }
 
@@ -2021,6 +1931,8 @@ public class NativeBridge {
       pigeonResult.setSize((Long) size);
       Object allowed = pigeonVar_list.get(8);
       pigeonResult.setAllowed((Boolean) allowed);
+      Object outgoing = pigeonVar_list.get(9);
+      pigeonResult.setOutgoing((Boolean) outgoing);
       return pigeonResult;
     }
   }
@@ -2113,14 +2025,12 @@ public class NativeBridge {
         case (byte) 135:
           return Rule.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 136:
-          return LogEntry.fromList((ArrayList<Object>) readValue(buffer));
-        case (byte) 137:
           return ErrorLog.fromList((ArrayList<Object>) readValue(buffer));
-        case (byte) 138:
+        case (byte) 137:
           return SessionStatistics.fromList((ArrayList<Object>) readValue(buffer));
-        case (byte) 139:
+        case (byte) 138:
           return TrafficLog.fromList((ArrayList<Object>) readValue(buffer));
-        case (byte) 140:
+        case (byte) 139:
           return Version.fromList((ArrayList<Object>) readValue(buffer));
         default:
           return super.readValueOfType(type, buffer);
@@ -2150,20 +2060,17 @@ public class NativeBridge {
       } else if (value instanceof Rule) {
         stream.write(135);
         writeValue(stream, ((Rule) value).toList());
-      } else if (value instanceof LogEntry) {
-        stream.write(136);
-        writeValue(stream, ((LogEntry) value).toList());
       } else if (value instanceof ErrorLog) {
-        stream.write(137);
+        stream.write(136);
         writeValue(stream, ((ErrorLog) value).toList());
       } else if (value instanceof SessionStatistics) {
-        stream.write(138);
+        stream.write(137);
         writeValue(stream, ((SessionStatistics) value).toList());
       } else if (value instanceof TrafficLog) {
-        stream.write(139);
+        stream.write(138);
         writeValue(stream, ((TrafficLog) value).toList());
       } else if (value instanceof Version) {
-        stream.write(140);
+        stream.write(139);
         writeValue(stream, ((Version) value).toList());
       } else {
         super.writeValue(stream, value);

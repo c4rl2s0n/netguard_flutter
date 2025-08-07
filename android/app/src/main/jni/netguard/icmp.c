@@ -135,6 +135,13 @@ void check_icmp_socket(const struct arguments *args, const struct epoll_event *e
                 // Forward to tun
                 if (write_icmp(args, &s->icmp, buffer, (size_t) bytes) < 0)
                     s->icmp.stop = 1;
+
+                // log incoming ICMP traffic
+                if(args->logTraffic){
+                    jint uid = get_uid_cached(args, s->icmp.version, s->protocol, dest, 0);
+                    jboolean  allowed = is_address_allowed(args, s->icmp.version, s->protocol, dest, 0, uid);
+                    log_traffic(args, s->icmp.version, s->protocol, dest, 0, bytes, uid, allowed, false);
+                }
             }
             ng_free(buffer, __FILE__, __LINE__);
         }

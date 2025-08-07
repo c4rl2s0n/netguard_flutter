@@ -118,17 +118,19 @@ void check_udp_socket(const struct arguments *args, const struct epoll_event *ev
             } else {
                 // Socket read data
                 char dest[INET6_ADDRSTRLEN + 1];
+                uint16_t dport = ntohs(s->udp.dest);
+
                 if (s->udp.version == 4)
                     inet_ntop(AF_INET, &s->udp.daddr.ip4, dest, sizeof(dest));
                 else
                     inet_ntop(AF_INET6, &s->udp.daddr.ip6, dest, sizeof(dest));
                 log_android(ANDROID_LOG_INFO, "UDP recv bytes %d from %s/%u for tun",
-                            bytes, dest, ntohs(s->udp.dest));
+                            bytes, dest, dport);
 
                 s->udp.received += bytes;
 
                 // Process DNS response
-                if (ntohs(s->udp.dest) == 53)
+                if (dport == 53)
                     parse_dns_response(args, s, buffer, (size_t *) &bytes);
 
                 // Forward to tun
@@ -136,8 +138,15 @@ void check_udp_socket(const struct arguments *args, const struct epoll_event *ev
                     s->udp.state = UDP_FINISHING;
                 else {
                     // Prevent too many open files
-                    if (ntohs(s->udp.dest) == 53)
+                    if (dport == 53)
                         s->udp.state = UDP_FINISHING;
+                }
+
+                // log incomung UDP traffic
+                if(args->logTraffic){
+                    jint uid = get_uid_cached(args, s->udp.version, s->protocol, dest, dport);
+                    jboolean  allowed = is_address_allowed(args, s->udp.version, s->protocol, dest, dport, uid);
+                    log_traffic(args, s->udp.version, s->protocol, dest, dport, bytes, uid, allowed, false);
                 }
             }
             ng_free(buffer, __FILE__, __LINE__);

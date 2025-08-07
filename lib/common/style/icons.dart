@@ -21,6 +21,9 @@ class CustomIcons {
   static const IconData delete = Icons.delete_outlined;
   static const IconData observationMode = Icons.troubleshoot;
 
+  static const IconData connectionOut = Icons.arrow_drop_up;
+  static const IconData connectionIn = Icons.arrow_drop_down;
+
   static const IconData infoPositive = Icons.verified;
   static const IconData infoNegative = Icons.error_outline;
   static const IconData save = Icons.save;
@@ -61,8 +64,6 @@ class CustomIcons {
   static const IconData hide = Icons.visibility_off_outlined;
   static const IconData sortAsc = Icons.arrow_downward;
   static const IconData sortDesc = Icons.arrow_upward;
-  static const IconData connectionOut = Icons.arrow_forward;
-  static const IconData connectionIn = Icons.arrow_back;
   static const IconData tests = Icons.science_outlined;
   static const IconData filter = Icons.filter_alt_outlined;
   static const IconData color = Icons.palette;

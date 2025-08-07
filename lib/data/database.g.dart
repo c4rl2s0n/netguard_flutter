@@ -2174,6 +2174,20 @@ class $TrafficLogTableTable extends TrafficLogTable
       'CHECK ("allowed" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _outgoingMeta = const VerificationMeta(
+    'outgoing',
+  );
+  @override
+  late final GeneratedColumn<bool> outgoing = GeneratedColumn<bool>(
+    'outgoing',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("outgoing" IN (0, 1))',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2184,6 +2198,7 @@ class $TrafficLogTableTable extends TrafficLogTable
     ip,
     host,
     allowed,
+    outgoing,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2252,6 +2267,14 @@ class $TrafficLogTableTable extends TrafficLogTable
     } else if (isInserting) {
       context.missing(_allowedMeta);
     }
+    if (data.containsKey('outgoing')) {
+      context.handle(
+        _outgoingMeta,
+        outgoing.isAcceptableOrUnknown(data['outgoing']!, _outgoingMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_outgoingMeta);
+    }
     return context;
   }
 
@@ -2289,6 +2312,10 @@ class $TrafficLogTableTable extends TrafficLogTable
         DriftSqlType.bool,
         data['${effectivePrefix}allowed'],
       )!,
+      outgoing: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}outgoing'],
+      )!,
     );
   }
 
@@ -2307,6 +2334,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
   final Value<String> ip;
   final Value<String?> host;
   final Value<bool> allowed;
+  final Value<bool> outgoing;
   final Value<int> rowid;
   const TrafficLogTableCompanion({
     this.id = const Value.absent(),
@@ -2317,6 +2345,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     this.ip = const Value.absent(),
     this.host = const Value.absent(),
     this.allowed = const Value.absent(),
+    this.outgoing = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TrafficLogTableCompanion.insert({
@@ -2328,12 +2357,14 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     required String ip,
     this.host = const Value.absent(),
     required bool allowed,
+    required bool outgoing,
     this.rowid = const Value.absent(),
   }) : time = Value(time),
        session = Value(session),
        protocol = Value(protocol),
        ip = Value(ip),
-       allowed = Value(allowed);
+       allowed = Value(allowed),
+       outgoing = Value(outgoing);
   static Insertable<TrafficLog> custom({
     Expression<String>? id,
     Expression<int>? time,
@@ -2343,6 +2374,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     Expression<String>? ip,
     Expression<String>? host,
     Expression<bool>? allowed,
+    Expression<bool>? outgoing,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2354,6 +2386,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
       if (ip != null) 'ip': ip,
       if (host != null) 'host': host,
       if (allowed != null) 'allowed': allowed,
+      if (outgoing != null) 'outgoing': outgoing,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2367,6 +2400,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     Value<String>? ip,
     Value<String?>? host,
     Value<bool>? allowed,
+    Value<bool>? outgoing,
     Value<int>? rowid,
   }) {
     return TrafficLogTableCompanion(
@@ -2378,6 +2412,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
       ip: ip ?? this.ip,
       host: host ?? this.host,
       allowed: allowed ?? this.allowed,
+      outgoing: outgoing ?? this.outgoing,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2409,6 +2444,9 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     if (allowed.present) {
       map['allowed'] = Variable<bool>(allowed.value);
     }
+    if (outgoing.present) {
+      map['outgoing'] = Variable<bool>(outgoing.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2426,6 +2464,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
           ..write('ip: $ip, ')
           ..write('host: $host, ')
           ..write('allowed: $allowed, ')
+          ..write('outgoing: $outgoing, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4615,6 +4654,7 @@ typedef $$TrafficLogTableTableCreateCompanionBuilder =
       required String ip,
       Value<String?> host,
       required bool allowed,
+      required bool outgoing,
       Value<int> rowid,
     });
 typedef $$TrafficLogTableTableUpdateCompanionBuilder =
@@ -4627,6 +4667,7 @@ typedef $$TrafficLogTableTableUpdateCompanionBuilder =
       Value<String> ip,
       Value<String?> host,
       Value<bool> allowed,
+      Value<bool> outgoing,
       Value<int> rowid,
     });
 
@@ -4676,6 +4717,11 @@ class $$TrafficLogTableTableFilterComposer
 
   ColumnFilters<bool> get allowed => $composableBuilder(
     column: $table.allowed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get outgoing => $composableBuilder(
+    column: $table.outgoing,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4728,6 +4774,11 @@ class $$TrafficLogTableTableOrderingComposer
     column: $table.allowed,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get outgoing => $composableBuilder(
+    column: $table.outgoing,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TrafficLogTableTableAnnotationComposer
@@ -4764,6 +4815,9 @@ class $$TrafficLogTableTableAnnotationComposer
 
   GeneratedColumn<bool> get allowed =>
       $composableBuilder(column: $table.allowed, builder: (column) => column);
+
+  GeneratedColumn<bool> get outgoing =>
+      $composableBuilder(column: $table.outgoing, builder: (column) => column);
 }
 
 class $$TrafficLogTableTableTableManager
@@ -4807,6 +4861,7 @@ class $$TrafficLogTableTableTableManager
                 Value<String> ip = const Value.absent(),
                 Value<String?> host = const Value.absent(),
                 Value<bool> allowed = const Value.absent(),
+                Value<bool> outgoing = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TrafficLogTableCompanion(
                 id: id,
@@ -4817,6 +4872,7 @@ class $$TrafficLogTableTableTableManager
                 ip: ip,
                 host: host,
                 allowed: allowed,
+                outgoing: outgoing,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4829,6 +4885,7 @@ class $$TrafficLogTableTableTableManager
                 required String ip,
                 Value<String?> host = const Value.absent(),
                 required bool allowed,
+                required bool outgoing,
                 Value<int> rowid = const Value.absent(),
               }) => TrafficLogTableCompanion.insert(
                 id: id,
@@ -4839,6 +4896,7 @@ class $$TrafficLogTableTableTableManager
                 ip: ip,
                 host: host,
                 allowed: allowed,
+                outgoing: outgoing,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

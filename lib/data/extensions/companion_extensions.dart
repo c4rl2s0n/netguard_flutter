@@ -91,5 +91,6 @@ extension TrafficLogToCompanion on TrafficLog {
     ip: Value(ip),
     host: Value(host),
     allowed: Value(allowed),
+    outgoing: Value(outgoing),
   );
 }

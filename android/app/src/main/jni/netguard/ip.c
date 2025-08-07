@@ -289,13 +289,13 @@ void handle_ip(const struct arguments *args,
         uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
     // cache uid
     if (uid == -1) {
-        jint cuid = get_uid_cached(args, version, protocol, source, sport, dest, dport);
+        jint cuid = get_uid_cached(args, version, protocol, dest, dport);
         if(cuid != -1){
             log_android(ANDROID_LOG_INFO, "get_uid_q failed but had it chached...");
         }
         uid = cuid;
     } else {
-        cache_uid(args, version, protocol, source, sport, dest, dport, uid);
+        cache_uid(args, version, protocol, dest, dport, uid);
     }
 
     // Get server name
@@ -333,8 +333,7 @@ void handle_ip(const struct arguments *args,
                *server_name == 0) { // TODO: not sure if this still makes sense for me, maybe skip it
         allowed = 1; // assume existing session
     } else {
-        jobject objPacket = create_packet(args, version, protocol, flags, source, sport, dest, dport, data, uid, 0);
-        allowed = is_address_allowed(args, objPacket);
+        allowed = is_address_allowed(args, version, protocol, dest, dport, uid);
         if (allowed && *server_name && is_domain_blocked(args, uid, server_name)) {
             allowed = 0;
         }
@@ -362,7 +361,7 @@ void handle_ip(const struct arguments *args,
 
     // optionally, log traffic to database
     if(args->logTraffic)
-        log_traffic(args, version, protocol, dest, dport, length, uid, allowed);
+        log_traffic(args, version, protocol, dest, dport, length, uid, allowed, true);
 
 }
 

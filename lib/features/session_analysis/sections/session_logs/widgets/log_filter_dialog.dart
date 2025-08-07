@@ -19,6 +19,7 @@ class LogFilterDialog extends StatelessWidget {
               [
                 _filterApplication(),
                 _showGrouped(),
+                _sorting(),
                 _blockedOnly(),
                 _allowedOnly(),
                 const VolumeTypeSetting(),
@@ -34,19 +35,11 @@ class LogFilterDialog extends StatelessWidget {
   Widget _showGrouped() {
     return BlocBuilder<SessionLogsFilterCubit, SessionLogsFilterState>(
       buildWhen: (oldState, state) => oldState.showGrouped != state.showGrouped,
-      builder: (context, state) => Column(
-        children: [
-          SwitchSetting(
-            name: "Compact view",
-            description: "Group logs by Application, Destination, Protocol",
-            value: state.showGrouped,
-            onChanged: filterCubit.setShowGrouped,
-          ),
-          if (true || state.showGrouped) ...[
-            const Margin.vertical(ThemeConstants.spacing),
-            _sorting(),
-          ],
-        ],
+      builder: (context, state) => SwitchSetting(
+        name: "Compact view",
+        description: "Group logs by Application, Destination, Protocol",
+        value: state.showGrouped,
+        onChanged: filterCubit.setShowGrouped,
       ),
     );
   }
@@ -91,20 +84,29 @@ class LogFilterDialog extends StatelessWidget {
       buildWhen: (oldState, state) =>
           oldState.showGrouped != state.showGrouped ||
           oldState.sorting != state.sorting,
-      builder: (context, state) => SortingSetting(
-        enabled: state.showGrouped,
-        selected: state.sorting,
-        options: [
-          LogSorting.time,
-          if (state.showGrouped) LogSorting.volume,
-          LogSorting.name,
-          LogSorting.application,
-        ],
-        onChanged: filterCubit.setSorting,
-      ),
+      builder: (context, filter) =>
+          BlocListener<SessionLogAnalysisCubit, SessionLogAnalysisState>(
+            listenWhen: (oldState, state) =>
+                !filter.showGrouped &&
+                filter.sorting == LogSorting.volume &&
+                oldState.volumeType != state.volumeType &&
+                state.volumeType == VolumeType.count,
+            listener: (context, state) =>
+                filterCubit.setSorting(LogSorting.time),
+            child: SortingSetting(
+              enabled: filter.showGrouped,
+              selected: filter.sorting,
+              options: [
+                LogSorting.time,
+                if (filter.showGrouped) LogSorting.volume,
+                LogSorting.name,
+                LogSorting.application,
+              ],
+              onChanged: filterCubit.setSorting,
+            ),
+          ),
     );
   }
-
 
   static Future show(
     BuildContext context,

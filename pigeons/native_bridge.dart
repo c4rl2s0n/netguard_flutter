@@ -163,23 +163,6 @@ class Rule {
 }
 
 
-// class LogEntry {
-//   LogEntry({required this.time, required this.session, this.data});
-//   final int time;
-//   final String session;
-//   Object? data;
-// }
-class LogEntry {
-  LogEntry({
-    required this.time,
-    required this.session,
-    required this.data,
-  });
-
-  int time;
-  String session;
-  Object data;
-}
 
 class ErrorLog {
   ErrorLog({
@@ -220,6 +203,7 @@ class TrafficLog {
     this.packageName,
     this.size = 0,
     required this.allowed,
+    required this.outgoing,
   });
 
   int time;
@@ -231,6 +215,7 @@ class TrafficLog {
   String? packageName;
   int size;
   bool allowed;
+  bool outgoing;
 }
 
 class Version {

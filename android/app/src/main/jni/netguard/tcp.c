@@ -250,9 +250,13 @@ void check_tcp_socket(const struct arguments *args,
         inet_ntop(AF_INET6, &s->tcp.saddr.ip6, source, sizeof(source));
         inet_ntop(AF_INET6, &s->tcp.daddr.ip6, dest, sizeof(dest));
     }
+
+    uint16_t sport = ntohs(s->tcp.source);
+    uint16_t dport = ntohs(s->tcp.dest);
+
     char session[250];
     sprintf(session, "TCP socket from %s/%u to %s/%u %s loc %u rem %u",
-            source, ntohs(s->tcp.source), dest, ntohs(s->tcp.dest),
+            source, sport, dest, dport,
             strstate(s->tcp.state),
             s->tcp.local_seq - s->tcp.local_start,
             s->tcp.remote_seq - s->tcp.remote_start);
@@ -515,9 +519,6 @@ void check_tcp_socket(const struct arguments *args,
                     }
                 }
 
-                // TODO: maybe block DNS requests here? Need to also find the code for UDP...
-                // TODO: Might only be incoming traffic here (?)
-
                 // Log data buffered
                 struct segment *seg = s->tcp.forward;
                 while (seg != NULL) {
@@ -599,7 +600,7 @@ void check_tcp_socket(const struct arguments *args,
                         s->tcp.received += bytes;
 
                         // Process DNS response
-                        if (ntohs(s->tcp.dest) == 53 && bytes > 2) {
+                        if (dport == 53 && bytes > 2) {
                             ssize_t dlen = bytes - 2;
                             parse_dns_response(args, s, buffer + 2, (size_t *) &dlen);
                         }
@@ -609,9 +610,12 @@ void check_tcp_socket(const struct arguments *args,
                             s->tcp.local_seq += bytes;
                             s->tcp.unconfirmed++;
                         }
-                        if(false && args->logTraffic){
-                            // TODO: read dest/source, length, uid, allowed
-                            log_traffic(args, s->tcp.version, s->protocol, "s->tcp.daddr", s->tcp.dest, 0, -1, true);
+
+                        // log incoming TCP traffic
+                        if(args->logTraffic){
+                            jint uid = get_uid_cached(args, s->tcp.version, s->protocol, dest, dport);
+                            jboolean  allowed = is_address_allowed(args, s->tcp.version, s->protocol, dest, dport, uid);
+                            log_traffic(args, s->tcp.version, s->protocol, dest, dport, bytes, uid, allowed, false);
                         }
                     }
                     ng_free(buffer, __FILE__, __LINE__);
@@ -666,6 +670,7 @@ jboolean handle_tcp(const struct arguments *args,
 
     char flags[10];
     int flen = 0;
+
     if (tcphdr->syn)
         flags[flen++] = 'S';
     if (tcphdr->ack)

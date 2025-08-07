@@ -16,4 +16,5 @@ class TrafficLogTable extends Table with IdExtension {
   TextColumn get ip => text()();
   TextColumn get host => text().nullable()();
   BoolColumn get allowed => boolean()();
+  BoolColumn get outgoing => boolean()();
 }

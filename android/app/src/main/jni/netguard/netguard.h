@@ -511,13 +511,17 @@ int sdk_int(JNIEnv *env);
 
 void log_android(int prio, const char *fmt, ...);
 
-void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed);
+
+/// JAVA METHOD CALLS
+void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed, jboolean outgoing);
 void dns_resolved(const struct arguments *args,
                   const char *qname, const char *aname, const char *resource, int ttl, jint uid);
 
 jboolean is_quic_blocked(const struct arguments *args, jint uid);
 jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *name);
+jboolean is_address_allowed(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jint uid);
 void sni_resolved(const struct arguments *args, const char *sni, jint version, jint protocol, const char* daddr, jint dport, const char* saddr, jint sport, jint uid);
+
 
 jint get_uid_q(const struct arguments *args,
                jint version,
@@ -529,28 +533,14 @@ jint get_uid_q(const struct arguments *args,
 
 jint get_uid_cached(const struct arguments *args,
                     jint version, jint protocol,
-                    const char *source, jint sport,
                     const char *dest, jint dport);
 
 jint cache_uid(const struct arguments *args,
                jint version, jint protocol,
-               const char *source, jint sport,
                const char *dest, jint dport, jint uid);
 
-jboolean is_address_allowed(const struct arguments *args, jobject objPacket);
 
-jobject create_packet(const struct arguments *args,
-                      jint version,
-                      jint protocol,
-                      const char *flags,
-                      const char *source,
-                      jint sport,
-                      const char *dest,
-                      jint dport,
-                      const char *data,
-                      jint uid,
-                      jboolean allowed);
-
+/// MISC
 void write_pcap_hdr();
 
 void write_pcap_rec(const uint8_t *buffer, size_t len);

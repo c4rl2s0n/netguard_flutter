@@ -300,10 +300,8 @@ void check_allowed(const struct arguments *args) {
                     inet_ntop(AF_INET6, &s->icmp.daddr.ip6, dest, sizeof(dest));
                 }
 
-                jobject objPacket = create_packet(
-                        args, s->icmp.version, IPPROTO_ICMP, "",
-                        source, 0, dest, 0, "", s->icmp.uid, 0);
-                if (!args->observeOnly && !is_address_allowed(args, objPacket)) {
+                if (!args->observeOnly
+                        && !is_address_allowed(args, s->icmp.version, IPPROTO_ICMP, dest, 0, s->icmp.uid)) {
                     s->icmp.stop = 1;
                     log_android(ANDROID_LOG_WARN, "ICMP terminate %d uid %d",
                                 s->socket, s->icmp.uid);
@@ -320,10 +318,7 @@ void check_allowed(const struct arguments *args) {
                     inet_ntop(AF_INET6, &s->udp.daddr.ip6, dest, sizeof(dest));
                 }
 
-                jobject objPacket = create_packet(
-                        args, s->udp.version, IPPROTO_UDP, "",
-                        source, ntohs(s->udp.source), dest, ntohs(s->udp.dest), "", s->udp.uid, 0);
-                if (!args->observeOnly && !is_address_allowed(args, objPacket)) {
+                if (!args->observeOnly && !is_address_allowed(args, s->udp.version, IPPROTO_UDP, dest, ntohs(s->udp.dest), s->udp.uid)) {
                     s->udp.state = UDP_FINISHING;
                     log_android(ANDROID_LOG_WARN, "UDP terminate session socket %d uid %d",
                                 s->socket, s->udp.uid);
@@ -352,10 +347,7 @@ void check_allowed(const struct arguments *args) {
                     inet_ntop(AF_INET6, &s->tcp.daddr.ip6, dest, sizeof(dest));
                 }
 
-                jobject objPacket = create_packet(
-                        args, s->tcp.version, IPPROTO_TCP, "",
-                        source, ntohs(s->tcp.source), dest, ntohs(s->tcp.dest), "", s->tcp.uid, 0);
-                if (!args->observeOnly && !is_address_allowed(args, objPacket)) {
+                if (!args->observeOnly && !is_address_allowed(args, s->tcp.version, IPPROTO_TCP, dest, ntohs(s->tcp.dest), s->tcp.uid)) {
                     write_rst(args, &s->tcp);
                     log_android(ANDROID_LOG_WARN, "TCP terminate socket %d uid %d",
                                 s->socket, s->tcp.uid);

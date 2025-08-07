@@ -38,7 +38,7 @@ public class ModelBuilder {
         return builder.build();
     }
 
-    public static TrafficLog TrafficLog(long time, String session, String packageName, int protocol, String ip, String host, int dport, long size, boolean allowed){
+    public static TrafficLog TrafficLog(long time, String session, String packageName, int protocol, String ip, String host, int dport, long size, boolean allowed, boolean outgoing){
         TrafficLog.Builder builder = new TrafficLog.Builder();
         builder.setTime(time);
         builder.setSession(session);
@@ -49,6 +49,7 @@ public class ModelBuilder {
         builder.setHost(host == null || host.isBlank() ? null : host);
         builder.setSize(size);
         builder.setAllowed(allowed);
+        builder.setOutgoing(outgoing);
         return builder.build();
     }
 
