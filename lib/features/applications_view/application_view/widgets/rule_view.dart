@@ -190,8 +190,16 @@ class RuleView extends StatelessWidget {
         icon: Icon(CustomIcons.remove),
         text: "Delete",
         color: context.colors.negative,
-        onTap: () =>
-            context.read<ApplicationEntryCubit>().deleteRule(ruleCubit),
+        onTap: () async {
+          if (await DeleteConfirmationDialog.ask(
+                context,
+                title: "Delete Firewall Rule?",
+                content: "Do you want to delete the rule '${rule.name}'?",
+              ) &&
+              context.mounted) {
+            context.read<ApplicationEntryCubit>().deleteRule(ruleCubit);
+          }
+        },
       ),
     );
   }

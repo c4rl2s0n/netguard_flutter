@@ -22,8 +22,8 @@ class SessionLogs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      buildWhen: (oldState, state) => oldState.observeOnly != state.observeOnly,
+    return BlocBuilder<SessionCubit, SessionState>(
+      buildWhen: (oldState, state) => oldState.sessionConfig != state.sessionConfig,
       builder: (context, state) => Column(
         children: [
           Expanded(child: _logs()),
@@ -35,7 +35,7 @@ class SessionLogs extends StatelessWidget {
               icon: CustomIcons.allow,
               indicatorSize: _legendIconSize,
             ),
-            if(state.observeOnly)...[
+            if(state.sessionConfig?.observeOnly ?? false)...[
               LegendEntry(
                 label: "Block observed",
                 color: context.colors.negative,

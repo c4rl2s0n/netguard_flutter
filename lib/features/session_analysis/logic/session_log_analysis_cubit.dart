@@ -30,7 +30,7 @@ class SessionLogAnalysisCubit extends Cubit<SessionLogAnalysisState> {
 
   void setView(AnalysisView view) {
     emit(state.copyWith(view: view));
-    if(view == AnalysisView.chart){
+    if (view == AnalysisView.chart) {
       reSort();
     }
   }
@@ -148,11 +148,18 @@ class SessionLogAnalysisCubit extends Cubit<SessionLogAnalysisState> {
         getTime: (x) => x.latest,
       );
 
-  void maybeSort() {
-    if (state.lastSort == null ||
+  void maybeSort([IList<TrafficLog>? lastLogs]) {
+    int delayMs = 1000;
+    if (lastLogs != null && lastLogs.hashCode == state.logs.hashCode ||
+        state.lastSort == null ||
         DateTime.timestamp().difference(state.lastSort!).inMilliseconds >
-            1000) {
+            delayMs) {
       reSort();
+    } else {
+      Future.delayed(
+        Duration(milliseconds: delayMs),
+        () => maybeSort(state.logs),
+      );
     }
   }
 

@@ -96,10 +96,4 @@ class SettingsRepository extends ISettingsRepository {
     );
   }
 
-  @override
-  Future<void> updateObserveOnly(bool observeOnly) async {
-    await _updateSetting().write(
-      SettingsTableCompanion(observeOnly: Value(observeOnly)),
-    );
-  }
 }

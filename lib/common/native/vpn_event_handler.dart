@@ -22,8 +22,8 @@ class VpnEventHandlerImpl extends VpnEventHandler {
 
 
   @override
-  void updateVpnState(VpnConfig? session) {
-    accessor.sessionCubit.setVpnSession(session);
+  void updateVpnState(bool running) {
+    accessor.sessionCubit.setVpnState(running);
   }
 
   final data.ITrafficLogRepository trafficLogRepository = accessor.trafficLogRepository;

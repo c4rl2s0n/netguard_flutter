@@ -82,23 +82,26 @@ class SessionCubit extends Cubit<SessionState> {
 
   StreamSubscription? trafficLogListener;
 
-  Future startVpn() async {
+  Future startVpn({bool observeOnly = false}) async {
     if (state.running) return;
     Settings settings = settingsCubit.state.settings;
 
     await PermissionTools.requestNotificationPermission();
     await PermissionTools.requestBatteryOptimizationPermission();
 
-    VpnConfig vpnConfig = await VpnTools.getConfig(settings);
-    if(vpnConfig.filteredPackages.isEmpty){
-      SnackBarFactory.showNegativeSnackBar("No packages are configured to be filtered. Start aborted!");
+    VpnConfig vpnConfig = await VpnTools.getConfig(settings)
+      ..observeOnly = observeOnly;
+    if (vpnConfig.filteredPackages.isEmpty) {
+      SnackBarFactory.showNegativeSnackBar(
+        "No packages are configured to be filtered. Start aborted!",
+      );
       return;
     }
     await vpnController.startVpn(vpnConfig);
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
     state.sessionAnalysis.clear();
     _notificationService.run();
-    emit(state.copyWith(sessionConfig: vpnConfig));
+    emit(state.copyWith(sessionConfig: vpnConfig, running: true));
   }
 
   Future stopVpn() async {
@@ -109,11 +112,11 @@ class SessionCubit extends Cubit<SessionState> {
     await trafficLogListener?.cancel();
     trafficLogListener = null;
 
-    emit(state.copyWith(sessionConfig: null));
+    emit(state.copyWith(running: false));
   }
 
-  void setVpnSession(VpnConfig? session) =>
-      emit(state.copyWith(sessionConfig: session));
+  void setVpnState(bool running) =>
+      emit(state.copyWith(running: running));
 
   void _onTrafficLog(TrafficLog event) {
     state.sessionStatistics.addLog(event);
@@ -129,6 +132,7 @@ class SessionCubit extends Cubit<SessionState> {
 class SessionState with _$SessionState {
   const SessionState({
     this.sessionConfig,
+    this.running = false,
     required this.sessionAnalysis,
     this.systemApplicationsMap = const {},
     this.thirdPartyApplicationsMap = const {},
@@ -138,15 +142,17 @@ class SessionState with _$SessionState {
   @override
   final VpnConfig? sessionConfig;
   @override
+  final bool running;
+  @override
   final SessionLogAnalysisCubit sessionAnalysis;
   @override
   final Map<String, Application> systemApplicationsMap;
   @override
   final Map<String, Application> thirdPartyApplicationsMap;
 
+  @override
   final SessionStatistics sessionStatistics;
 
-  bool get running => sessionConfig != null;
   bool get hasLogs => sessionAnalysis.hasLogs;
 
   Map<String, Application> get applicationsMap => {

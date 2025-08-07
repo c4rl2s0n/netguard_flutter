@@ -31,6 +31,7 @@ class PieView extends StatelessWidget {
                 child: GridView.count(
                   crossAxisCount: _gridCrossAxisCount(analysis),
                   shrinkWrap: true,
+                  childAspectRatio: 0.55,
                   physics: NeverScrollableScrollPhysics(),
                   mainAxisSpacing: ThemeConstants.spacing,
                   crossAxisSpacing: ThemeConstants.spacing,

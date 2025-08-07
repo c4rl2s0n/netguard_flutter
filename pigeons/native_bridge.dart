@@ -24,7 +24,7 @@ abstract class VpnController {
 abstract class VpnEventHandler {
   void logText(String message);
   void logError(String errorCode, String message, Object details);
-  void updateVpnState(VpnConfig? session);
+  void updateVpnState(bool running);
   @async
   void logTraffic(TrafficLog log);
 }
@@ -37,6 +37,7 @@ class VpnConfig {
     required this.filteredPackages,
     this.logTraffic = true,
     this.observeOnly = false,
+    this.finished = false,
     this.logLevel = 5,
   });
 
@@ -57,6 +58,10 @@ class VpnConfig {
   /// Can be useful to understand the potential impact of the firewall.
   bool observeOnly;
 
+  /// indicates if the session has already finished
+  bool finished;
+
+  /// LogLevel for native code
   int logLevel;
 }
 

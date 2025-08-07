@@ -18,6 +18,8 @@ class CustomIcons {
   static const IconData allow = Icons.verified_user_outlined;
   static const IconData pie = Icons.pie_chart;
   static const IconData bar = Icons.bar_chart;
+  static const IconData delete = Icons.delete_outlined;
+  static const IconData observationMode = Icons.troubleshoot;
 
   static const IconData infoPositive = Icons.verified;
   static const IconData infoNegative = Icons.error_outline;

@@ -27,9 +27,9 @@ public class VpnEventChannel {
         _vpnEventHandler.logError(errorCode, message, details, _voidResult);
     }
 
-    public static void updateVpnState(@Nullable VpnConfig session){
+    public static void updateVpnState(boolean running){
         if(notInitialized()) return;
-        _vpnEventHandler.updateVpnState(session, _voidResult);
+        _vpnEventHandler.updateVpnState(running, _voidResult);
     }
 
     public static void logTraffic(TrafficLog log){

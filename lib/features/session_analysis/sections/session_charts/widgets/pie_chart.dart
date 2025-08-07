@@ -14,6 +14,7 @@ class PieChart extends StatelessWidget {
 
   final double centerRadiusApp = 20;
   final double centerRadiusDefault = 5;
+  double get centerRadius => isApp ? centerRadiusApp : centerRadiusDefault;
 
   @override
   Widget build(BuildContext context) {
@@ -21,19 +22,23 @@ class PieChart extends StatelessWidget {
       (byApp, child) =>
           TapToAppLogs(application: byApp.application, child: child),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(child: _chart()),
+          _chart(),
+          const Margin.vertical(ThemeConstants.smallSpacing),
           _label(context),
           _totalVolumeLabel(),
-        ].insertBetweenItems(() => const Margin.vertical(ThemeConstants.smallSpacing)),
+        ],
       ),
     );
   }
 
   Widget _label(BuildContext context) => Text(
-    analysis.label,
+    // replace '-' to avoid inefficient linebreaks for URLs
+    analysis.label.replaceAll("-", "\u2011"),
     style: context.textTheme.labelLarge,
     textAlign: TextAlign.center,
+    maxLines: 2,
     overflow: TextOverflow.ellipsis,
   );
 
@@ -52,8 +57,8 @@ class PieChart extends StatelessWidget {
 
   Widget _chart() {
     return LayoutBuilder(
-      builder: (context, constraints) => SizedBox(
-        width: _getSize(constraints),
+      builder: (context, constraints) => SizedBox.square(
+        dimension: _getSize(constraints),
         child: Stack(
           children: [
             BlocBuilder<SessionLogAnalysisCubit, SessionLogAnalysisState>(
@@ -68,9 +73,7 @@ class PieChart extends StatelessWidget {
                     _getSize(constraints),
                     state.volumeType,
                   ),
-                  centerSpaceRadius: analysis is TrafficLogByApplication
-                      ? centerRadiusApp
-                      : centerRadiusDefault,
+                  centerSpaceRadius: centerRadius,
                 ),
               ),
             ),
@@ -106,7 +109,7 @@ class PieChart extends StatelessWidget {
     } else if (constraints.hasBoundedWidth) {
       size = constraints.maxWidth;
     }
-    return max(0, size - ((isApp ? centerRadiusApp : centerRadiusDefault) * 2));
+    return max(0, size);
   }
 
   List<charts.PieChartSectionData> _sections(
@@ -114,6 +117,7 @@ class PieChart extends StatelessWidget {
     double size,
     VolumeType type,
   ) {
+    size = size - centerRadius * 2;
     TextStyle textStyle = context.textTheme.labelLarge!.copyWith(
       fontWeight: FontWeight.bold,
     );

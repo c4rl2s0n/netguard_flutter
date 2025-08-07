@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SessionState {
 
- VpnConfig? get sessionConfig; SessionLogAnalysisCubit get sessionAnalysis; Map<String, Application> get systemApplicationsMap; Map<String, Application> get thirdPartyApplicationsMap; SessionStatistics get sessionStatistics;
+ VpnConfig? get sessionConfig; bool get running; SessionLogAnalysisCubit get sessionAnalysis; Map<String, Application> get systemApplicationsMap; Map<String, Application> get thirdPartyApplicationsMap; SessionStatistics get sessionStatistics;
 /// Create a copy of SessionState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SessionStateCopyWith<SessionState> get copyWith => _$SessionStateCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionState&&(identical(other.sessionConfig, sessionConfig) || other.sessionConfig == sessionConfig)&&(identical(other.sessionAnalysis, sessionAnalysis) || other.sessionAnalysis == sessionAnalysis)&&const DeepCollectionEquality().equals(other.systemApplicationsMap, systemApplicationsMap)&&const DeepCollectionEquality().equals(other.thirdPartyApplicationsMap, thirdPartyApplicationsMap)&&(identical(other.sessionStatistics, sessionStatistics) || other.sessionStatistics == sessionStatistics));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionState&&(identical(other.sessionConfig, sessionConfig) || other.sessionConfig == sessionConfig)&&(identical(other.running, running) || other.running == running)&&(identical(other.sessionAnalysis, sessionAnalysis) || other.sessionAnalysis == sessionAnalysis)&&const DeepCollectionEquality().equals(other.systemApplicationsMap, systemApplicationsMap)&&const DeepCollectionEquality().equals(other.thirdPartyApplicationsMap, thirdPartyApplicationsMap)&&(identical(other.sessionStatistics, sessionStatistics) || other.sessionStatistics == sessionStatistics));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sessionConfig,sessionAnalysis,const DeepCollectionEquality().hash(systemApplicationsMap),const DeepCollectionEquality().hash(thirdPartyApplicationsMap),sessionStatistics);
+int get hashCode => Object.hash(runtimeType,sessionConfig,running,sessionAnalysis,const DeepCollectionEquality().hash(systemApplicationsMap),const DeepCollectionEquality().hash(thirdPartyApplicationsMap),sessionStatistics);
 
 @override
 String toString() {
-  return 'SessionState(sessionConfig: $sessionConfig, sessionAnalysis: $sessionAnalysis, systemApplicationsMap: $systemApplicationsMap, thirdPartyApplicationsMap: $thirdPartyApplicationsMap, sessionStatistics: $sessionStatistics)';
+  return 'SessionState(sessionConfig: $sessionConfig, running: $running, sessionAnalysis: $sessionAnalysis, systemApplicationsMap: $systemApplicationsMap, thirdPartyApplicationsMap: $thirdPartyApplicationsMap, sessionStatistics: $sessionStatistics)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SessionStateCopyWith<$Res>  {
   factory $SessionStateCopyWith(SessionState value, $Res Function(SessionState) _then) = _$SessionStateCopyWithImpl;
 @useResult
 $Res call({
- VpnConfig? sessionConfig, SessionLogAnalysisCubit sessionAnalysis, Map<String, Application> systemApplicationsMap, Map<String, Application> thirdPartyApplicationsMap, SessionStatistics sessionStatistics
+ VpnConfig? sessionConfig, bool running, SessionLogAnalysisCubit sessionAnalysis, Map<String, Application> systemApplicationsMap, Map<String, Application> thirdPartyApplicationsMap, SessionStatistics sessionStatistics
 });
 
 
@@ -62,10 +62,11 @@ class _$SessionStateCopyWithImpl<$Res>
 
 /// Create a copy of SessionState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sessionConfig = freezed,Object? sessionAnalysis = null,Object? systemApplicationsMap = null,Object? thirdPartyApplicationsMap = null,Object? sessionStatistics = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionConfig = freezed,Object? running = null,Object? sessionAnalysis = null,Object? systemApplicationsMap = null,Object? thirdPartyApplicationsMap = null,Object? sessionStatistics = null,}) {
   return _then(SessionState(
 sessionConfig: freezed == sessionConfig ? _self.sessionConfig : sessionConfig // ignore: cast_nullable_to_non_nullable
-as VpnConfig?,sessionAnalysis: null == sessionAnalysis ? _self.sessionAnalysis : sessionAnalysis // ignore: cast_nullable_to_non_nullable
+as VpnConfig?,running: null == running ? _self.running : running // ignore: cast_nullable_to_non_nullable
+as bool,sessionAnalysis: null == sessionAnalysis ? _self.sessionAnalysis : sessionAnalysis // ignore: cast_nullable_to_non_nullable
 as SessionLogAnalysisCubit,systemApplicationsMap: null == systemApplicationsMap ? _self.systemApplicationsMap : systemApplicationsMap // ignore: cast_nullable_to_non_nullable
 as Map<String, Application>,thirdPartyApplicationsMap: null == thirdPartyApplicationsMap ? _self.thirdPartyApplicationsMap : thirdPartyApplicationsMap // ignore: cast_nullable_to_non_nullable
 as Map<String, Application>,sessionStatistics: null == sessionStatistics ? _self.sessionStatistics : sessionStatistics // ignore: cast_nullable_to_non_nullable

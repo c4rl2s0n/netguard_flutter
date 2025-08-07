@@ -52,6 +52,7 @@ class VpnConfig {
     required this.dbPath,
     this.logTraffic = true,
     this.observeOnly = false,
+    this.finished = false,
     this.logLevel = 5,
   });
 
@@ -72,6 +73,10 @@ class VpnConfig {
   /// Can be useful to understand the potential impact of the firewall.
   bool observeOnly;
 
+  /// indicates if the session has already finished
+  bool finished;
+
+  /// LogLevel for native code
   int logLevel;
 
   List<Object?> _toList() {
@@ -81,6 +86,7 @@ class VpnConfig {
       dbPath,
       logTraffic,
       observeOnly,
+      finished,
       logLevel,
     ];
   }
@@ -96,7 +102,8 @@ class VpnConfig {
       dbPath: result[2]! as String,
       logTraffic: result[3]! as bool,
       observeOnly: result[4]! as bool,
-      logLevel: result[5]! as int,
+      finished: result[5]! as bool,
+      logLevel: result[6]! as int,
     );
   }
 
@@ -1038,7 +1045,7 @@ abstract class VpnEventHandler {
 
   void logError(String errorCode, String message, Object details);
 
-  void updateVpnState(VpnConfig? session);
+  void updateVpnState(bool running);
 
   Future<void> logTraffic(TrafficLog log);
 
@@ -1111,9 +1118,11 @@ abstract class VpnEventHandler {
           assert(message != null,
           'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final VpnConfig? arg_session = (args[0] as VpnConfig?);
+          final bool? arg_running = (args[0] as bool?);
+          assert(arg_running != null,
+              'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState was null, expected non-null bool.');
           try {
-            api.updateVpnState(arg_session);
+            api.updateVpnState(arg_running!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

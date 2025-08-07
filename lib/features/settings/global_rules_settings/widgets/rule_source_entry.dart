@@ -24,7 +24,7 @@ class RuleSourceEntry extends StatelessWidget {
 
   Future _deleteSource(BuildContext context, {bool confirm = false}) async {
     if (!confirm ||
-        await ConfirmationDialog.ask(
+        await DeleteConfirmationDialog.ask(
               context,
               title: "Delete source?",
               content:

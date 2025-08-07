@@ -9,7 +9,6 @@ class SettingsTable extends Table {
   TextColumn get colorScheme => textEnum<FlexScheme>()();
   BoolColumn get includeSystemApps => boolean()();
   BoolColumn get logTraffic => boolean()();
-  BoolColumn get observeOnly => boolean()();
   BoolColumn get logCompactView => boolean()();
   DateTimeColumn get lastHostlistUpdate => dateTime().nullable()();
   TextColumn get analysisSettingsVolumeType => textEnum<VolumeType>()();

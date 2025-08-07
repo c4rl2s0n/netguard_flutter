@@ -95,12 +95,12 @@ public final class LogHandler extends Handler {
     }
 
 
-    public void vpnStarted(VpnConfig session){
-        VpnEventChannel.updateVpnState(session);
+    public void vpnStarted(){
+        VpnEventChannel.updateVpnState(true);
         logText("VPN started!");
     }
     public void vpnStopped(){
-        VpnEventChannel.updateVpnState(null);
+        VpnEventChannel.updateVpnState(false);
         logText("VPN stopped!");
     }
 

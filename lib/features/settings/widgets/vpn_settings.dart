@@ -17,7 +17,6 @@ class VpnSettings extends StatelessWidget {
         settings: [
           _systemApps(),
           _logTraffic(),
-          _observeOnly(),
           _globalRules(),
           _ruleImport(),
         ],
@@ -55,18 +54,6 @@ class VpnSettings extends StatelessWidget {
             "If the traffic should be logged. Might increase battery usage, but is necessary to use found domains in custom rules.",
         value: state.logTraffic,
         onChanged: (_) => settingsCubit.toggleLogTraffic(),
-      ),
-    );
-  }
-
-  Widget _observeOnly() {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      builder: (context, state) => SwitchSetting(
-        name: "Observe only",
-        description:
-            "If set, the firewall does not block any traffic.\nIt jus observes the traffic and logs, which traffic would usually be blocked. Useful for analysis.",
-        value: state.observeOnly,
-        onChanged: settingsCubit.setObserveOnly,
       ),
     );
   }

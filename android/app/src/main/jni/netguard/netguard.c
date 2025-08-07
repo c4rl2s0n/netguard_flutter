@@ -155,7 +155,7 @@ Java_eu_flutter_netguard_MyVpnService_jni_1run(
     args->env = env;
     args->instance = instance;
     args->tun = tun;
-    args->logTraffic = logTraffic;
+    args->logTraffic = logTraffic || observeOnly;   // in observation-mode, we also want to log the traffic!
     args->observeOnly = observeOnly;
     args->ctx = ctx;
     handle_events(args);

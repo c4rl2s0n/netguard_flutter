@@ -25,7 +25,6 @@ class VpnTools {
     VpnConfig config = VpnConfig(
       session: IdTools.generateUuid(),
       logTraffic: settings.logTraffic,
-      observeOnly: settings.observeOnly,
       dbPath: databaseFilepath,
       filteredPackages: filtered,
       logLevel: 5,

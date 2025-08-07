@@ -49,11 +49,6 @@ class SettingsCubit extends Cubit<SettingsState> {
     _settingsRepository.updateLogTraffic(state.logTraffic);
   }
 
-  void setObserveOnly(bool observeOnly) {
-    emit(state.copyWith(observeOnly: observeOnly));
-    _settingsRepository.updateObserveOnly(observeOnly);
-  }
-
   // ANALYSIS
   void setAnalysisVolumeType(VolumeType analysisVolumeType) {
     emit(state.copyWith(analysisVolumeType: analysisVolumeType));
@@ -100,7 +95,6 @@ class SettingsState with _$SettingsState {
     required this.colorScheme,
     required this.includeSystemApps,
     required this.logTraffic,
-    required this.observeOnly,
     required this.logCompactView,
     this.lastHostlistUpdate,
     required this.analysisVolumeType,
@@ -119,8 +113,6 @@ class SettingsState with _$SettingsState {
   final bool includeSystemApps;
   @override
   final bool logTraffic;
-  @override
-  final bool observeOnly;
 
   @override
   final bool logCompactView;
@@ -141,7 +133,6 @@ class SettingsState with _$SettingsState {
         colorScheme: settings.colorScheme,
         includeSystemApps: settings.includeSystemApps,
         logTraffic: settings.logTraffic,
-        observeOnly: settings.observeOnly,
         logCompactView: settings.logCompactView,
         lastHostlistUpdate: settings.lastHostlistUpdate,
         analysisVolumeType: settings.analysisSettingsVolumeType,
@@ -156,7 +147,6 @@ class SettingsState with _$SettingsState {
     colorScheme: colorScheme,
     includeSystemApps: includeSystemApps,
     logTraffic: logTraffic,
-    observeOnly: observeOnly,
     logCompactView: logCompactView,
     lastHostlistUpdate: lastHostlistUpdate,
     analysisSettingsVolumeType: analysisVolumeType,

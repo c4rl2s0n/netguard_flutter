@@ -209,7 +209,7 @@ public class MyVpnService extends VpnService {
             } else {
                 Log.i(TAG, "VPN interface established");
                 running = true;
-                logHandler.vpnStarted(vpnConfig);
+                logHandler.vpnStarted();
                 startNative(vpnInterface);
                 return;
             }

@@ -8,7 +8,6 @@ class Settings {
     this.colorScheme = FlexScheme.green,
     this.includeSystemApps = true,
     this.logTraffic = true,
-    this.observeOnly = false,
     this.logCompactView = false,
     this.lastHostlistUpdate,
     this.analysisSettingsVolumeType = VolumeType.count,
@@ -22,7 +21,6 @@ class Settings {
   FlexScheme colorScheme;
   bool includeSystemApps;
   bool logTraffic;
-  bool observeOnly;
   bool logCompactView;
   DateTime? lastHostlistUpdate;
   VolumeType analysisSettingsVolumeType;

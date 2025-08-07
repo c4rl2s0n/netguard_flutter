@@ -163,6 +163,21 @@ public class NativeBridge {
       this.observeOnly = setterArg;
     }
 
+    /** indicates if the session has already finished */
+    private @NonNull Boolean finished;
+
+    public @NonNull Boolean getFinished() {
+      return finished;
+    }
+
+    public void setFinished(@NonNull Boolean setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"finished\" is null.");
+      }
+      this.finished = setterArg;
+    }
+
+    /** LogLevel for native code */
     private @NonNull Long logLevel;
 
     public @NonNull Long getLogLevel() {
@@ -184,12 +199,12 @@ public class NativeBridge {
       if (this == o) { return true; }
       if (o == null || getClass() != o.getClass()) { return false; }
       VpnConfig that = (VpnConfig) o;
-      return session.equals(that.session) && filteredPackages.equals(that.filteredPackages) && dbPath.equals(that.dbPath) && logTraffic.equals(that.logTraffic) && observeOnly.equals(that.observeOnly) && logLevel.equals(that.logLevel);
+      return session.equals(that.session) && filteredPackages.equals(that.filteredPackages) && dbPath.equals(that.dbPath) && logTraffic.equals(that.logTraffic) && observeOnly.equals(that.observeOnly) && finished.equals(that.finished) && logLevel.equals(that.logLevel);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(session, filteredPackages, dbPath, logTraffic, observeOnly, logLevel);
+      return Objects.hash(session, filteredPackages, dbPath, logTraffic, observeOnly, finished, logLevel);
     }
 
     public static final class Builder {
@@ -234,6 +249,14 @@ public class NativeBridge {
         return this;
       }
 
+      private @Nullable Boolean finished;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setFinished(@NonNull Boolean setterArg) {
+        this.finished = setterArg;
+        return this;
+      }
+
       private @Nullable Long logLevel;
 
       @CanIgnoreReturnValue
@@ -249,6 +272,7 @@ public class NativeBridge {
         pigeonReturn.setDbPath(dbPath);
         pigeonReturn.setLogTraffic(logTraffic);
         pigeonReturn.setObserveOnly(observeOnly);
+        pigeonReturn.setFinished(finished);
         pigeonReturn.setLogLevel(logLevel);
         return pigeonReturn;
       }
@@ -256,12 +280,13 @@ public class NativeBridge {
 
     @NonNull
     ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<>(6);
+      ArrayList<Object> toListResult = new ArrayList<>(7);
       toListResult.add(session);
       toListResult.add(filteredPackages);
       toListResult.add(dbPath);
       toListResult.add(logTraffic);
       toListResult.add(observeOnly);
+      toListResult.add(finished);
       toListResult.add(logLevel);
       return toListResult;
     }
@@ -278,7 +303,9 @@ public class NativeBridge {
       pigeonResult.setLogTraffic((Boolean) logTraffic);
       Object observeOnly = pigeonVar_list.get(4);
       pigeonResult.setObserveOnly((Boolean) observeOnly);
-      Object logLevel = pigeonVar_list.get(5);
+      Object finished = pigeonVar_list.get(5);
+      pigeonResult.setFinished((Boolean) finished);
+      Object logLevel = pigeonVar_list.get(6);
       pigeonResult.setLogLevel((Long) logLevel);
       return pigeonResult;
     }
@@ -2414,13 +2441,13 @@ public class NativeBridge {
             } 
           });
     }
-    public void updateVpnState(@Nullable VpnConfig sessionArg, @NonNull VoidResult result) {
+    public void updateVpnState(@NonNull Boolean runningArg, @NonNull VoidResult result) {
       final String channelName = "dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.updateVpnState" + messageChannelSuffix;
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(
               binaryMessenger, channelName, getCodec());
       channel.send(
-          new ArrayList<>(Collections.singletonList(sessionArg)),
+          new ArrayList<>(Collections.singletonList(runningArg)),
           channelReply -> {
             if (channelReply instanceof List) {
               List<Object> listReply = (List<Object>) channelReply;

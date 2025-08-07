@@ -71,7 +71,6 @@ extension SettingsToCompanion on Settings {
     colorScheme: colorScheme,
     includeSystemApps: includeSystemApps,
     logTraffic: logTraffic,
-    observeOnly: observeOnly,
     logCompactView: logCompactView,
     lastHostlistUpdate: Value(lastHostlistUpdate),
     analysisSettingsVolumeType: analysisSettingsVolumeType,

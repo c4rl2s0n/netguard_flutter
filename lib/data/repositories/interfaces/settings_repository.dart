@@ -13,7 +13,6 @@ abstract class ISettingsRepository extends RepositoryBase {
   Future<void> updateColorScheme(FlexScheme colorScheme);
   Future<void> updateIncludeSystemApps(bool includeSystemApps);
   Future<void> updateLogTraffic(bool logTraffic);
-  Future<void> updateObserveOnly(bool observeOnly);
   Future<void> updateLogCompactView(bool logCompactView);
   Future<void> updateLastHostlistUpdate(DateTime? lastUpdate);
   Future<void> updateAnalysisSettingsVolumeType(VolumeType volumeType);
