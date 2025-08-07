@@ -19,7 +19,7 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
   @override
   Future close() async {
     super.close();
-    while(_entryListener.isNotEmpty) {
+    while (_entryListener.isNotEmpty) {
       await _entryListener.removeLast().cancel();
     }
     for (var e in state.entries) {
@@ -37,7 +37,9 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
     emit(
       state.copyWith(
         thirdPartyEntries: thirdParty,
+        thirdPartyAllEnabled: _allEnabled(thirdParty),
         systemEntries: system,
+        systemAllEnabled: _allEnabled(system),
       ),
     );
   }
@@ -57,27 +59,31 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
     return cubits;
   }
 
+  bool _allEnabled(List<ApplicationEntryCubit> entries) =>
+      entries.every((e) => e.state.filter);
+  bool get _thirdPartyAllEnabled => _allEnabled(state.thirdPartyEntries);
+  bool get _systemAllEnabled => _allEnabled(state.systemEntries);
 
-  void updateAllEnabled() {
+  void _updateAllEnabled() {
     emit(
       state.copyWith(
-        thirdPartyAllEnabled: state.thirdPartyEntries.every(
-          (e) => e.state.filter,
-        ),
-        systemAllEnabled: state.systemEntries.every(
-          (e) => e.state.filter,
-        ),
+        thirdPartyAllEnabled: _thirdPartyAllEnabled,
+        systemAllEnabled: _systemAllEnabled,
       ),
     );
   }
-  Future setFilterForAll(List<ApplicationEntryCubit> cubits, bool filter)async{
+
+  Future setFilterForAll(
+    List<ApplicationEntryCubit> cubits,
+    bool filter,
+  ) async {
     _updateOnCubitChange = false;
-    for(var cubit in cubits){
+    for (var cubit in cubits) {
       cubit.setFilter(filter);
     }
     // small async gap to ensure cubits are updated before we listen for updates again
-    Future.delayed(Duration(milliseconds: 100), (){
-      updateAllEnabled();
+    Future.delayed(Duration(milliseconds: 100), () {
+      _updateAllEnabled();
       _updateOnCubitChange = true;
     });
   }
@@ -85,7 +91,7 @@ class ApplicationsViewCubit extends Cubit<ApplicationsViewState> {
   // TODO: this is not working reliably, if at all....
   bool _updateOnCubitChange = true;
   void onCubitChanged(ApplicationEntryState state) {
-    if(_updateOnCubitChange) updateAllEnabled();
+    if (_updateOnCubitChange) _updateAllEnabled();
   }
 }
 

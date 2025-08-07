@@ -11,17 +11,18 @@ class ApplicationsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SessionCubit, SessionState>(
-      buildWhen: (oldState, state) => oldState.applications != state.applications,
-      builder: (context, state) =>  BlocProvider(
+      buildWhen: (oldState, state) =>
+          oldState.applications != state.applications,
+      builder: (context, state) => BlocProvider(
         create: (_) => ApplicationsViewCubit(),
         child: PageComponentFactory.scaffold(
+          context,
+          appBar: PageComponentFactory.appBar(
             context,
-            appBar: PageComponentFactory.appBar(
-              context,
-              title: "Applications",
-              actions: [PageComponentFactory.settingsNavigationButton()],
-            ),
-            body: _buildContent(),
+            title: "Applications",
+            actions: [PageComponentFactory.settingsNavigationButton()],
+          ),
+          body: _buildContent(),
         ),
       ),
     );
@@ -80,8 +81,12 @@ class ApplicationsView extends StatelessWidget {
         groupAction: BlocBuilder<ApplicationsViewCubit, ApplicationsViewState>(
           buildWhen: (oldState, state) =>
               oldState.thirdPartyAllEnabled != state.thirdPartyAllEnabled,
-          builder: (context, state) =>
-              _groupAction(context, state.thirdPartyEntries, canEdit),
+          builder: (context, state) => _groupAction(
+            context,
+            state.thirdPartyAllEnabled,
+            state.thirdPartyEntries,
+            canEdit,
+          ),
         ),
       ),
     );
@@ -105,8 +110,12 @@ class ApplicationsView extends StatelessWidget {
         groupAction: BlocBuilder<ApplicationsViewCubit, ApplicationsViewState>(
           buildWhen: (oldState, state) =>
               oldState.systemAllEnabled != state.systemAllEnabled,
-          builder: (context, state) =>
-              _groupAction(context, state.systemEntries, canEdit),
+          builder: (context, state) => _groupAction(
+            context,
+            state.systemAllEnabled,
+            state.systemEntries,
+            canEdit,
+          ),
         ),
       ),
     );
@@ -114,11 +123,12 @@ class ApplicationsView extends StatelessWidget {
 
   Widget _groupAction(
     BuildContext context,
+    bool value,
     List<ApplicationEntryCubit> affectedEntries,
     bool canEdit,
   ) {
     return Switch(
-      value: affectedEntries.every((e) => e.state.filter),
+      value: value,
       onChanged: canEdit
           ? (v) => context.applicationsViewCubit.setFilterForAll(
               affectedEntries,
