@@ -258,8 +258,6 @@ public class MyVpnService extends VpnService {
 
 
     private Builder getBuilder(List<String> packageNames) {
-        assert !applicationSettings.isEmpty();
-
         // Build VPN service
         Builder builder = new Builder();
         builder.setSession("NetGuard");
@@ -307,14 +305,24 @@ public class MyVpnService extends VpnService {
         Log.i(TAG, "MTU=" + mtu);
         builder.setMtu(mtu);
 
-        // Add list of allowed applications
-        // Whitelist
-        for (var packageName : packageNames) {
+
+        // Add list of routed applications
+        if(packageNames.isEmpty()){
+            // if no filtered packages are specified, add the firewall itself
             try {
-                builder.addAllowedApplication(packageName);
-                Log.i(TAG, "MyVpnService " + packageName);
+                builder.addAllowedApplication(getPackageName());
             } catch (PackageManager.NameNotFoundException ex) {
-                Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
+                Log.e(TAG, ex + "\n" + Log.getStackTraceString(ex));
+            }
+        }else {
+            // Whitelist
+            for (var packageName : packageNames) {
+                try {
+                    builder.addAllowedApplication(packageName);
+                    Log.i(TAG, "MyVpnService " + packageName);
+                } catch (PackageManager.NameNotFoundException ex) {
+                    Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
+                }
             }
         }
 

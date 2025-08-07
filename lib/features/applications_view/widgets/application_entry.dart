@@ -13,31 +13,34 @@ class ApplicationEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(value: applicationCubit, child: _content(context));
-  }
-
-  Widget _content(BuildContext context) {
-    return ActionSetting(
-      name: application.label,
-      //subtitle: Text(application.packageName),
-      description: "${application.packageName}\n${application.version}",
-      leading: SizedBox.square(
-        dimension: 42,
-        child: application.icon != null
-            ? Image.memory(application.icon!)
-            : null,
-      ),
-      trailing: _switch(),
-      action: (context) => context.navigator.navigateTo(ApplicationView(applicationCubit)),
+    return BlocProvider.value(
+      value: applicationCubit,
+      child: _content(context),
     );
   }
 
-  Widget _switch() {
+  Widget _content(BuildContext context) {
     return BlocBuilder<ApplicationEntryCubit, ApplicationEntryState>(
       buildWhen: (oldState, state) => oldState.filter != state.filter,
-      builder: (context, state) => Switch(
-        value: state.filter,
-        onChanged: applicationCubit.setFilter,
+      builder: (context, state) => ActionSetting(
+        name: application.label,
+        //subtitle: Text(application.packageName),
+        description: "${application.packageName}\n${application.version}",
+        leading: SizedBox.square(
+          dimension: 42,
+          child: application.icon != null
+              ? Image.memory(application.icon!)
+              : null,
+        ),
+        trailing: Switch(
+          value: state.filter,
+          onChanged: applicationCubit.setFilter,
+        ),
+        action: state.filter
+            ? (context) => context.navigator.navigateTo(
+                ApplicationView(applicationCubit),
+              )
+            : null,
       ),
     );
   }

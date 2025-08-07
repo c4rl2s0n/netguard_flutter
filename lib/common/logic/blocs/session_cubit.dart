@@ -90,6 +90,10 @@ class SessionCubit extends Cubit<SessionState> {
     await PermissionTools.requestBatteryOptimizationPermission();
 
     VpnConfig vpnConfig = await VpnTools.getConfig(settings);
+    if(vpnConfig.filteredPackages.isEmpty){
+      SnackBarFactory.showNegativeSnackBar("No packages are configured to be filtered. Start aborted!");
+      return;
+    }
     await vpnController.startVpn(vpnConfig);
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
     state.sessionAnalysis.clear();
