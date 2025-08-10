@@ -15,29 +15,39 @@ class HomeTitle extends StatelessWidget {
     );
   }
 
-  Widget _firewallEnabled(BuildContext context, VpnConfig? sessionConfig) => Row(
+  Widget _firewallEnabled(BuildContext context, VpnConfig? sessionConfig) => Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(
-        CustomIcons.active,
-        color: context.colors.positive,
-        size: context.textTheme.headlineLarge.size,
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            CustomIcons.active,
+            color: context.colors.positive,
+            size: context.textTheme.headlineLarge.size,
+          ),
+          const Margin.horizontal(ThemeConstants.spacing),
+          Text("Firewall is ${sessionConfig?.observeOnly ?? false ? "observing" : "active"}", style: context.textTheme.headlineLarge),
+        ],
       ),
-      const Margin.horizontal(ThemeConstants.spacing),
-      Text("Firewall is active${sessionConfig?.observeOnly ?? false ? "(observation)" : ""}", style: context.textTheme.headlineLarge),
       Text("Statistics for current session:", style: context.textTheme.headlineSmall),
     ],
   );
-  Widget _firewallDisabled(BuildContext context) => Row(
+  Widget _firewallDisabled(BuildContext context) => Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(
-        CustomIcons.inactive,
-        color: context.colors.negative,
-        size: context.textTheme.headlineLarge.size,
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            CustomIcons.inactive,
+            color: context.colors.negative,
+            size: context.textTheme.headlineLarge.size,
+          ),
+          const Margin.horizontal(ThemeConstants.spacing),
+          Text("Firewall is disabled", style: context.textTheme.headlineLarge),
+        ],
       ),
-      const Margin.horizontal(ThemeConstants.spacing),
-      Text("Firewall is disabled", style: context.textTheme.headlineLarge),
       Text("All-time statistics:", style: context.textTheme.headlineSmall),
     ],
   );
