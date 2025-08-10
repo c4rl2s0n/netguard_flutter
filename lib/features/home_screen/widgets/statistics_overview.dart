@@ -83,6 +83,7 @@ class StatisticsOverview extends StatelessWidget {
     required Widget bottomRight,
   }) => GridView.count(
     shrinkWrap: true,
+    physics: NeverScrollableScrollPhysics(),
     crossAxisCount: 2,
     mainAxisSpacing: 0,
     crossAxisSpacing: 0,

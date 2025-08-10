@@ -6,9 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/netguard.dart';
 
 class PieChart extends StatelessWidget {
-  const PieChart(this.analysis, {super.key});
+  const PieChart(this.analysis, {required this.size, super.key});
 
   final TrafficLogAggregation analysis;
+  final Size size;
 
   bool get isApp => analysis is TrafficLogByApplication;
 
@@ -56,37 +57,35 @@ class PieChart extends StatelessWidget {
           ),);
 
   Widget _chart() {
-    return LayoutBuilder(
-      builder: (context, constraints) => SizedBox.square(
-        dimension: _getSize(constraints),
-        child: Stack(
-          children: [
-            BlocBuilder<SessionLogAnalysisCubit, SessionLogAnalysisState>(
-              buildWhen: (oldState, state) =>
-                  oldState.volumeType != state.volumeType,
-              builder: (context, state) => charts.PieChart(
-                charts.PieChartData(
-                  borderData: charts.FlBorderData(show: false),
-                  startDegreeOffset: -90,
-                  sections: _sections(
-                    context,
-                    _getSize(constraints),
-                    state.volumeType,
-                  ),
-                  centerSpaceRadius: centerRadius,
+    return SizedBox.square(
+      dimension: size.width,
+      child: Stack(
+        children: [
+          BlocBuilder<SessionLogAnalysisCubit, SessionLogAnalysisState>(
+            buildWhen: (oldState, state) =>
+                oldState.volumeType != state.volumeType,
+            builder: (context, state) => charts.PieChart(
+              charts.PieChartData(
+                borderData: charts.FlBorderData(show: false),
+                startDegreeOffset: -90,
+                sections: _sections(
+                  context,
+                  size.width,
+                  state.volumeType,
                 ),
+                centerSpaceRadius: centerRadius,
               ),
             ),
-            _forApplication(
-              (byApp, child) => Center(
-                child: SizedBox.square(
-                  dimension: centerRadiusApp * 2 - 5,
-                  child: byApp.application?.image ?? Icon(CustomIcons.question),
-                ),
+          ),
+          _forApplication(
+            (byApp, child) => Center(
+              child: SizedBox.square(
+                dimension: centerRadiusApp * 2 - 5,
+                child: byApp.application?.image ?? Icon(CustomIcons.question),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
