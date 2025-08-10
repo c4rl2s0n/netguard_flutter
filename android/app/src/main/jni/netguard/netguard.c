@@ -1005,6 +1005,65 @@ void ng_dump() {
                         ++r, alloc[c].tag, ctime(&alloc[c].time));
 }
 
+struct ng_session* get_session(const struct arguments *args, const uint8_t *pkt, uint8_t * payload){
+    // Get headers
+    const uint8_t version = (*pkt) >> 4;
+    const struct iphdr *ip4 = (struct iphdr *) pkt;
+    const struct ip6_hdr *ip6 = (struct ip6_hdr *) pkt;
+    struct tcphdr *tcphdr;
+    struct udphdr *udphdr;
+
+    // Search session
+    struct ng_session *cur = args->ctx->ng_session;
+    while (cur != NULL){
+        switch (cur->protocol) {
+            case IPPROTO_UDP:
+                udphdr = (struct udphdr *) payload;
+                if(cur->udp.version == version &&
+                   cur->udp.source == udphdr->source && cur->udp.dest == udphdr->dest &&
+                   (version == 4 ? cur->udp.saddr.ip4 == ip4->saddr &&
+                                   cur->udp.daddr.ip4 == ip4->daddr
+                                 : memcmp(&cur->udp.saddr.ip6, &ip6->ip6_src, 16) == 0 &&
+                                   memcmp(&cur->udp.daddr.ip6, &ip6->ip6_dst, 16) == 0)){
+                    return cur;
+                }
+                break;
+            case IPPROTO_TCP:
+                tcphdr = (struct tcphdr *) payload;
+                if(cur->tcp.version == version &&
+                   cur->tcp.source == tcphdr->source && cur->tcp.dest == tcphdr->dest &&
+                   (version == 4 ? cur->tcp.saddr.ip4 == ip4->saddr &&
+                                   cur->tcp.daddr.ip4 == ip4->daddr
+                                 : memcmp(&cur->tcp.saddr.ip6, &ip6->ip6_src, 16) == 0 &&
+                                   memcmp(&cur->tcp.daddr.ip6, &ip6->ip6_dst, 16) == 0)){
+                    return cur;
+                }
+                break;
+            case IPPROTO_ICMP:
+            case IPPROTO_ICMPV6:
+                if((cur->protocol == IPPROTO_ICMP || cur->protocol == IPPROTO_ICMPV6) &&
+                  !cur->icmp.stop && cur->icmp.version == version &&
+                  (version == 4 ? cur->icmp.saddr.ip4 == ip4->saddr &&
+                                  cur->icmp.daddr.ip4 == ip4->daddr
+                                : memcmp(&cur->icmp.saddr.ip6, &ip6->ip6_src, 16) == 0 &&
+                                  memcmp(&cur->icmp.daddr.ip6, &ip6->ip6_dst, 16) == 0)){
+                    return cur;
+                }
+                break;
+        }
+        cur = cur->next;
+           !(cur->protocol == IPPROTO_TCP &&
+             cur->tcp.version == version &&
+             cur->tcp.source == tcphdr->source && cur->tcp.dest == tcphdr->dest &&
+             (version == 4 ? cur->tcp.saddr.ip4 == ip4->saddr &&
+                             cur->tcp.daddr.ip4 == ip4->daddr
+                           : memcmp(&cur->tcp.saddr.ip6, &ip6->ip6_src, 16) == 0 &&
+                             memcmp(&cur->tcp.daddr.ip6, &ip6->ip6_dst, 16) == 0)))
+        cur = cur->next;
+    }
+    return 0;
+}
+
 JNIEXPORT void JNICALL
 Java_eu_flutter_netguard_utils_Util_dump_1memory_1profile(JNIEnv *env, jclass type) {
 #ifdef PROFILE_MEMORY

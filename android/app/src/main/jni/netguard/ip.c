@@ -121,48 +121,6 @@ void handle_ip(const struct arguments *args,
                const int epoll_fd,
                int sessions, int maxsessions) {
 
-    struct ng_session *s = args->ctx->ng_session;
-    while (s != NULL) {
-        if (s->protocol == IPPROTO_ICMP || s->protocol == IPPROTO_ICMPV6) {
-            char source[INET6_ADDRSTRLEN + 1];
-            char dest[INET6_ADDRSTRLEN + 1];
-            if (s->icmp.version == 4) {
-                inet_ntop(AF_INET, &s->icmp.saddr.ip4, source, sizeof(source));
-                inet_ntop(AF_INET, &s->icmp.daddr.ip4, dest, sizeof(dest));
-            } else {
-                inet_ntop(AF_INET6, &s->icmp.saddr.ip6, source, sizeof(source));
-                inet_ntop(AF_INET6, &s->icmp.daddr.ip6, dest, sizeof(dest));
-            }
-            if (s->icmp.uid < 0)
-                log_android(ANDROID_LOG_WARN, "ICMP with unknown uid: %s -> %s\n", source, dest);
-        } else if (s->protocol == IPPROTO_UDP) {
-            char source[INET6_ADDRSTRLEN + 1];
-            char dest[INET6_ADDRSTRLEN + 1];
-            if (s->udp.version == 4) {
-                inet_ntop(AF_INET, &s->udp.saddr.ip4, source, sizeof(source));
-                inet_ntop(AF_INET, &s->udp.daddr.ip4, dest, sizeof(dest));
-            } else {
-                inet_ntop(AF_INET6, &s->udp.saddr.ip6, source, sizeof(source));
-                inet_ntop(AF_INET6, &s->udp.daddr.ip6, dest, sizeof(dest));
-            }
-            if (s->udp.uid < 0)
-                log_android(ANDROID_LOG_WARN, "UDP with unknown uid: %s -> %s\n", source, dest);
-        } else if (s->protocol == IPPROTO_TCP) {
-            char source[INET6_ADDRSTRLEN + 1];
-            char dest[INET6_ADDRSTRLEN + 1];
-            if (s->tcp.version == 4) {
-                inet_ntop(AF_INET, &s->tcp.saddr.ip4, source, sizeof(source));
-                inet_ntop(AF_INET, &s->tcp.daddr.ip4, dest, sizeof(dest));
-            } else {
-                inet_ntop(AF_INET6, &s->tcp.saddr.ip6, source, sizeof(source));
-                inet_ntop(AF_INET6, &s->tcp.daddr.ip6, dest, sizeof(dest));
-            }
-            if (s->tcp.uid < 0)
-                log_android(ANDROID_LOG_WARN, "TCP with unknown uid: %s -> %s\n", source, dest);
-        }
-        s = s->next;
-    }
-
     uint8_t protocol;
     void *saddr;
     void *daddr;
@@ -324,44 +282,64 @@ void handle_ip(const struct arguments *args,
         }
     }
 
-    // Get uid
-    jint uid = -1;
-    if (args->ctx->sdk <= 28) // Android 9 Pie
-        uid = get_uid(version, protocol, saddr, sport, daddr, dport);
-    else
-        uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
-    // cache uid
-    if (uid == -1) {
-        jint cuid = get_uid_cached(args, version, protocol, dest, dport);
-        if(cuid != -1){
-            log_android(ANDROID_LOG_INFO, "get_uid_q failed but had it chached...");
-        }
-        uid = cuid;
-    } else {
-        cache_uid(args, version, protocol, dest, dport, uid);
-    }
 
-    // Get server name
+
     char server_name[TLS_SNI_LENGTH + 1];
     *server_name = 0;
-    if (protocol == IPPROTO_TCP) {
-        const struct tcphdr *tcphdr = (struct tcphdr *) payload;
-        const uint8_t tcpoptlen = (uint8_t) ((tcphdr->doff - 5) * 4);
-        const uint8_t *data = payload + sizeof(struct tcphdr) + tcpoptlen;
-        const uint16_t datalen = (const uint16_t) (length - (data - pkt));
+    // Get uid
+    jint uid = -1;
 
-        if (parse_sni(data, datalen, server_name)) {
-            log_android(ANDROID_LOG_INFO, "TLS server name: %s", server_name);
+    // get uid from session
+    struct ng_session* session = get_session(args, pkt, payload);
+    if(session != 0) {
+        if (protocol == IPPROTO_TCP) {
+            uid = session->tcp.uid;
+        } else if (protocol == IPPROTO_TCP) {
+            uid = session->udp.uid;
+        } else if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6) {
+            uid = session->icmp.uid;
         }
     }
+    if(uid < 0) {
+        if (args->ctx->sdk <= 28) // Android 9 Pie
+            uid = get_uid(version, protocol, saddr, sport, daddr, dport);
+        else
+            uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
+        if(uid > 0){
+            log_android(ANDROID_LOG_INFO, "Couldn't find uid from session, but get_uid(_q) found it!");
+        }
+        // cache uid
+        if (uid == -1) {
+            jint cuid = get_uid_cached(args, version, protocol, dest, dport);
+            if (cuid != -1) {
+                log_android(ANDROID_LOG_INFO, "get_uid_q failed but had it cached...");
+            }
+            uid = cuid;
+        } else {
+            cache_uid(args, version, protocol, dest, dport, uid);
+        }
 
-    if (*server_name) {
-        sni_resolved(args, server_name, version, protocol, dest, dport, source, sport, uid);
+        // Get server name
+        if (protocol == IPPROTO_TCP) {
+            const struct tcphdr *tcphdr = (struct tcphdr *) payload;
+            const uint8_t tcpoptlen = (uint8_t) ((tcphdr->doff - 5) * 4);
+            const uint8_t *data = payload + sizeof(struct tcphdr) + tcpoptlen;
+            const uint16_t datalen = (const uint16_t) (length - (data - pkt));
+
+            if (parse_sni(data, datalen, server_name)) {
+                log_android(ANDROID_LOG_INFO, "TLS server name: %s", server_name);
+            }
+        }
+
+        if (*server_name) {
+            sni_resolved(args, server_name, version, protocol, dest, dport, source, sport, uid);
+        }
+
+        log_android(ANDROID_LOG_DEBUG,
+                    "Packet v%d %s/%u > %s/%u proto %d flags %s uid %d sni %s",
+                    version, source, sport, dest, dport, protocol, flags, uid, server_name);
     }
 
-    log_android(ANDROID_LOG_DEBUG,
-                "Packet v%d %s/%u > %s/%u proto %d flags %s uid %d sni %s",
-                version, source, sport, dest, dport, protocol, flags, uid, server_name);
 
     // Check if allowed
     int allowed = 0;
@@ -384,6 +362,7 @@ void handle_ip(const struct arguments *args,
 
     // Handle allowed traffic
     // if we only observe the traffic, it is allowed unless it is QUIC that we want to block for TLS fallback
+    // TODO: pass session to handle_xyz functions
     if (allowed || (args->observeOnly && !blockedQuic)) {
         if (protocol == IPPROTO_ICMP || protocol == IPPROTO_ICMPV6) {
             handle_icmp(args, pkt, length, payload, uid, epoll_fd);

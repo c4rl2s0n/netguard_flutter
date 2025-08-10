@@ -541,6 +541,7 @@ jint cache_uid(const struct arguments *args,
 
 
 /// MISC
+struct ng_session* get_session(const struct arguments *args, const uint8_t *pkt, uint8_t * payload);
 void write_pcap_hdr();
 
 void write_pcap_rec(const uint8_t *buffer, size_t len);
