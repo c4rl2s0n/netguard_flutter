@@ -7,8 +7,14 @@ class SettingsRepository extends ISettingsRepository {
 
   @override
   Future<Settings> get() async {
-    List<Settings> settings = await (db.settingsTable.select()..limit(1)).get();
-    return settings.firstOrNull ?? Settings();
+    Settings? settings =
+        (await (db.settingsTable.select()..limit(1)).get()).firstOrNull;
+    if (settings == null) {
+      settings = Settings();
+      await update(settings);
+      return settings;
+    }
+    return settings;
   }
 
   @override
@@ -95,5 +101,4 @@ class SettingsRepository extends ISettingsRepository {
       SettingsTableCompanion(logTraffic: Value(logTraffic)),
     );
   }
-
 }

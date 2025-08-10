@@ -75,6 +75,7 @@ class PageComponentFactory {
 
   static Widget _sessionButton() {
     return BlocBuilder<SessionCubit, SessionState>(
+      buildWhen: (oldState, state) => oldState.running != state.running || oldState.sessionConfig != state.sessionConfig,
       builder: (context, state) => state.running
           ? IconButton(
               onPressed: () async {
@@ -86,7 +87,7 @@ class PageComponentFactory {
                   await sessionCubit.stopVpn();
                 }
               },
-              icon: Icon(CustomIcons.active),
+              icon: state.sessionConfig?.observeOnly ?? false ? Icon(CustomIcons.observationMode) : Icon(CustomIcons.active),
             )
           : VpnLauncher(
               (launchVpn) => IconButton(

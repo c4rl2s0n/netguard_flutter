@@ -127,7 +127,7 @@ class SessionLogs extends StatelessWidget {
     return ListView.separated(
       itemCount: logs.length,
       itemBuilder: (context, index) =>
-          LogEntrySingle(logs[logs.length - 1 - index]),
+          LogEntrySingle(logs[index]),
       separatorBuilder: (BuildContext context, int index) =>
           const Divider(height: ThemeConstants.spacing),
     );

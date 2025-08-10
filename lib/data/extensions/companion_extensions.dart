@@ -26,10 +26,13 @@ extension GlobalRuleSourceToCompanion on GlobalRuleSource {
       GlobalRuleSourceTableCompanion(source: Value(source), type: Value(type));
 }
 
-extension PackageStatisticsToCompanion on PackageStatistics {
-  PackageStatisticsTableCompanion get companion =>
-      PackageStatisticsTableCompanion(
+
+extension TrafficStatisticsToCompanion on TrafficStatistics {
+  TrafficStatisticsTableCompanion get companion =>
+      TrafficStatisticsTableCompanion(
         packageName: Value(packageName),
+        endpoint: Value(endpoint),
+        endpointType: Value(endpointType),
         packetCountAllowed: Value(packetCountAllowed),
         packetSizeAllowed: Value(packetSizeAllowed),
         packetCountBlocked: Value(packetCountBlocked),
@@ -81,16 +84,3 @@ extension SettingsToCompanion on Settings {
   );
 }
 
-extension TrafficLogToCompanion on TrafficLog {
-  TrafficLogTableCompanion get companion => TrafficLogTableCompanion(
-    id: Value(IdTools.generateUuid()),
-    time: Value(time),
-    session: Value(session),
-    protocol: Value(protocol),
-    packageName: Value(packageName),
-    ip: Value(ip),
-    host: Value(host),
-    allowed: Value(allowed),
-    outgoing: Value(outgoing),
-  );
-}

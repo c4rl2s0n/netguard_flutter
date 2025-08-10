@@ -26,18 +26,18 @@ class TrafficLogGroup {
   final String destination;
   final bool allowed;
   int latest = 0;
-  int countIn= 0;
-  int countOut= 0;
+  int countIn = 0;
+  int countOut = 0;
   int get count => countIn + countOut;
-  int sizeIn= 0;
-  int sizeOut= 0;
+  int sizeIn = 0;
+  int sizeOut = 0;
   int get size => sizeIn + sizeOut;
 
   void add(TrafficLog log) {
-    if(log.outgoing) {
+    if (log.outgoing) {
       countOut++;
       sizeOut += log.size;
-    }else{
+    } else {
       countIn++;
       sizeIn += log.size;
     }

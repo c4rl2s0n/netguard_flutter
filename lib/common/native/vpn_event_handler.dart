@@ -26,7 +26,6 @@ class VpnEventHandlerImpl extends VpnEventHandler {
     accessor.sessionCubit.setVpnState(running);
   }
 
-  final data.ITrafficLogRepository trafficLogRepository = accessor.trafficLogRepository;
   final StreamController<TrafficLog> _trafficLog = StreamController.broadcast();
   Stream<TrafficLog> get trafficLog => _trafficLog.stream;
   @override

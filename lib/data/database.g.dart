@@ -2084,53 +2084,12 @@ class GlobalRuleSourceTableCompanion extends UpdateCompanion<GlobalRuleSource> {
   }
 }
 
-class $TrafficLogTableTable extends TrafficLogTable
-    with TableInfo<$TrafficLogTableTable, TrafficLog> {
+class $TrafficStatisticsTableTable extends TrafficStatisticsTable
+    with TableInfo<$TrafficStatisticsTableTable, TrafficStatistics> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $TrafficLogTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    clientDefault: () => IdTools.generateUuid(),
-  );
-  static const VerificationMeta _timeMeta = const VerificationMeta('time');
-  @override
-  late final GeneratedColumn<int> time = GeneratedColumn<int>(
-    'time',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _sessionMeta = const VerificationMeta(
-    'session',
-  );
-  @override
-  late final GeneratedColumn<String> session = GeneratedColumn<String>(
-    'session',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _protocolMeta = const VerificationMeta(
-    'protocol',
-  );
-  @override
-  late final GeneratedColumn<int> protocol = GeneratedColumn<int>(
-    'protocol',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
+  $TrafficStatisticsTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _packageNameMeta = const VerificationMeta(
     'packageName',
   );
@@ -2142,352 +2101,29 @@ class $TrafficLogTableTable extends TrafficLogTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _ipMeta = const VerificationMeta('ip');
+  static const VerificationMeta _endpointMeta = const VerificationMeta(
+    'endpoint',
+  );
   @override
-  late final GeneratedColumn<String> ip = GeneratedColumn<String>(
-    'ip',
+  late final GeneratedColumn<String> endpoint = GeneratedColumn<String>(
+    'endpoint',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _hostMeta = const VerificationMeta('host');
   @override
-  late final GeneratedColumn<String> host = GeneratedColumn<String>(
-    'host',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _allowedMeta = const VerificationMeta(
-    'allowed',
-  );
-  @override
-  late final GeneratedColumn<bool> allowed = GeneratedColumn<bool>(
-    'allowed',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("allowed" IN (0, 1))',
-    ),
-  );
-  static const VerificationMeta _outgoingMeta = const VerificationMeta(
-    'outgoing',
-  );
-  @override
-  late final GeneratedColumn<bool> outgoing = GeneratedColumn<bool>(
-    'outgoing',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("outgoing" IN (0, 1))',
-    ),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    time,
-    session,
-    protocol,
-    packageName,
-    ip,
-    host,
-    allowed,
-    outgoing,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'traffic_log_table';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<TrafficLog> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('time')) {
-      context.handle(
-        _timeMeta,
-        time.isAcceptableOrUnknown(data['time']!, _timeMeta),
+  late final GeneratedColumnWithTypeConverter<EndpointType, String>
+  endpointType =
+      GeneratedColumn<String>(
+        'endpoint_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<EndpointType>(
+        $TrafficStatisticsTableTable.$converterendpointType,
       );
-    } else if (isInserting) {
-      context.missing(_timeMeta);
-    }
-    if (data.containsKey('session')) {
-      context.handle(
-        _sessionMeta,
-        session.isAcceptableOrUnknown(data['session']!, _sessionMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_sessionMeta);
-    }
-    if (data.containsKey('protocol')) {
-      context.handle(
-        _protocolMeta,
-        protocol.isAcceptableOrUnknown(data['protocol']!, _protocolMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_protocolMeta);
-    }
-    if (data.containsKey('package_name')) {
-      context.handle(
-        _packageNameMeta,
-        packageName.isAcceptableOrUnknown(
-          data['package_name']!,
-          _packageNameMeta,
-        ),
-      );
-    }
-    if (data.containsKey('ip')) {
-      context.handle(_ipMeta, ip.isAcceptableOrUnknown(data['ip']!, _ipMeta));
-    } else if (isInserting) {
-      context.missing(_ipMeta);
-    }
-    if (data.containsKey('host')) {
-      context.handle(
-        _hostMeta,
-        host.isAcceptableOrUnknown(data['host']!, _hostMeta),
-      );
-    }
-    if (data.containsKey('allowed')) {
-      context.handle(
-        _allowedMeta,
-        allowed.isAcceptableOrUnknown(data['allowed']!, _allowedMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_allowedMeta);
-    }
-    if (data.containsKey('outgoing')) {
-      context.handle(
-        _outgoingMeta,
-        outgoing.isAcceptableOrUnknown(data['outgoing']!, _outgoingMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_outgoingMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  TrafficLog map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TrafficLog(
-      time: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}time'],
-      )!,
-      session: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}session'],
-      )!,
-      protocol: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}protocol'],
-      )!,
-      ip: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}ip'],
-      )!,
-      host: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}host'],
-      ),
-      packageName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}package_name'],
-      ),
-      allowed: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}allowed'],
-      )!,
-      outgoing: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}outgoing'],
-      )!,
-    );
-  }
-
-  @override
-  $TrafficLogTableTable createAlias(String alias) {
-    return $TrafficLogTableTable(attachedDatabase, alias);
-  }
-}
-
-class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
-  final Value<String> id;
-  final Value<int> time;
-  final Value<String> session;
-  final Value<int> protocol;
-  final Value<String?> packageName;
-  final Value<String> ip;
-  final Value<String?> host;
-  final Value<bool> allowed;
-  final Value<bool> outgoing;
-  final Value<int> rowid;
-  const TrafficLogTableCompanion({
-    this.id = const Value.absent(),
-    this.time = const Value.absent(),
-    this.session = const Value.absent(),
-    this.protocol = const Value.absent(),
-    this.packageName = const Value.absent(),
-    this.ip = const Value.absent(),
-    this.host = const Value.absent(),
-    this.allowed = const Value.absent(),
-    this.outgoing = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  TrafficLogTableCompanion.insert({
-    this.id = const Value.absent(),
-    required int time,
-    required String session,
-    required int protocol,
-    this.packageName = const Value.absent(),
-    required String ip,
-    this.host = const Value.absent(),
-    required bool allowed,
-    required bool outgoing,
-    this.rowid = const Value.absent(),
-  }) : time = Value(time),
-       session = Value(session),
-       protocol = Value(protocol),
-       ip = Value(ip),
-       allowed = Value(allowed),
-       outgoing = Value(outgoing);
-  static Insertable<TrafficLog> custom({
-    Expression<String>? id,
-    Expression<int>? time,
-    Expression<String>? session,
-    Expression<int>? protocol,
-    Expression<String>? packageName,
-    Expression<String>? ip,
-    Expression<String>? host,
-    Expression<bool>? allowed,
-    Expression<bool>? outgoing,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (time != null) 'time': time,
-      if (session != null) 'session': session,
-      if (protocol != null) 'protocol': protocol,
-      if (packageName != null) 'package_name': packageName,
-      if (ip != null) 'ip': ip,
-      if (host != null) 'host': host,
-      if (allowed != null) 'allowed': allowed,
-      if (outgoing != null) 'outgoing': outgoing,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  TrafficLogTableCompanion copyWith({
-    Value<String>? id,
-    Value<int>? time,
-    Value<String>? session,
-    Value<int>? protocol,
-    Value<String?>? packageName,
-    Value<String>? ip,
-    Value<String?>? host,
-    Value<bool>? allowed,
-    Value<bool>? outgoing,
-    Value<int>? rowid,
-  }) {
-    return TrafficLogTableCompanion(
-      id: id ?? this.id,
-      time: time ?? this.time,
-      session: session ?? this.session,
-      protocol: protocol ?? this.protocol,
-      packageName: packageName ?? this.packageName,
-      ip: ip ?? this.ip,
-      host: host ?? this.host,
-      allowed: allowed ?? this.allowed,
-      outgoing: outgoing ?? this.outgoing,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (time.present) {
-      map['time'] = Variable<int>(time.value);
-    }
-    if (session.present) {
-      map['session'] = Variable<String>(session.value);
-    }
-    if (protocol.present) {
-      map['protocol'] = Variable<int>(protocol.value);
-    }
-    if (packageName.present) {
-      map['package_name'] = Variable<String>(packageName.value);
-    }
-    if (ip.present) {
-      map['ip'] = Variable<String>(ip.value);
-    }
-    if (host.present) {
-      map['host'] = Variable<String>(host.value);
-    }
-    if (allowed.present) {
-      map['allowed'] = Variable<bool>(allowed.value);
-    }
-    if (outgoing.present) {
-      map['outgoing'] = Variable<bool>(outgoing.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('TrafficLogTableCompanion(')
-          ..write('id: $id, ')
-          ..write('time: $time, ')
-          ..write('session: $session, ')
-          ..write('protocol: $protocol, ')
-          ..write('packageName: $packageName, ')
-          ..write('ip: $ip, ')
-          ..write('host: $host, ')
-          ..write('allowed: $allowed, ')
-          ..write('outgoing: $outgoing, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $PackageStatisticsTableTable extends PackageStatisticsTable
-    with TableInfo<$PackageStatisticsTableTable, PackageStatistics> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $PackageStatisticsTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _packageNameMeta = const VerificationMeta(
-    'packageName',
-  );
-  @override
-  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
-    'package_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _packetCountAllowedMeta =
       const VerificationMeta('packetCountAllowed');
   @override
@@ -2537,6 +2173,8 @@ class $PackageStatisticsTableTable extends PackageStatisticsTable
   @override
   List<GeneratedColumn> get $columns => [
     packageName,
+    endpoint,
+    endpointType,
     packetCountAllowed,
     packetSizeAllowed,
     packetCountBlocked,
@@ -2546,10 +2184,10 @@ class $PackageStatisticsTableTable extends PackageStatisticsTable
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'package_statistics_table';
+  static const String $name = 'traffic_statistics_table';
   @override
   VerificationContext validateIntegrity(
-    Insertable<PackageStatistics> instance, {
+    Insertable<TrafficStatistics> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -2562,8 +2200,14 @@ class $PackageStatisticsTableTable extends PackageStatisticsTable
           _packageNameMeta,
         ),
       );
+    }
+    if (data.containsKey('endpoint')) {
+      context.handle(
+        _endpointMeta,
+        endpoint.isAcceptableOrUnknown(data['endpoint']!, _endpointMeta),
+      );
     } else if (isInserting) {
-      context.missing(_packageNameMeta);
+      context.missing(_endpointMeta);
     }
     if (data.containsKey('packet_count_allowed')) {
       context.handle(
@@ -2605,15 +2249,25 @@ class $PackageStatisticsTableTable extends PackageStatisticsTable
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {packageName};
+  Set<GeneratedColumn> get $primaryKey => {packageName, endpoint};
   @override
-  PackageStatistics map(Map<String, dynamic> data, {String? tablePrefix}) {
+  TrafficStatistics map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return PackageStatistics(
+    return TrafficStatistics(
       packageName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}package_name'],
+      ),
+      endpoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}endpoint'],
       )!,
+      endpointType: $TrafficStatisticsTableTable.$converterendpointType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}endpoint_type'],
+        )!,
+      ),
       packetCountAllowed: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}packet_count_allowed'],
@@ -2634,37 +2288,51 @@ class $PackageStatisticsTableTable extends PackageStatisticsTable
   }
 
   @override
-  $PackageStatisticsTableTable createAlias(String alias) {
-    return $PackageStatisticsTableTable(attachedDatabase, alias);
+  $TrafficStatisticsTableTable createAlias(String alias) {
+    return $TrafficStatisticsTableTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<EndpointType, String, String>
+  $converterendpointType = const EnumNameConverter<EndpointType>(
+    EndpointType.values,
+  );
 }
 
-class PackageStatisticsTableCompanion
-    extends UpdateCompanion<PackageStatistics> {
-  final Value<String> packageName;
+class TrafficStatisticsTableCompanion
+    extends UpdateCompanion<TrafficStatistics> {
+  final Value<String?> packageName;
+  final Value<String> endpoint;
+  final Value<EndpointType> endpointType;
   final Value<int> packetCountAllowed;
   final Value<int> packetSizeAllowed;
   final Value<int> packetCountBlocked;
   final Value<int> packetSizeBlocked;
   final Value<int> rowid;
-  const PackageStatisticsTableCompanion({
+  const TrafficStatisticsTableCompanion({
     this.packageName = const Value.absent(),
+    this.endpoint = const Value.absent(),
+    this.endpointType = const Value.absent(),
     this.packetCountAllowed = const Value.absent(),
     this.packetSizeAllowed = const Value.absent(),
     this.packetCountBlocked = const Value.absent(),
     this.packetSizeBlocked = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  PackageStatisticsTableCompanion.insert({
-    required String packageName,
+  TrafficStatisticsTableCompanion.insert({
+    this.packageName = const Value.absent(),
+    required String endpoint,
+    required EndpointType endpointType,
     this.packetCountAllowed = const Value.absent(),
     this.packetSizeAllowed = const Value.absent(),
     this.packetCountBlocked = const Value.absent(),
     this.packetSizeBlocked = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : packageName = Value(packageName);
-  static Insertable<PackageStatistics> custom({
+  }) : endpoint = Value(endpoint),
+       endpointType = Value(endpointType);
+  static Insertable<TrafficStatistics> custom({
     Expression<String>? packageName,
+    Expression<String>? endpoint,
+    Expression<String>? endpointType,
     Expression<int>? packetCountAllowed,
     Expression<int>? packetSizeAllowed,
     Expression<int>? packetCountBlocked,
@@ -2673,6 +2341,8 @@ class PackageStatisticsTableCompanion
   }) {
     return RawValuesInsertable({
       if (packageName != null) 'package_name': packageName,
+      if (endpoint != null) 'endpoint': endpoint,
+      if (endpointType != null) 'endpoint_type': endpointType,
       if (packetCountAllowed != null)
         'packet_count_allowed': packetCountAllowed,
       if (packetSizeAllowed != null) 'packet_size_allowed': packetSizeAllowed,
@@ -2683,16 +2353,20 @@ class PackageStatisticsTableCompanion
     });
   }
 
-  PackageStatisticsTableCompanion copyWith({
-    Value<String>? packageName,
+  TrafficStatisticsTableCompanion copyWith({
+    Value<String?>? packageName,
+    Value<String>? endpoint,
+    Value<EndpointType>? endpointType,
     Value<int>? packetCountAllowed,
     Value<int>? packetSizeAllowed,
     Value<int>? packetCountBlocked,
     Value<int>? packetSizeBlocked,
     Value<int>? rowid,
   }) {
-    return PackageStatisticsTableCompanion(
+    return TrafficStatisticsTableCompanion(
       packageName: packageName ?? this.packageName,
+      endpoint: endpoint ?? this.endpoint,
+      endpointType: endpointType ?? this.endpointType,
       packetCountAllowed: packetCountAllowed ?? this.packetCountAllowed,
       packetSizeAllowed: packetSizeAllowed ?? this.packetSizeAllowed,
       packetCountBlocked: packetCountBlocked ?? this.packetCountBlocked,
@@ -2706,6 +2380,16 @@ class PackageStatisticsTableCompanion
     final map = <String, Expression>{};
     if (packageName.present) {
       map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (endpoint.present) {
+      map['endpoint'] = Variable<String>(endpoint.value);
+    }
+    if (endpointType.present) {
+      map['endpoint_type'] = Variable<String>(
+        $TrafficStatisticsTableTable.$converterendpointType.toSql(
+          endpointType.value,
+        ),
+      );
     }
     if (packetCountAllowed.present) {
       map['packet_count_allowed'] = Variable<int>(packetCountAllowed.value);
@@ -2727,8 +2411,10 @@ class PackageStatisticsTableCompanion
 
   @override
   String toString() {
-    return (StringBuffer('PackageStatisticsTableCompanion(')
+    return (StringBuffer('TrafficStatisticsTableCompanion(')
           ..write('packageName: $packageName, ')
+          ..write('endpoint: $endpoint, ')
+          ..write('endpointType: $endpointType, ')
           ..write('packetCountAllowed: $packetCountAllowed, ')
           ..write('packetSizeAllowed: $packetSizeAllowed, ')
           ..write('packetCountBlocked: $packetCountBlocked, ')
@@ -2751,11 +2437,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ResourceRecordTableTable(this);
   late final $GlobalRuleSourceTableTable globalRuleSourceTable =
       $GlobalRuleSourceTableTable(this);
-  late final $TrafficLogTableTable trafficLogTable = $TrafficLogTableTable(
-    this,
-  );
-  late final $PackageStatisticsTableTable packageStatisticsTable =
-      $PackageStatisticsTableTable(this);
+  late final $TrafficStatisticsTableTable trafficStatisticsTable =
+      $TrafficStatisticsTableTable(this);
   late final Index hostRuleIndex = Index(
     'hostRuleIndex',
     'CREATE INDEX hostRuleIndex ON hosts_table (rule_id)',
@@ -2780,30 +2463,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'globalRuleTypeIndex',
     'CREATE INDEX globalRuleTypeIndex ON global_rule_source_table (type)',
   );
-  late final Index trafficLogSessionPackage = Index(
-    'trafficLogSessionPackage',
-    'CREATE INDEX trafficLogSessionPackage ON traffic_log_table (session, package_name)',
-  );
-  late final Index trafficLogPackageIp = Index(
-    'trafficLogPackageIp',
-    'CREATE INDEX trafficLogPackageIp ON traffic_log_table (package_name, ip)',
-  );
-  late final Index trafficLogPackageHost = Index(
-    'trafficLogPackageHost',
-    'CREATE INDEX trafficLogPackageHost ON traffic_log_table (package_name, host)',
-  );
-  late final Index trafficLogPackageAllowed = Index(
-    'trafficLogPackageAllowed',
-    'CREATE INDEX trafficLogPackageAllowed ON traffic_log_table (package_name, allowed)',
-  );
-  late final Index trafficLogAllowed = Index(
-    'trafficLogAllowed',
-    'CREATE INDEX trafficLogAllowed ON traffic_log_table (allowed)',
-  );
-  late final Index trafficLogSessionTime = Index(
-    'trafficLogSessionTime',
-    'CREATE INDEX trafficLogSessionTime ON traffic_log_table (session, time)',
-  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2815,20 +2474,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     settingsTable,
     resourceRecordTable,
     globalRuleSourceTable,
-    trafficLogTable,
-    packageStatisticsTable,
+    trafficStatisticsTable,
     hostRuleIndex,
     hostTypeIndex,
     package,
     indexDns,
     indexDnsResource,
     globalRuleTypeIndex,
-    trafficLogSessionPackage,
-    trafficLogPackageIp,
-    trafficLogPackageHost,
-    trafficLogPackageAllowed,
-    trafficLogAllowed,
-    trafficLogSessionTime,
   ];
 }
 
@@ -4644,298 +4296,22 @@ typedef $$GlobalRuleSourceTableTableProcessedTableManager =
       GlobalRuleSource,
       PrefetchHooks Function()
     >;
-typedef $$TrafficLogTableTableCreateCompanionBuilder =
-    TrafficLogTableCompanion Function({
-      Value<String> id,
-      required int time,
-      required String session,
-      required int protocol,
+typedef $$TrafficStatisticsTableTableCreateCompanionBuilder =
+    TrafficStatisticsTableCompanion Function({
       Value<String?> packageName,
-      required String ip,
-      Value<String?> host,
-      required bool allowed,
-      required bool outgoing,
-      Value<int> rowid,
-    });
-typedef $$TrafficLogTableTableUpdateCompanionBuilder =
-    TrafficLogTableCompanion Function({
-      Value<String> id,
-      Value<int> time,
-      Value<String> session,
-      Value<int> protocol,
-      Value<String?> packageName,
-      Value<String> ip,
-      Value<String?> host,
-      Value<bool> allowed,
-      Value<bool> outgoing,
-      Value<int> rowid,
-    });
-
-class $$TrafficLogTableTableFilterComposer
-    extends Composer<_$AppDatabase, $TrafficLogTableTable> {
-  $$TrafficLogTableTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get time => $composableBuilder(
-    column: $table.time,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get session => $composableBuilder(
-    column: $table.session,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get protocol => $composableBuilder(
-    column: $table.protocol,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get packageName => $composableBuilder(
-    column: $table.packageName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get ip => $composableBuilder(
-    column: $table.ip,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get host => $composableBuilder(
-    column: $table.host,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get allowed => $composableBuilder(
-    column: $table.allowed,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get outgoing => $composableBuilder(
-    column: $table.outgoing,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$TrafficLogTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $TrafficLogTableTable> {
-  $$TrafficLogTableTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get time => $composableBuilder(
-    column: $table.time,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get session => $composableBuilder(
-    column: $table.session,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get protocol => $composableBuilder(
-    column: $table.protocol,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get packageName => $composableBuilder(
-    column: $table.packageName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get ip => $composableBuilder(
-    column: $table.ip,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get host => $composableBuilder(
-    column: $table.host,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get allowed => $composableBuilder(
-    column: $table.allowed,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get outgoing => $composableBuilder(
-    column: $table.outgoing,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$TrafficLogTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TrafficLogTableTable> {
-  $$TrafficLogTableTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<int> get time =>
-      $composableBuilder(column: $table.time, builder: (column) => column);
-
-  GeneratedColumn<String> get session =>
-      $composableBuilder(column: $table.session, builder: (column) => column);
-
-  GeneratedColumn<int> get protocol =>
-      $composableBuilder(column: $table.protocol, builder: (column) => column);
-
-  GeneratedColumn<String> get packageName => $composableBuilder(
-    column: $table.packageName,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get ip =>
-      $composableBuilder(column: $table.ip, builder: (column) => column);
-
-  GeneratedColumn<String> get host =>
-      $composableBuilder(column: $table.host, builder: (column) => column);
-
-  GeneratedColumn<bool> get allowed =>
-      $composableBuilder(column: $table.allowed, builder: (column) => column);
-
-  GeneratedColumn<bool> get outgoing =>
-      $composableBuilder(column: $table.outgoing, builder: (column) => column);
-}
-
-class $$TrafficLogTableTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $TrafficLogTableTable,
-          TrafficLog,
-          $$TrafficLogTableTableFilterComposer,
-          $$TrafficLogTableTableOrderingComposer,
-          $$TrafficLogTableTableAnnotationComposer,
-          $$TrafficLogTableTableCreateCompanionBuilder,
-          $$TrafficLogTableTableUpdateCompanionBuilder,
-          (
-            TrafficLog,
-            BaseReferences<_$AppDatabase, $TrafficLogTableTable, TrafficLog>,
-          ),
-          TrafficLog,
-          PrefetchHooks Function()
-        > {
-  $$TrafficLogTableTableTableManager(
-    _$AppDatabase db,
-    $TrafficLogTableTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$TrafficLogTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$TrafficLogTableTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$TrafficLogTableTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<int> time = const Value.absent(),
-                Value<String> session = const Value.absent(),
-                Value<int> protocol = const Value.absent(),
-                Value<String?> packageName = const Value.absent(),
-                Value<String> ip = const Value.absent(),
-                Value<String?> host = const Value.absent(),
-                Value<bool> allowed = const Value.absent(),
-                Value<bool> outgoing = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => TrafficLogTableCompanion(
-                id: id,
-                time: time,
-                session: session,
-                protocol: protocol,
-                packageName: packageName,
-                ip: ip,
-                host: host,
-                allowed: allowed,
-                outgoing: outgoing,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                required int time,
-                required String session,
-                required int protocol,
-                Value<String?> packageName = const Value.absent(),
-                required String ip,
-                Value<String?> host = const Value.absent(),
-                required bool allowed,
-                required bool outgoing,
-                Value<int> rowid = const Value.absent(),
-              }) => TrafficLogTableCompanion.insert(
-                id: id,
-                time: time,
-                session: session,
-                protocol: protocol,
-                packageName: packageName,
-                ip: ip,
-                host: host,
-                allowed: allowed,
-                outgoing: outgoing,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$TrafficLogTableTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $TrafficLogTableTable,
-      TrafficLog,
-      $$TrafficLogTableTableFilterComposer,
-      $$TrafficLogTableTableOrderingComposer,
-      $$TrafficLogTableTableAnnotationComposer,
-      $$TrafficLogTableTableCreateCompanionBuilder,
-      $$TrafficLogTableTableUpdateCompanionBuilder,
-      (
-        TrafficLog,
-        BaseReferences<_$AppDatabase, $TrafficLogTableTable, TrafficLog>,
-      ),
-      TrafficLog,
-      PrefetchHooks Function()
-    >;
-typedef $$PackageStatisticsTableTableCreateCompanionBuilder =
-    PackageStatisticsTableCompanion Function({
-      required String packageName,
+      required String endpoint,
+      required EndpointType endpointType,
       Value<int> packetCountAllowed,
       Value<int> packetSizeAllowed,
       Value<int> packetCountBlocked,
       Value<int> packetSizeBlocked,
       Value<int> rowid,
     });
-typedef $$PackageStatisticsTableTableUpdateCompanionBuilder =
-    PackageStatisticsTableCompanion Function({
-      Value<String> packageName,
+typedef $$TrafficStatisticsTableTableUpdateCompanionBuilder =
+    TrafficStatisticsTableCompanion Function({
+      Value<String?> packageName,
+      Value<String> endpoint,
+      Value<EndpointType> endpointType,
       Value<int> packetCountAllowed,
       Value<int> packetSizeAllowed,
       Value<int> packetCountBlocked,
@@ -4943,9 +4319,9 @@ typedef $$PackageStatisticsTableTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
-class $$PackageStatisticsTableTableFilterComposer
-    extends Composer<_$AppDatabase, $PackageStatisticsTableTable> {
-  $$PackageStatisticsTableTableFilterComposer({
+class $$TrafficStatisticsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $TrafficStatisticsTableTable> {
+  $$TrafficStatisticsTableTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4955,6 +4331,17 @@ class $$PackageStatisticsTableTableFilterComposer
   ColumnFilters<String> get packageName => $composableBuilder(
     column: $table.packageName,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endpoint => $composableBuilder(
+    column: $table.endpoint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<EndpointType, EndpointType, String>
+  get endpointType => $composableBuilder(
+    column: $table.endpointType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<int> get packetCountAllowed => $composableBuilder(
@@ -4978,9 +4365,9 @@ class $$PackageStatisticsTableTableFilterComposer
   );
 }
 
-class $$PackageStatisticsTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $PackageStatisticsTableTable> {
-  $$PackageStatisticsTableTableOrderingComposer({
+class $$TrafficStatisticsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $TrafficStatisticsTableTable> {
+  $$TrafficStatisticsTableTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -4989,6 +4376,16 @@ class $$PackageStatisticsTableTableOrderingComposer
   });
   ColumnOrderings<String> get packageName => $composableBuilder(
     column: $table.packageName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endpoint => $composableBuilder(
+    column: $table.endpoint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endpointType => $composableBuilder(
+    column: $table.endpointType,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5013,9 +4410,9 @@ class $$PackageStatisticsTableTableOrderingComposer
   );
 }
 
-class $$PackageStatisticsTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $PackageStatisticsTableTable> {
-  $$PackageStatisticsTableTableAnnotationComposer({
+class $$TrafficStatisticsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TrafficStatisticsTableTable> {
+  $$TrafficStatisticsTableTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -5026,6 +4423,15 @@ class $$PackageStatisticsTableTableAnnotationComposer
     column: $table.packageName,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get endpoint =>
+      $composableBuilder(column: $table.endpoint, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<EndpointType, String> get endpointType =>
+      $composableBuilder(
+        column: $table.endpointType,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<int> get packetCountAllowed => $composableBuilder(
     column: $table.packetCountAllowed,
@@ -5048,60 +4454,64 @@ class $$PackageStatisticsTableTableAnnotationComposer
   );
 }
 
-class $$PackageStatisticsTableTableTableManager
+class $$TrafficStatisticsTableTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $PackageStatisticsTableTable,
-          PackageStatistics,
-          $$PackageStatisticsTableTableFilterComposer,
-          $$PackageStatisticsTableTableOrderingComposer,
-          $$PackageStatisticsTableTableAnnotationComposer,
-          $$PackageStatisticsTableTableCreateCompanionBuilder,
-          $$PackageStatisticsTableTableUpdateCompanionBuilder,
+          $TrafficStatisticsTableTable,
+          TrafficStatistics,
+          $$TrafficStatisticsTableTableFilterComposer,
+          $$TrafficStatisticsTableTableOrderingComposer,
+          $$TrafficStatisticsTableTableAnnotationComposer,
+          $$TrafficStatisticsTableTableCreateCompanionBuilder,
+          $$TrafficStatisticsTableTableUpdateCompanionBuilder,
           (
-            PackageStatistics,
+            TrafficStatistics,
             BaseReferences<
               _$AppDatabase,
-              $PackageStatisticsTableTable,
-              PackageStatistics
+              $TrafficStatisticsTableTable,
+              TrafficStatistics
             >,
           ),
-          PackageStatistics,
+          TrafficStatistics,
           PrefetchHooks Function()
         > {
-  $$PackageStatisticsTableTableTableManager(
+  $$TrafficStatisticsTableTableTableManager(
     _$AppDatabase db,
-    $PackageStatisticsTableTable table,
+    $TrafficStatisticsTableTable table,
   ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$PackageStatisticsTableTableFilterComposer(
+              $$TrafficStatisticsTableTableFilterComposer(
                 $db: db,
                 $table: table,
               ),
           createOrderingComposer: () =>
-              $$PackageStatisticsTableTableOrderingComposer(
+              $$TrafficStatisticsTableTableOrderingComposer(
                 $db: db,
                 $table: table,
               ),
           createComputedFieldComposer: () =>
-              $$PackageStatisticsTableTableAnnotationComposer(
+              $$TrafficStatisticsTableTableAnnotationComposer(
                 $db: db,
                 $table: table,
               ),
           updateCompanionCallback:
               ({
-                Value<String> packageName = const Value.absent(),
+                Value<String?> packageName = const Value.absent(),
+                Value<String> endpoint = const Value.absent(),
+                Value<EndpointType> endpointType = const Value.absent(),
                 Value<int> packetCountAllowed = const Value.absent(),
                 Value<int> packetSizeAllowed = const Value.absent(),
                 Value<int> packetCountBlocked = const Value.absent(),
                 Value<int> packetSizeBlocked = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => PackageStatisticsTableCompanion(
+              }) => TrafficStatisticsTableCompanion(
                 packageName: packageName,
+                endpoint: endpoint,
+                endpointType: endpointType,
                 packetCountAllowed: packetCountAllowed,
                 packetSizeAllowed: packetSizeAllowed,
                 packetCountBlocked: packetCountBlocked,
@@ -5110,14 +4520,18 @@ class $$PackageStatisticsTableTableTableManager
               ),
           createCompanionCallback:
               ({
-                required String packageName,
+                Value<String?> packageName = const Value.absent(),
+                required String endpoint,
+                required EndpointType endpointType,
                 Value<int> packetCountAllowed = const Value.absent(),
                 Value<int> packetSizeAllowed = const Value.absent(),
                 Value<int> packetCountBlocked = const Value.absent(),
                 Value<int> packetSizeBlocked = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => PackageStatisticsTableCompanion.insert(
+              }) => TrafficStatisticsTableCompanion.insert(
                 packageName: packageName,
+                endpoint: endpoint,
+                endpointType: endpointType,
                 packetCountAllowed: packetCountAllowed,
                 packetSizeAllowed: packetSizeAllowed,
                 packetCountBlocked: packetCountBlocked,
@@ -5132,25 +4546,25 @@ class $$PackageStatisticsTableTableTableManager
       );
 }
 
-typedef $$PackageStatisticsTableTableProcessedTableManager =
+typedef $$TrafficStatisticsTableTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $PackageStatisticsTableTable,
-      PackageStatistics,
-      $$PackageStatisticsTableTableFilterComposer,
-      $$PackageStatisticsTableTableOrderingComposer,
-      $$PackageStatisticsTableTableAnnotationComposer,
-      $$PackageStatisticsTableTableCreateCompanionBuilder,
-      $$PackageStatisticsTableTableUpdateCompanionBuilder,
+      $TrafficStatisticsTableTable,
+      TrafficStatistics,
+      $$TrafficStatisticsTableTableFilterComposer,
+      $$TrafficStatisticsTableTableOrderingComposer,
+      $$TrafficStatisticsTableTableAnnotationComposer,
+      $$TrafficStatisticsTableTableCreateCompanionBuilder,
+      $$TrafficStatisticsTableTableUpdateCompanionBuilder,
       (
-        PackageStatistics,
+        TrafficStatistics,
         BaseReferences<
           _$AppDatabase,
-          $PackageStatisticsTableTable,
-          PackageStatistics
+          $TrafficStatisticsTableTable,
+          TrafficStatistics
         >,
       ),
-      PackageStatistics,
+      TrafficStatistics,
       PrefetchHooks Function()
     >;
 
@@ -5172,11 +4586,9 @@ class $AppDatabaseManager {
       $$ResourceRecordTableTableTableManager(_db, _db.resourceRecordTable);
   $$GlobalRuleSourceTableTableTableManager get globalRuleSourceTable =>
       $$GlobalRuleSourceTableTableTableManager(_db, _db.globalRuleSourceTable);
-  $$TrafficLogTableTableTableManager get trafficLogTable =>
-      $$TrafficLogTableTableTableManager(_db, _db.trafficLogTable);
-  $$PackageStatisticsTableTableTableManager get packageStatisticsTable =>
-      $$PackageStatisticsTableTableTableManager(
+  $$TrafficStatisticsTableTableTableManager get trafficStatisticsTable =>
+      $$TrafficStatisticsTableTableTableManager(
         _db,
-        _db.packageStatisticsTable,
+        _db.trafficStatisticsTable,
       );
 }

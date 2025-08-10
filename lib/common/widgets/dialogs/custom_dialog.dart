@@ -39,7 +39,6 @@ class CustomDialog<T> extends StatelessWidget {
       contentPadding: const EdgeInsets.all(ThemeConstants.spacing),
       content: Builder(
         builder: (context) {
-          MediaQueryData mediaQuery = MediaQuery.of(context);
           return IntrinsicHeight(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -47,7 +46,7 @@ class CustomDialog<T> extends StatelessWidget {
                 _buildTitle(context),
                 const Divider(),
                 Flexible(
-                  child: SingleChildScrollView(child: content),
+                  child: content,
                 ),
                 if (actions != null) ..._buildActions(context),
               ],

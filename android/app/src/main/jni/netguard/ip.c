@@ -120,6 +120,49 @@ void handle_ip(const struct arguments *args,
                const uint8_t *pkt, const size_t length,
                const int epoll_fd,
                int sessions, int maxsessions) {
+
+    struct ng_session *s = args->ctx->ng_session;
+    while (s != NULL) {
+        if (s->protocol == IPPROTO_ICMP || s->protocol == IPPROTO_ICMPV6) {
+            char source[INET6_ADDRSTRLEN + 1];
+            char dest[INET6_ADDRSTRLEN + 1];
+            if (s->icmp.version == 4) {
+                inet_ntop(AF_INET, &s->icmp.saddr.ip4, source, sizeof(source));
+                inet_ntop(AF_INET, &s->icmp.daddr.ip4, dest, sizeof(dest));
+            } else {
+                inet_ntop(AF_INET6, &s->icmp.saddr.ip6, source, sizeof(source));
+                inet_ntop(AF_INET6, &s->icmp.daddr.ip6, dest, sizeof(dest));
+            }
+            if (s->icmp.uid < 0)
+                log_android(ANDROID_LOG_WARN, "ICMP with unknown uid: %s -> %s\n", source, dest);
+        } else if (s->protocol == IPPROTO_UDP) {
+            char source[INET6_ADDRSTRLEN + 1];
+            char dest[INET6_ADDRSTRLEN + 1];
+            if (s->udp.version == 4) {
+                inet_ntop(AF_INET, &s->udp.saddr.ip4, source, sizeof(source));
+                inet_ntop(AF_INET, &s->udp.daddr.ip4, dest, sizeof(dest));
+            } else {
+                inet_ntop(AF_INET6, &s->udp.saddr.ip6, source, sizeof(source));
+                inet_ntop(AF_INET6, &s->udp.daddr.ip6, dest, sizeof(dest));
+            }
+            if (s->udp.uid < 0)
+                log_android(ANDROID_LOG_WARN, "UDP with unknown uid: %s -> %s\n", source, dest);
+        } else if (s->protocol == IPPROTO_TCP) {
+            char source[INET6_ADDRSTRLEN + 1];
+            char dest[INET6_ADDRSTRLEN + 1];
+            if (s->tcp.version == 4) {
+                inet_ntop(AF_INET, &s->tcp.saddr.ip4, source, sizeof(source));
+                inet_ntop(AF_INET, &s->tcp.daddr.ip4, dest, sizeof(dest));
+            } else {
+                inet_ntop(AF_INET6, &s->tcp.saddr.ip6, source, sizeof(source));
+                inet_ntop(AF_INET6, &s->tcp.daddr.ip6, dest, sizeof(dest));
+            }
+            if (s->tcp.uid < 0)
+                log_android(ANDROID_LOG_WARN, "TCP with unknown uid: %s -> %s\n", source, dest);
+        }
+        s = s->next;
+    }
+
     uint8_t protocol;
     void *saddr;
     void *daddr;

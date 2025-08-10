@@ -17,6 +17,7 @@ class SimpleTextField extends StatefulWidget {
     this.isPassword = false,
     this.updateWhenInvalid = false,
     this.enabled = true,
+    this.canClear = true,
     this.maxLines,
     super.key,
   });
@@ -32,6 +33,7 @@ class SimpleTextField extends StatefulWidget {
   final bool isPassword;
   final bool updateWhenInvalid;
   final bool enabled;
+  final bool canClear;
   final int? maxLines;
 
   @override
@@ -115,6 +117,17 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
                   icon: Icon(
                     Icons.remove_red_eye_outlined,
                     color: theme.iconTheme.color,
+                  ),
+                )
+              : widget.canClear
+              ? IconButton(
+                  onPressed: () {
+                    controller.text = "";
+                    widget.onChanged?.call("");
+                  },
+                  icon: Icon(
+                    Icons.cancel_outlined,
+                    color: theme.iconTheme.color?.light,
                   ),
                 )
               : null,

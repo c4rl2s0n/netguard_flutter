@@ -8,14 +8,14 @@ class HomeTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SessionCubit, SessionState>(
-      buildWhen: (oldState, state) => oldState.running != state.running,
+      buildWhen: (oldState, state) => oldState.running != state.running || oldState.sessionConfig != state.sessionConfig,
       builder: (context, state) => state.running
-          ? _firewallEnabled(context)
+          ? _firewallEnabled(context, state.sessionConfig)
           : _firewallDisabled(context),
     );
   }
 
-  Widget _firewallEnabled(BuildContext context) => Row(
+  Widget _firewallEnabled(BuildContext context, VpnConfig? sessionConfig) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
       Icon(
@@ -24,7 +24,8 @@ class HomeTitle extends StatelessWidget {
         size: context.textTheme.headlineLarge.size,
       ),
       const Margin.horizontal(ThemeConstants.spacing),
-      Text("Firewall is active", style: context.textTheme.headlineLarge),
+      Text("Firewall is active${sessionConfig?.observeOnly ?? false ? "(observation)" : ""}", style: context.textTheme.headlineLarge),
+      Text("Statistics for current session:", style: context.textTheme.headlineSmall),
     ],
   );
   Widget _firewallDisabled(BuildContext context) => Row(
@@ -37,6 +38,7 @@ class HomeTitle extends StatelessWidget {
       ),
       const Margin.horizontal(ThemeConstants.spacing),
       Text("Firewall is disabled", style: context.textTheme.headlineLarge),
+      Text("All-time statistics:", style: context.textTheme.headlineSmall),
     ],
   );
 }

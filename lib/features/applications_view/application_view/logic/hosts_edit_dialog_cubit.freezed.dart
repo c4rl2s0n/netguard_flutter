@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$HostsEditDialogState {
 
- bool get loading; Rule get rule; List<HostsEditEntryCubit> get entries;
+ bool get loading; Rule get rule; List<HostsEditEntryCubit> get entries; String? get search;
 /// Create a copy of HostsEditDialogState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $HostsEditDialogStateCopyWith<HostsEditDialogState> get copyWith => _$HostsEditD
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HostsEditDialogState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.rule, rule) || other.rule == rule)&&const DeepCollectionEquality().equals(other.entries, entries));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HostsEditDialogState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.rule, rule) || other.rule == rule)&&const DeepCollectionEquality().equals(other.entries, entries)&&(identical(other.search, search) || other.search == search));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loading,rule,const DeepCollectionEquality().hash(entries));
+int get hashCode => Object.hash(runtimeType,loading,rule,const DeepCollectionEquality().hash(entries),search);
 
 @override
 String toString() {
-  return 'HostsEditDialogState(loading: $loading, rule: $rule, entries: $entries)';
+  return 'HostsEditDialogState(loading: $loading, rule: $rule, entries: $entries, search: $search)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $HostsEditDialogStateCopyWith<$Res>  {
   factory $HostsEditDialogStateCopyWith(HostsEditDialogState value, $Res Function(HostsEditDialogState) _then) = _$HostsEditDialogStateCopyWithImpl;
 @useResult
 $Res call({
- bool loading, Rule rule, List<HostsEditEntryCubit> entries
+ bool loading, Rule rule, List<HostsEditEntryCubit> entries, String? search
 });
 
 
@@ -62,12 +62,13 @@ class _$HostsEditDialogStateCopyWithImpl<$Res>
 
 /// Create a copy of HostsEditDialogState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? loading = null,Object? rule = null,Object? entries = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? loading = null,Object? rule = null,Object? entries = null,Object? search = freezed,}) {
   return _then(HostsEditDialogState(
 loading: null == loading ? _self.loading : loading // ignore: cast_nullable_to_non_nullable
 as bool,rule: null == rule ? _self.rule : rule // ignore: cast_nullable_to_non_nullable
 as Rule,entries: null == entries ? _self.entries : entries // ignore: cast_nullable_to_non_nullable
-as List<HostsEditEntryCubit>,
+as List<HostsEditEntryCubit>,search: freezed == search ? _self.search : search // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -9,4 +9,5 @@ export 'package:netguard/common/native/native_bridge.g.dart'
 export 'global_rule_source.dart';
 export 'traffic_log_aggregation.dart';
 export 'traffic_log_group.dart';
-export 'package_statistics.dart';
+export 'traffic_statistics.dart';
+export 'live_session_statistics.dart';

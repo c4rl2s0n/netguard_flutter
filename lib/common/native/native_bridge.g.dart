@@ -531,6 +531,77 @@ class ErrorLog {
 ;
 }
 
+class PackageStatistics {
+  PackageStatistics({
+    this.packageName,
+    this.packetCountAllowed = 0,
+    this.packetSizeAllowed = 0,
+    this.packetCountBlocked = 0,
+    this.packetSizeBlocked = 0,
+    this.ipsCount = 0,
+    this.hostsCount = 0,
+  });
+
+  String? packageName;
+
+  int packetCountAllowed;
+
+  int packetSizeAllowed;
+
+  int packetCountBlocked;
+
+  int packetSizeBlocked;
+
+  int ipsCount;
+
+  int hostsCount;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      packageName,
+      packetCountAllowed,
+      packetSizeAllowed,
+      packetCountBlocked,
+      packetSizeBlocked,
+      ipsCount,
+      hostsCount,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static PackageStatistics decode(Object result) {
+    result as List<Object?>;
+    return PackageStatistics(
+      packageName: result[0] as String?,
+      packetCountAllowed: result[1]! as int,
+      packetSizeAllowed: result[2]! as int,
+      packetCountBlocked: result[3]! as int,
+      packetSizeBlocked: result[4]! as int,
+      ipsCount: result[5]! as int,
+      hostsCount: result[6]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! PackageStatistics || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 class SessionStatistics {
   SessionStatistics({
     this.packetCountAllowed = 0,
@@ -549,9 +620,9 @@ class SessionStatistics {
 
   int packetSizeBlocked;
 
-  String? mostBlockedPackage;
+  PackageStatistics? mostBlockedPackage;
 
-  String? mostTrafficPackage;
+  PackageStatistics? mostTrafficPackage;
 
   List<Object?> _toList() {
     return <Object?>[
@@ -574,8 +645,8 @@ class SessionStatistics {
       packetSizeAllowed: result[1]! as int,
       packetCountBlocked: result[2]! as int,
       packetSizeBlocked: result[3]! as int,
-      mostBlockedPackage: result[4] as String?,
-      mostTrafficPackage: result[5] as String?,
+      mostBlockedPackage: result[4] as PackageStatistics?,
+      mostTrafficPackage: result[5] as PackageStatistics?,
     );
   }
 
@@ -756,14 +827,17 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is ErrorLog) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    }    else if (value is SessionStatistics) {
+    }    else if (value is PackageStatistics) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is TrafficLog) {
+    }    else if (value is SessionStatistics) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    }    else if (value is Version) {
+    }    else if (value is TrafficLog) {
       buffer.putUint8(139);
+      writeValue(buffer, value.encode());
+    }    else if (value is Version) {
+      buffer.putUint8(140);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -791,10 +865,12 @@ class _PigeonCodec extends StandardMessageCodec {
       case 136: 
         return ErrorLog.decode(readValue(buffer)!);
       case 137: 
-        return SessionStatistics.decode(readValue(buffer)!);
+        return PackageStatistics.decode(readValue(buffer)!);
       case 138: 
-        return TrafficLog.decode(readValue(buffer)!);
+        return SessionStatistics.decode(readValue(buffer)!);
       case 139: 
+        return TrafficLog.decode(readValue(buffer)!);
+      case 140: 
         return Version.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);

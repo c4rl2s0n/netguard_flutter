@@ -9,20 +9,51 @@ extension ApplicationExtension on Application? {
 
 extension SessionStatisticsExtension on SessionStatistics {
   int get packetCount => packetCountAllowed + packetCountBlocked;
+
   int get packetSize => packetSizeAllowed + packetSizeBlocked;
-  void addLog(TrafficLog log){
-    if(log.allowed) {
+
+  void addLog(TrafficLog log) {
+    if (log.allowed) {
       packetCountAllowed++;
       packetSizeAllowed += log.size;
     }
-    if(log.blocked){
+    if (log.blocked) {
       packetCountBlocked++;
       packetSizeBlocked += log.size;
     }
   }
-  void updatePackageInfoFromMap(Iterable<TrafficLogByApplication> analysisByApplication){
-    mostTrafficPackage = analysisByApplication.nonNulls.sortedBy((a) => a.count).lastOrNull?.application?.packageName;
-    mostBlockedPackage = analysisByApplication.nonNulls.sortedBy((a) => a.countBlocked).lastOrNull?.application?.packageName;
+}
+extension PackageStatisticsExtension on PackageStatistics {
+  int get packetCount => packetCountAllowed + packetCountBlocked;
+  int get packetSize => packetSizeAllowed + packetSizeBlocked;
+
+  void addLog(TrafficLog log) {
+    if (log.allowed) {
+      packetCountAllowed++;
+      packetSizeAllowed += log.size;
+    }
+    if (log.blocked) {
+      packetCountBlocked++;
+      packetSizeBlocked += log.size;
+    }
+  }
+}
+
+extension LiveSessionStatisticsExtension on LiveSessionStatistics {
+  void addLog(TrafficLog log) {
+    SessionStatisticsExtension(this).addLog(log);
+    var packageStatistics = this.packageStatistics.putIfAbsent(
+      log.packageName,
+      () => PackageStatistics(packageName: log.packageName),
+    );
+    packageStatistics.addLog(log);
+
+    mostTrafficPackage = this.packageStatistics.values
+        .sortedBy((a) => a.packetCount)
+        .lastOrNull;
+    mostBlockedPackage = this.packageStatistics.values
+        .sortedBy((a) => a.packetCountBlocked)
+        .lastOrNull;
   }
 }
 
@@ -30,5 +61,3 @@ extension TrafficLogExtension on TrafficLog {
   bool get blocked => !allowed;
   String get destination => host ?? ip;
 }
-
-

@@ -31,7 +31,10 @@ class LogEntry extends StatelessWidget {
                 [
                   application.image,
                   Expanded(child: _child()),
-                  _statusIcon(context),
+                  _statusIcon(
+                    context,
+                    session.sessionConfig?.observeOnly ?? false,
+                  ),
                 ].insertBetweenItems(
                   () => const Margin.horizontal(ThemeConstants.spacing),
                 ),
@@ -60,7 +63,7 @@ class LogEntry extends StatelessWidget {
     );
   }
 
-  Widget _statusIcon(BuildContext context) {
+  Widget _statusIcon(BuildContext context, bool observeOnly) {
     return allowed
         ? Icon(
             CustomIcons.allow,
@@ -68,7 +71,7 @@ class LogEntry extends StatelessWidget {
             size: ThemeConstants.appIconSize,
           )
         : Icon(
-            CustomIcons.block,
+            observeOnly ? CustomIcons.blockObserve : CustomIcons.block,
             color: context.colors.negative,
             size: ThemeConstants.appIconSize,
           );

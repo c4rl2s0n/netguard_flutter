@@ -59,8 +59,6 @@ public class ModelBuilder {
         bundle.putLong(Values.Intent.Extras.SessionStatistics.packetSizeAllowed, statistics.getPacketSizeAllowed());
         bundle.putLong(Values.Intent.Extras.SessionStatistics.packetCountBlocked, statistics.getPacketCountBlocked());
         bundle.putLong(Values.Intent.Extras.SessionStatistics.packetSizeBlocked, statistics.getPacketSizeBlocked());
-        bundle.putString(Values.Intent.Extras.SessionStatistics.mostTrafficPackage, statistics.getMostTrafficPackage());
-        bundle.putString(Values.Intent.Extras.SessionStatistics.mostBlockedPackage, statistics.getMostBlockedPackage());
         return bundle;
     }
     public static SessionStatistics SessionStatisticsFromBundle(Bundle bundle){
@@ -69,8 +67,6 @@ public class ModelBuilder {
         builder.setPacketSizeAllowed(bundle.getLong(Values.Intent.Extras.SessionStatistics.packetSizeAllowed));
         builder.setPacketCountBlocked(bundle.getLong(Values.Intent.Extras.SessionStatistics.packetCountBlocked));
         builder.setPacketSizeBlocked(bundle.getLong(Values.Intent.Extras.SessionStatistics.packetSizeBlocked));
-        builder.setMostTrafficPackage(bundle.getString(Values.Intent.Extras.SessionStatistics.mostTrafficPackage));
-        builder.setMostBlockedPackage(bundle.getString(Values.Intent.Extras.SessionStatistics.mostBlockedPackage));
         return builder.build();
     }
 

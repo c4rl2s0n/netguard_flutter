@@ -20,12 +20,10 @@ class SessionCubit extends Cubit<SessionState> {
 
   Future load() async {
     await loadApplications();
-    SessionStatistics statistics = await packageStatisticsRepository
-        .getOverallStatistics(state.applicationsMap.keys.toList());
     emit(
       state.copyWith(
         sessionConfig: await vpnController.getSession(),
-        sessionStatistics: statistics,
+        sessionStatistics: await reloadStatistics(),
       ),
     );
   }
@@ -36,8 +34,14 @@ class SessionCubit extends Cubit<SessionState> {
     return super.close();
   }
 
+  Future<SessionStatistics> reloadStatistics() async {
+    return await trafficStatisticsRepository.getPackageStatistics(
+      state.applicationsMap.keys.toList(),
+    );
+  }
+
   Future resetStatistics() async {
-    await packageStatisticsRepository.resetStatistics();
+    await trafficStatisticsRepository.resetStatistics();
     emit(state.copyWith(sessionStatistics: SessionStatistics()));
   }
 
@@ -106,7 +110,13 @@ class SessionCubit extends Cubit<SessionState> {
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
     state.sessionAnalysis.clear();
     _notificationService.run();
-    emit(state.copyWith(sessionConfig: vpnConfig, running: true));
+    emit(
+      state.copyWith(
+        sessionConfig: vpnConfig,
+        sessionStatistics: LiveSessionStatistics(),
+        running: true,
+      ),
+    );
   }
 
   Future stopVpn() async {
@@ -117,21 +127,15 @@ class SessionCubit extends Cubit<SessionState> {
     await trafficLogListener?.cancel();
     trafficLogListener = null;
 
-    emit(state.copyWith(running: false));
+    emit(state.copyWith(running: false, sessionStatistics: await reloadStatistics()));
   }
 
-  void setVpnState(bool running) =>
-      emit(state.copyWith(running: running));
+  void setVpnState(bool running) => emit(state.copyWith(running: running));
 
   void _onTrafficLog(TrafficLog event) {
     state.sessionStatistics.addLog(event);
     state.sessionAnalysis.insert(event, state.applicationsMap);
-    state.sessionStatistics.updatePackageInfoFromMap(
-      state.sessionAnalysis.state.analysisByApplication.values,
-    );
-    packageStatisticsRepository.addLog(event);
-    // TODO: decide if trafficLog should be stored in repository (maybe not to save data)
-    // await trafficLogRepository.insert(log);
+    trafficStatisticsRepository.addLog(event);
   }
 }
 

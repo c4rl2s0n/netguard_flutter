@@ -1,3 +1,6 @@
+enum EndpointType{
+  ip, host
+}
 enum LogSorting {
   time,
   volume,

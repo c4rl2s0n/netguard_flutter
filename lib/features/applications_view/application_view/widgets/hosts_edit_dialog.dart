@@ -18,7 +18,7 @@ class HostsEditDialog extends StatelessWidget {
       child: CustomDialog(
         title: title,
         icon: Icon(CustomIcons.edit),
-        content: _hosts(),
+        content: _content(),
         actions: [_cancel(), _confirm()],
       ),
     );
@@ -39,10 +39,29 @@ class HostsEditDialog extends StatelessWidget {
     );
   }
 
+  Widget _content(){
+    return Column(
+      children: [
+        _searchBar(),
+        Flexible(child: _hosts())
+      ],
+    );
+  }
+  Widget _searchBar(){
+    return BlocBuilder<HostsEditDialogCubit, HostsEditDialogState>(
+      buildWhen: (oldState, state) => oldState.search != state.search,
+      builder: (context, state) => SimpleTextField(
+        initialValue: state.search ?? "",
+        labelText: "Search",
+        onChanged: context.read<HostsEditDialogCubit>().setSearch,
+        onChangedDelay: Duration(milliseconds: 250),
+      )
+    );
+  }
   Widget _hosts() {
     return BlocBuilder<HostsEditDialogCubit, HostsEditDialogState>(
       buildWhen: (oldState, state) =>
-          oldState.entries != state.entries ||
+          oldState.visibleEntries != state.visibleEntries ||
           oldState.loading != state.loading,
       builder: (context, state) => state.loading
           ? Center(child: CircularProgressIndicator())
@@ -50,8 +69,7 @@ class HostsEditDialog extends StatelessWidget {
               child: Column(
                 children:
                     <Widget>[
-                      Todo("sometimes only hosts or ips visible?"),
-                      ...state.entries.map((e) => HostEditEntry(e)),
+                      ...state.visibleEntries.map((e) => HostEditEntry(e)),
                     ].insertBetweenItems(
                       () => const Margin.vertical(ThemeConstants.smallSpacing),
                     ),

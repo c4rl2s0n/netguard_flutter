@@ -21,16 +21,20 @@ class HostsEditDialogCubit extends Cubit<HostsEditDialogState> {
     return await super.close();
   }
 
+  void setSearch(String search) {
+    emit(state.copyWith(search: search.empty ? null : search));
+  }
+
   Future _load() async {
     Set<String> hosts = state.rule.hosts.keys.toSet();
     Set<String> ips = state.rule.ips.keys.toSet();
     hosts.addAll(
-      (await trafficLogRepository.getHostsForPackage(
+      (await trafficStatisticsRepository.getHostsForPackage(
         state.rule.packageName,
       )).sorted(compareHostnames),
     );
     ips.addAll(
-      (await trafficLogRepository.getIPsForPackage(
+      (await trafficStatisticsRepository.getIPsForPackage(
         state.rule.packageName,
       )).sorted(compareIPs),
     );
@@ -63,11 +67,19 @@ class HostsEditDialogState with _$HostsEditDialogState {
     required this.loading,
     required this.rule,
     this.entries = const [],
+    this.search,
   });
 
+  @override
   final bool loading;
   @override
   final Rule rule;
   @override
   final List<HostsEditEntryCubit> entries;
+  @override
+  final String? search;
+
+  Iterable<HostsEditEntryCubit> get visibleEntries => entries.where(
+    (e) => search.empty || e.state.entry.target.contains(search!),
+  );
 }

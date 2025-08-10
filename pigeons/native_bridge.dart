@@ -175,6 +175,24 @@ class ErrorLog {
   String message;
 }
 
+class PackageStatistics{
+  PackageStatistics({
+    required this.packageName,
+    this.packetCountAllowed = 0,
+    this.packetSizeAllowed = 0,
+    this.packetCountBlocked = 0,
+    this.packetSizeBlocked = 0,
+    this.ipsCount = 0,
+    this.hostsCount = 0,
+  });
+  String? packageName;
+  int packetCountAllowed;
+  int packetSizeAllowed;
+  int packetCountBlocked;
+  int packetSizeBlocked;
+  int ipsCount;
+  int hostsCount;
+}
 class SessionStatistics {
   SessionStatistics({
     this.packetCountAllowed = 0,
@@ -188,8 +206,8 @@ class SessionStatistics {
   final int packetSizeAllowed;
   final int packetCountBlocked;
   final int packetSizeBlocked;
-  final String? mostBlockedPackage;
-  final String? mostTrafficPackage;
+  final PackageStatistics? mostBlockedPackage;
+  final PackageStatistics? mostTrafficPackage;
 }
 
 class TrafficLog {

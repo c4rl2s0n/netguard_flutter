@@ -29,14 +29,21 @@ class StatisticsOverview extends StatelessWidget {
           bottomLeft: _statApplication(
             context,
             session,
-            "Most Traffic",
-            session.sessionStatistics.mostTrafficPackage,
+            title: "Most Traffic",
+            subtitle: session.sessionStatistics.mostTrafficPackage?.packetSize
+                .readableFileSize(),
+            packageStatistics: session.sessionStatistics.mostTrafficPackage,
           ),
           bottomRight: _statApplication(
             context,
             session,
-            "Most Blocked",
-            session.sessionStatistics.mostBlockedPackage,
+            title: "Most Blocked",
+            subtitle: session
+                .sessionStatistics
+                .mostBlockedPackage
+                ?.packetCountBlocked
+                .toString(),
+            packageStatistics: session.sessionStatistics.mostBlockedPackage,
           ),
         ),
       ),
@@ -146,11 +153,13 @@ class StatisticsOverview extends StatelessWidget {
 
   Widget _statApplication(
     BuildContext context,
-    SessionState session,
-    String title,
-    String? packageName,
-  ) {
-    Application? application = session.applicationsMap[packageName ?? ""];
+    SessionState session, {
+    required String title,
+    String? subtitle,
+    PackageStatistics? packageStatistics,
+  }) {
+    Application? application =
+        session.applicationsMap[packageStatistics?.packageName ?? ""];
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -164,6 +173,13 @@ class StatisticsOverview extends StatelessWidget {
           style: context.textTheme.titleSmall,
           textAlign: TextAlign.center,
         ),
+        if (subtitle.notEmpty) ...[
+          Text(
+            subtitle!,
+            style: context.textTheme.labelSmall,
+            textAlign: TextAlign.center,
+          ),
+        ],
         const Margin.vertical(ThemeConstants.spacing),
         Text(
           title,

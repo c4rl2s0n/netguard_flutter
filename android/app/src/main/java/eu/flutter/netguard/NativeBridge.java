@@ -1474,6 +1474,216 @@ public class NativeBridge {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
+  public static final class PackageStatistics {
+    private @Nullable String packageName;
+
+    public @Nullable String getPackageName() {
+      return packageName;
+    }
+
+    public void setPackageName(@Nullable String setterArg) {
+      this.packageName = setterArg;
+    }
+
+    private @NonNull Long packetCountAllowed;
+
+    public @NonNull Long getPacketCountAllowed() {
+      return packetCountAllowed;
+    }
+
+    public void setPacketCountAllowed(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"packetCountAllowed\" is null.");
+      }
+      this.packetCountAllowed = setterArg;
+    }
+
+    private @NonNull Long packetSizeAllowed;
+
+    public @NonNull Long getPacketSizeAllowed() {
+      return packetSizeAllowed;
+    }
+
+    public void setPacketSizeAllowed(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"packetSizeAllowed\" is null.");
+      }
+      this.packetSizeAllowed = setterArg;
+    }
+
+    private @NonNull Long packetCountBlocked;
+
+    public @NonNull Long getPacketCountBlocked() {
+      return packetCountBlocked;
+    }
+
+    public void setPacketCountBlocked(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"packetCountBlocked\" is null.");
+      }
+      this.packetCountBlocked = setterArg;
+    }
+
+    private @NonNull Long packetSizeBlocked;
+
+    public @NonNull Long getPacketSizeBlocked() {
+      return packetSizeBlocked;
+    }
+
+    public void setPacketSizeBlocked(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"packetSizeBlocked\" is null.");
+      }
+      this.packetSizeBlocked = setterArg;
+    }
+
+    private @NonNull Long ipsCount;
+
+    public @NonNull Long getIpsCount() {
+      return ipsCount;
+    }
+
+    public void setIpsCount(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"ipsCount\" is null.");
+      }
+      this.ipsCount = setterArg;
+    }
+
+    private @NonNull Long hostsCount;
+
+    public @NonNull Long getHostsCount() {
+      return hostsCount;
+    }
+
+    public void setHostsCount(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"hostsCount\" is null.");
+      }
+      this.hostsCount = setterArg;
+    }
+
+    /** Constructor is non-public to enforce null safety; use Builder. */
+    PackageStatistics() {}
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) { return true; }
+      if (o == null || getClass() != o.getClass()) { return false; }
+      PackageStatistics that = (PackageStatistics) o;
+      return Objects.equals(packageName, that.packageName) && packetCountAllowed.equals(that.packetCountAllowed) && packetSizeAllowed.equals(that.packetSizeAllowed) && packetCountBlocked.equals(that.packetCountBlocked) && packetSizeBlocked.equals(that.packetSizeBlocked) && ipsCount.equals(that.ipsCount) && hostsCount.equals(that.hostsCount);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(packageName, packetCountAllowed, packetSizeAllowed, packetCountBlocked, packetSizeBlocked, ipsCount, hostsCount);
+    }
+
+    public static final class Builder {
+
+      private @Nullable String packageName;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPackageName(@Nullable String setterArg) {
+        this.packageName = setterArg;
+        return this;
+      }
+
+      private @Nullable Long packetCountAllowed;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPacketCountAllowed(@NonNull Long setterArg) {
+        this.packetCountAllowed = setterArg;
+        return this;
+      }
+
+      private @Nullable Long packetSizeAllowed;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPacketSizeAllowed(@NonNull Long setterArg) {
+        this.packetSizeAllowed = setterArg;
+        return this;
+      }
+
+      private @Nullable Long packetCountBlocked;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPacketCountBlocked(@NonNull Long setterArg) {
+        this.packetCountBlocked = setterArg;
+        return this;
+      }
+
+      private @Nullable Long packetSizeBlocked;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setPacketSizeBlocked(@NonNull Long setterArg) {
+        this.packetSizeBlocked = setterArg;
+        return this;
+      }
+
+      private @Nullable Long ipsCount;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setIpsCount(@NonNull Long setterArg) {
+        this.ipsCount = setterArg;
+        return this;
+      }
+
+      private @Nullable Long hostsCount;
+
+      @CanIgnoreReturnValue
+      public @NonNull Builder setHostsCount(@NonNull Long setterArg) {
+        this.hostsCount = setterArg;
+        return this;
+      }
+
+      public @NonNull PackageStatistics build() {
+        PackageStatistics pigeonReturn = new PackageStatistics();
+        pigeonReturn.setPackageName(packageName);
+        pigeonReturn.setPacketCountAllowed(packetCountAllowed);
+        pigeonReturn.setPacketSizeAllowed(packetSizeAllowed);
+        pigeonReturn.setPacketCountBlocked(packetCountBlocked);
+        pigeonReturn.setPacketSizeBlocked(packetSizeBlocked);
+        pigeonReturn.setIpsCount(ipsCount);
+        pigeonReturn.setHostsCount(hostsCount);
+        return pigeonReturn;
+      }
+    }
+
+    @NonNull
+    ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<>(7);
+      toListResult.add(packageName);
+      toListResult.add(packetCountAllowed);
+      toListResult.add(packetSizeAllowed);
+      toListResult.add(packetCountBlocked);
+      toListResult.add(packetSizeBlocked);
+      toListResult.add(ipsCount);
+      toListResult.add(hostsCount);
+      return toListResult;
+    }
+
+    static @NonNull PackageStatistics fromList(@NonNull ArrayList<Object> pigeonVar_list) {
+      PackageStatistics pigeonResult = new PackageStatistics();
+      Object packageName = pigeonVar_list.get(0);
+      pigeonResult.setPackageName((String) packageName);
+      Object packetCountAllowed = pigeonVar_list.get(1);
+      pigeonResult.setPacketCountAllowed((Long) packetCountAllowed);
+      Object packetSizeAllowed = pigeonVar_list.get(2);
+      pigeonResult.setPacketSizeAllowed((Long) packetSizeAllowed);
+      Object packetCountBlocked = pigeonVar_list.get(3);
+      pigeonResult.setPacketCountBlocked((Long) packetCountBlocked);
+      Object packetSizeBlocked = pigeonVar_list.get(4);
+      pigeonResult.setPacketSizeBlocked((Long) packetSizeBlocked);
+      Object ipsCount = pigeonVar_list.get(5);
+      pigeonResult.setIpsCount((Long) ipsCount);
+      Object hostsCount = pigeonVar_list.get(6);
+      pigeonResult.setHostsCount((Long) hostsCount);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
   public static final class SessionStatistics {
     private @NonNull Long packetCountAllowed;
 
@@ -1527,23 +1737,23 @@ public class NativeBridge {
       this.packetSizeBlocked = setterArg;
     }
 
-    private @Nullable String mostBlockedPackage;
+    private @Nullable PackageStatistics mostBlockedPackage;
 
-    public @Nullable String getMostBlockedPackage() {
+    public @Nullable PackageStatistics getMostBlockedPackage() {
       return mostBlockedPackage;
     }
 
-    public void setMostBlockedPackage(@Nullable String setterArg) {
+    public void setMostBlockedPackage(@Nullable PackageStatistics setterArg) {
       this.mostBlockedPackage = setterArg;
     }
 
-    private @Nullable String mostTrafficPackage;
+    private @Nullable PackageStatistics mostTrafficPackage;
 
-    public @Nullable String getMostTrafficPackage() {
+    public @Nullable PackageStatistics getMostTrafficPackage() {
       return mostTrafficPackage;
     }
 
-    public void setMostTrafficPackage(@Nullable String setterArg) {
+    public void setMostTrafficPackage(@Nullable PackageStatistics setterArg) {
       this.mostTrafficPackage = setterArg;
     }
 
@@ -1597,18 +1807,18 @@ public class NativeBridge {
         return this;
       }
 
-      private @Nullable String mostBlockedPackage;
+      private @Nullable PackageStatistics mostBlockedPackage;
 
       @CanIgnoreReturnValue
-      public @NonNull Builder setMostBlockedPackage(@Nullable String setterArg) {
+      public @NonNull Builder setMostBlockedPackage(@Nullable PackageStatistics setterArg) {
         this.mostBlockedPackage = setterArg;
         return this;
       }
 
-      private @Nullable String mostTrafficPackage;
+      private @Nullable PackageStatistics mostTrafficPackage;
 
       @CanIgnoreReturnValue
-      public @NonNull Builder setMostTrafficPackage(@Nullable String setterArg) {
+      public @NonNull Builder setMostTrafficPackage(@Nullable PackageStatistics setterArg) {
         this.mostTrafficPackage = setterArg;
         return this;
       }
@@ -1648,9 +1858,9 @@ public class NativeBridge {
       Object packetSizeBlocked = pigeonVar_list.get(3);
       pigeonResult.setPacketSizeBlocked((Long) packetSizeBlocked);
       Object mostBlockedPackage = pigeonVar_list.get(4);
-      pigeonResult.setMostBlockedPackage((String) mostBlockedPackage);
+      pigeonResult.setMostBlockedPackage((PackageStatistics) mostBlockedPackage);
       Object mostTrafficPackage = pigeonVar_list.get(5);
-      pigeonResult.setMostTrafficPackage((String) mostTrafficPackage);
+      pigeonResult.setMostTrafficPackage((PackageStatistics) mostTrafficPackage);
       return pigeonResult;
     }
   }
@@ -2027,10 +2237,12 @@ public class NativeBridge {
         case (byte) 136:
           return ErrorLog.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 137:
-          return SessionStatistics.fromList((ArrayList<Object>) readValue(buffer));
+          return PackageStatistics.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 138:
-          return TrafficLog.fromList((ArrayList<Object>) readValue(buffer));
+          return SessionStatistics.fromList((ArrayList<Object>) readValue(buffer));
         case (byte) 139:
+          return TrafficLog.fromList((ArrayList<Object>) readValue(buffer));
+        case (byte) 140:
           return Version.fromList((ArrayList<Object>) readValue(buffer));
         default:
           return super.readValueOfType(type, buffer);
@@ -2063,14 +2275,17 @@ public class NativeBridge {
       } else if (value instanceof ErrorLog) {
         stream.write(136);
         writeValue(stream, ((ErrorLog) value).toList());
-      } else if (value instanceof SessionStatistics) {
+      } else if (value instanceof PackageStatistics) {
         stream.write(137);
+        writeValue(stream, ((PackageStatistics) value).toList());
+      } else if (value instanceof SessionStatistics) {
+        stream.write(138);
         writeValue(stream, ((SessionStatistics) value).toList());
       } else if (value instanceof TrafficLog) {
-        stream.write(138);
+        stream.write(139);
         writeValue(stream, ((TrafficLog) value).toList());
       } else if (value instanceof Version) {
-        stream.write(139);
+        stream.write(140);
         writeValue(stream, ((Version) value).toList());
       } else {
         super.writeValue(stream, value);

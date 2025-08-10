@@ -3,6 +3,7 @@ package eu.flutter.netguard;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
@@ -15,6 +16,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -29,6 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import eu.flutter.netguard.data.DatabaseHelper;
 import eu.flutter.netguard.data.IPKey;
 import eu.flutter.netguard.data.ModelBuilder;
+import eu.flutter.netguard.data.PersistenceCache;
 import eu.flutter.netguard.network.NetworkMonitor;
 import eu.flutter.netguard.network.NetworkUtils;
 import eu.flutter.netguard.network.Protocols;
@@ -68,15 +71,15 @@ public class MyVpnService extends VpnService {
     private LogHandler logHandler;
     private NotificationTools notification;
 
-    private Map<String, Boolean> mapGlobalBlockedHosts = new HashMap<>();
-    private Map<String, Boolean> mapGlobalBlockedIPs = new HashMap<>();
-    private Map<Long, List<Rule>> mapUidRules = new HashMap<>();
-    private Set<Long> setUidBlockAll = new HashSet<>();
-    private Set<Long> setUidBlockQuic = new HashSet<>();
-    private Map<Long, String> mapUidPackageName = new HashMap<>();
-    private Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
-    private Map<IPKey, String> mapIPKeySni = new HashMap<>();
-    private Map<String, String> mapIpDomain = new HashMap<>();
+    private final Map<String, Boolean> mapGlobalBlockedHosts = new HashMap<>();
+    private final Map<String, Boolean> mapGlobalBlockedIPs = new HashMap<>();
+    private final Map<Long, List<Rule>> mapUidRules = new HashMap<>();
+    private final Set<Long> setUidBlockAll = new HashSet<>();
+    private final Set<Long> setUidBlockQuic = new HashSet<>();
+    private final Map<Long, String> mapUidPackageName = new HashMap<>();
+    private final Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
+    private final Map<IPKey, String> mapIPKeySni = new HashMap<>();
+    private final Map<String, String> mapIpDomain = new HashMap<>();
 
     private List<ApplicationSetting> applicationSettings;
     private static boolean running = false;
@@ -175,7 +178,8 @@ public class MyVpnService extends VpnService {
         if(config == null) return;
 
         MyVpnService.vpnConfig = config;
-        Log.setLogLevel(config.getLogLevel().intValue());
+        PersistenceCache.StoreVpnConfig(PreferenceManager.getDefaultSharedPreferences(context), config);
+
 
         if(isRunning()){
             reload(context, "Update Config");
@@ -191,6 +195,10 @@ public class MyVpnService extends VpnService {
         startForeground(NotificationTools.WAITING, notification.getRunningNotification());
         Log.i(TAG, "Starting the VPN!");
 
+        // load config from shared preferences
+        vpnConfig = PersistenceCache.VpnConfig(PreferenceManager.getDefaultSharedPreferences(this));
+
+        Log.setLogLevel(vpnConfig.getLogLevel().intValue());
 
         database = new DatabaseHelper(Values.Paths.database(this));
 
@@ -321,7 +329,7 @@ public class MyVpnService extends VpnService {
                     builder.addAllowedApplication(packageName);
                     Log.i(TAG, "MyVpnService " + packageName);
                 } catch (PackageManager.NameNotFoundException ex) {
-                    Log.e(TAG, ex.toString() + "\n" + Log.getStackTraceString(ex));
+                    Log.e(TAG, ex + "\n" + Log.getStackTraceString(ex));
                 }
             }
         }
@@ -634,7 +642,8 @@ public class MyVpnService extends VpnService {
             this.checkFinished = checkFinished;
         }
     }
-    private enum CheckRuleTarget{ip, host};
+    private enum CheckRuleTarget{ip, host}
+
     private RuleCheckResult blockedByRule(long uid, String value, CheckRuleTarget target){
         if(!mapUidRules.containsKey(uid)) return new RuleCheckResult(false);
         List<Rule> rules = mapUidRules.get(uid);
@@ -649,7 +658,7 @@ public class MyVpnService extends VpnService {
                 case host:
                     ruleMap = rule.getHosts();
                     break;
-            };
+            }
             if(ruleMap == null || ruleMap.isEmpty()) continue;
             boolean valueListed = ruleMap.containsKey(value);
             switch (rule.getType()) {
