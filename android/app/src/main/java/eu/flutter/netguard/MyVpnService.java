@@ -1,5 +1,6 @@
 package eu.flutter.netguard;
 
+import android.app.ActivityManager;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.content.Context;
 import android.content.Intent;
@@ -82,20 +83,27 @@ public class MyVpnService extends VpnService {
     private final Map<String, String> mapIpDomain = new HashMap<>();
 
     private List<ApplicationSetting> applicationSettings;
-    private static boolean running = false;
 
     private static DatabaseHelper database;
 
-    public static boolean isRunning() {
-        return running;
+    public static boolean isRunning(Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (MyVpnService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
-    public static VpnConfig getSessionConfig() {
-        if(running) return vpnConfig;
+    public static VpnConfig getSessionConfig(Context context) {
+        if(isRunning(context)){
+            PersistenceCache.VpnConfig(PreferenceManager.getDefaultSharedPreferences(context));
+        }
         return null;
     }
 
     public static void reload(Context context, String reason) {
-        if (!running) return;
+        if (!isRunning(context)) return;
         Log.i(TAG, "Reload VPN - "+reason);
         Intent intent = new Intent(context, MyVpnService.class);
         intent.setAction(Values.Intent.Actions.RELOAD);
@@ -151,7 +159,7 @@ public class MyVpnService extends VpnService {
 
         switch (action) {
             case Values.Intent.Actions.START:
-                if(isRunning())
+                if(isRunning(this))
                     reloadVpn();
                 else
                     startVpn();
@@ -160,6 +168,7 @@ public class MyVpnService extends VpnService {
                 reloadVpn();
                 break;
             case Values.Intent.Actions.STOP:
+                PersistenceCache.ClearVpnConfig(PreferenceManager.getDefaultSharedPreferences(this));
                 stopVpn();
                 break;
             case Values.Intent.Actions.PUSH_STATS:
@@ -181,7 +190,7 @@ public class MyVpnService extends VpnService {
         PersistenceCache.StoreVpnConfig(PreferenceManager.getDefaultSharedPreferences(context), config);
 
 
-        if(isRunning()){
+        if(isRunning(context)){
             reload(context, "Update Config");
         }
     }
@@ -216,7 +225,6 @@ public class MyVpnService extends VpnService {
                 Log.e(TAG, "Failed to establish VPN interface");
             } else {
                 Log.i(TAG, "VPN interface established");
-                running = true;
                 logHandler.vpnStarted();
                 startNative(vpnInterface);
                 return;
@@ -224,11 +232,10 @@ public class MyVpnService extends VpnService {
         } catch (Exception e) {
             Log.e(TAG, "Failed to start VPN", e);
         }
-        running = false;
     }
     private void reloadVpn(){
         Log.i(TAG, "Restarting VPN");
-        if(isRunning()) stopVpn();
+        if(isRunning(this)) stopVpn();
         startVpn();
     }
     private void stopVpn(){
@@ -237,7 +244,6 @@ public class MyVpnService extends VpnService {
         if (vpnInterface != null) {
             try {
                 vpnInterface.close();
-                running = false;
             } catch (Exception ignored) {}
             vpnInterface = null;
         }
@@ -252,7 +258,6 @@ public class MyVpnService extends VpnService {
 
         logHandler.vpnStopped();
         Log.i(TAG, "VPN stopped");
-        running = false;
     }
 
     @Override

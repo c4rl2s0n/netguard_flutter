@@ -28,6 +28,17 @@ public class PersistenceCache {
         editor.putStringSet(PREF_FILTERED_PACKAGES, Set.copyOf(vpnConfig.getFilteredPackages()));
         editor.apply();
     }
+    public static void ClearVpnConfig(SharedPreferences sharedPrefs){
+        var editor = sharedPrefs.edit();
+        editor.remove(PREF_DB_PATH);
+        editor.remove(PREF_SESSION);
+        editor.remove(PREF_LOG_LEVEL);
+        editor.remove(PREF_LOG_TRAFFIC);
+        editor.remove(PREF_OBSERVE_ONLY);
+        editor.remove(PREF_FINISHED);
+        editor.remove(PREF_FILTERED_PACKAGES);
+        editor.apply();
+    }
     public static NativeBridge.VpnConfig VpnConfig(SharedPreferences sharedPrefs){
         NativeBridge.VpnConfig.Builder builder = new NativeBridge.VpnConfig.Builder();
         builder.setDbPath(sharedPrefs.getString(PREF_DB_PATH, ""));
@@ -35,7 +46,7 @@ public class PersistenceCache {
         builder.setLogLevel(sharedPrefs.getLong(PREF_LOG_LEVEL, 5));
         builder.setLogTraffic(sharedPrefs.getBoolean(PREF_LOG_TRAFFIC, false)) ;
         builder.setObserveOnly(sharedPrefs.getBoolean(PREF_OBSERVE_ONLY, false)) ;
-        builder.setFinished(sharedPrefs.getBoolean(PREF_FINISHED, false)) ;
+        builder.setFinished(sharedPrefs.getBoolean(PREF_FINISHED, true)) ;
         builder.setFilteredPackages(List.copyOf(sharedPrefs.getStringSet(PREF_FILTERED_PACKAGES, new HashSet<>())));
         return builder.build();
 

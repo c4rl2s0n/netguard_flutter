@@ -51,13 +51,13 @@ public class VpnApiImpl implements VpnController {
     @NonNull
     @Override
     public Boolean isRunning() {
-        return MyVpnService.isRunning();
+        return MyVpnService.isRunning(context);
     }
 
     @Nullable
     @Override
     public VpnConfig getSession() {
-        return MyVpnService.getSessionConfig();
+        return MyVpnService.getSessionConfig(context);
     }
 
     @Override
