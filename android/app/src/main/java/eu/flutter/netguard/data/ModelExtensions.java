@@ -1,6 +1,6 @@
 package eu.flutter.netguard.data;
 
-import eu.flutter.netguard.NativeBridge;
+import eu.flutter.netguard.flutter.NativeBridge;
 
 public class ModelExtensions {
 

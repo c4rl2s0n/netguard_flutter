@@ -4,5 +4,6 @@ export 'logging_tools.dart';
 export 'networking_tools.dart';
 export 'parsing_tools.dart';
 export 'permission_tools.dart';
+export 'setup_tools.dart';
 export 'vpn_tools.dart';
 export 'web_tools.dart';

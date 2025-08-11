@@ -2,10 +2,10 @@ import 'package:netguard/netguard.dart';
 
 class NotificationUpdateService {
   NotificationUpdateService(
-    this.sessionCubit,
-    this.vpnController, {
-    this.intervalMs = 500,
-  });
+      this.sessionCubit,
+      this.vpnController, {
+        this.intervalMs = 500,
+      });
 
   final int intervalMs;
 

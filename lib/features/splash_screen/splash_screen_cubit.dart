@@ -6,7 +6,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:netguard/common/common.dart';
-import 'package:netguard/common/service_locator/service_locator.dart' show configureDependencies;
+import 'package:netguard/common/service_locator/service_locator.dart'
+    show configureDependencies;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
@@ -23,18 +24,12 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
   Future _loadData() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    await _initializeFilepaths();
-    _setupLogging();
+    AppFilepaths filepaths = await _initializeFilepaths();
+    SetupTools.setupLogging(applicationDocumentsDirectory);
     _enforcePortraitMode();
 
-    // Load localization (Text resources)
-    //await MusiciousLocalizations.load(AppLocalizationDelegate().supportedLocales.first);
-
     // Setup service locator
-    await configureDependencies(
-      applicationDocumentsDirectory,
-      databaseFilename,
-    );
+    await configureDependencies(filepaths);
 
     await _setupBlocs();
 
@@ -45,8 +40,6 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
     //   getIt<IMigrationRepository>(),
     // ).initializeApp();
 
-    //getIt.registerSingleton<RouteObserver>(MusiciousRouteObserver(breadcrumbsCubit: _breadcrumbsCubit));
-
     emit(
       state.copyWith(
         loaded: true,
@@ -55,19 +48,13 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
     );
   }
 
-  Future _initializeFilepaths() async {
+  Future<AppFilepaths> _initializeFilepaths() async {
     // initialize filepaths and database
     // NOTE: do not change these, as the filenames are also hardcoded in JAVA/Native side
-    Directory dir = await getApplicationDocumentsDirectory();
-    applicationDocumentsDirectory = path.join(dir.path, 'netguard');
-    databaseFilename = 'netguard.db';
-    await _prepareStorage(applicationDocumentsDirectory);
-  }
-
-  void _setupLogging() {
-    // Error handling
-    LoggingTools.setup(applicationDocumentsDirectory);
-    FlutterError.onError = LoggingTools.onError;
+    AppFilepaths filepaths = await SetupTools.getFilepaths();
+    applicationDocumentsDirectory = filepaths.applicationDocumentsDirectory;
+    databaseFilename = filepaths.databaseFilename;
+    return filepaths;
   }
 
   void _enforcePortraitMode() {
@@ -78,15 +65,7 @@ class SplashScreenCubit extends Cubit<SplashScreenState> {
     ]);
   }
 
-  Future _prepareStorage(String applicationDirectory) async {
-    Directory dir = Directory(applicationDirectory);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-  }
-
   Future _setupBlocs() async {
-
     await sessionCubit.load();
 
     // _settingsCubit = getIt<SettingsCubit>();

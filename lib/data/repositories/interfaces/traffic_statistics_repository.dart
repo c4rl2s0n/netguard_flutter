@@ -14,14 +14,5 @@ abstract class ITrafficStatisticsRepository extends RepositoryBase {
   Future<Set<String>> getIPsForPackage(String? packageName);
   Future insert(TrafficStatistics entity);
   Future addLog(TrafficLog log);
-  Future updateCount(
-    String? packageName,
-    String endpoint,
-    EndpointType type,
-    int addCountAllowed,
-    int addSizeAllowed,
-    int addCountBlocked,
-    int addSizeBlocked,
-  );
   Future resetStatistics();
 }

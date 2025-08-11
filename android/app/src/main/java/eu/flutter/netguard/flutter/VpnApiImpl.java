@@ -1,12 +1,12 @@
-package eu.flutter.netguard;
+package eu.flutter.netguard.flutter;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
-import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,27 +17,32 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import eu.flutter.netguard.MainActivity;
+import eu.flutter.netguard.MyVpnService;
 import eu.flutter.netguard.data.ModelBuilder;
 import eu.flutter.netguard.utils.Util;
 import eu.flutter.netguard.utils.Values;
-import eu.flutter.netguard.NativeBridge.*;
+import eu.flutter.netguard.flutter.NativeBridge.*;
 
 public class VpnApiImpl implements VpnController {
-    private final MainActivity context;
+    private final Context context;
 
-    public VpnApiImpl(MainActivity context) {
+    public VpnApiImpl(Context context) {
         this.context = context;
     }
     @Override
     public void startVpn(@NonNull VpnConfig config) {
         MyVpnService.updateVpnConfig(context, config);
         Intent prepareIntent = VpnService.prepare(context);
-        if (prepareIntent != null) {
-            // Need user consent — ask MainActivity to launch permission
-            context.requestVpnPermission(prepareIntent);
-        } else {
-            // Permission already granted — start VPN directly
-            context.startVpnService();
+        if(context instanceof MainActivity) {
+            MainActivity mainActivity = (MainActivity) context;
+            if (prepareIntent != null) {
+                // Need user consent — ask MainActivity to launch permission
+                mainActivity.requestVpnPermission(prepareIntent);
+            } else {
+                // Permission already granted — start VPN directly
+                mainActivity.startVpnService();
+            }
         }
     }
 

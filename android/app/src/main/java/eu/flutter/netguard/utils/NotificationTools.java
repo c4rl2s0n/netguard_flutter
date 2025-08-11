@@ -5,30 +5,18 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.os.Build;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.PendingIntentCompat;
 
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import eu.flutter.netguard.MainActivity;
-import eu.flutter.netguard.NativeBridge;
+import eu.flutter.netguard.flutter.NativeBridge;
 import eu.flutter.netguard.R;
-import eu.flutter.netguard.data.ModelExtensions;
 import eu.flutter.netguard.data.StatusNotificationData;
 
 public class NotificationTools {

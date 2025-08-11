@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import java.util.HashMap;
 
-import eu.flutter.netguard.NativeBridge.*;
+import eu.flutter.netguard.flutter.NativeBridge.*;
 import eu.flutter.netguard.utils.Values;
 
 public class ModelBuilder {

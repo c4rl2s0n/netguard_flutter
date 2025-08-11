@@ -49,10 +49,12 @@ extension LiveSessionStatisticsExtension on LiveSessionStatistics {
     packageStatistics.addLog(log);
 
     mostTrafficPackage = this.packageStatistics.values
-        .sortedBy((a) => a.packetCount)
+        .sortedBy((a) => a.packetSize)
+        .where((a) => a.packetSize > 0)
         .lastOrNull;
     mostBlockedPackage = this.packageStatistics.values
         .sortedBy((a) => a.packetCountBlocked)
+        .where((a) => a.packetCountBlocked > 0)
         .lastOrNull;
   }
 }
@@ -60,4 +62,8 @@ extension LiveSessionStatisticsExtension on LiveSessionStatistics {
 extension TrafficLogExtension on TrafficLog {
   bool get blocked => !allowed;
   String get destination => host ?? ip;
+}
+
+extension VpnConfigExtension on VpnConfig? {
+  bool get running => this != null && this!.session.notEmpty && !this!.finished;
 }

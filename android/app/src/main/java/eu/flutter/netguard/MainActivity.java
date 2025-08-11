@@ -2,25 +2,24 @@ package eu.flutter.netguard;
 
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
+import eu.flutter.netguard.flutter.FlutterEngineManager;
 import eu.flutter.netguard.utils.Values;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
-import eu.flutter.netguard.NativeBridge.*;
-import io.flutter.plugin.common.BinaryMessenger;
 
 // TODO: Intent Handler to start and configure firewall
 public class MainActivity extends FlutterActivity {
     private static final int VPN_REQUEST_CODE = 1000;
 
     @Override
-    public void configureFlutterEngine(FlutterEngine flutterEngine) {
+    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
 
-        BinaryMessenger binaryMessenger = flutterEngine.getDartExecutor().getBinaryMessenger();
-        VpnEventChannel.setUp(binaryMessenger);
-        VpnController.setUp(binaryMessenger, new VpnApiImpl(this));
+        // monitor FlutterEngine Lifecycle
+        FlutterEngineManager.getInstance(this).onUiEngineAttached(flutterEngine);
     }
 
     public void requestVpnPermission(Intent prepareIntent) {

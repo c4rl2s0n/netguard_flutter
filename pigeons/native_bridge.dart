@@ -4,8 +4,8 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/common/native/native_bridge.g.dart',
     dartOptions: DartOptions(),
-    javaOut: 'android/app/src/main/java/eu/flutter/netguard/NativeBridge.java',
-    javaOptions: JavaOptions(package: "eu.flutter.netguard"),
+    javaOut: 'android/app/src/main/java/eu/flutter/netguard/flutter/NativeBridge.java',
+    javaOptions: JavaOptions(package: "eu.flutter.netguard.flutter"),
     dartPackageName: 'pigeon_example_package',
   ),
 )
@@ -27,6 +27,7 @@ abstract class VpnEventHandler {
   void updateVpnState(bool running);
   @async
   void logTraffic(TrafficLog log);
+  void closeFlutterEngine();
 }
 
 /// MODELS

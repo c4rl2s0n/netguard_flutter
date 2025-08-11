@@ -14,7 +14,7 @@ import com.github.mikephil.charting.data.PieEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.flutter.netguard.NativeBridge;
+import eu.flutter.netguard.flutter.NativeBridge;
 import eu.flutter.netguard.R;
 import eu.flutter.netguard.utils.Util;
 
