@@ -51,8 +51,8 @@ class HostsRepository extends IHostsRepository {
   }
 
   @override
-  Future<void> clearGeneric() async {
-    await (db.hostsTable.delete()..where((e) => e.ruleId.equalsNullable(null)))
+  Future<int> clearGeneric() async {
+    return await (db.hostsTable.delete()..where((e) => e.ruleId.equalsNullable(null)))
         .go();
   }
 

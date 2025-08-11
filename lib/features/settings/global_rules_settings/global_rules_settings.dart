@@ -52,8 +52,9 @@ class GlobalRulesSettings extends StatelessWidget {
                     oldState.running != state.running,
                 builder: (context, session) => SingleChildScrollView(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _lastScanIndication(),
+                      _head(context),
                       if (session.running) ...[
                         TWarning(
                           "These settings will only be effective after restarting the VPN.",
@@ -69,6 +70,34 @@ class GlobalRulesSettings extends StatelessWidget {
     );
   }
 
+  Widget _head(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: _lastScanIndication()),
+        _clearSourcesBtn(context),
+      ],
+    );
+  }
+
+  Widget _clearSourcesBtn(BuildContext context) {
+    return IconButton(
+      onPressed: () async {
+        if (await DeleteConfirmationDialog.ask(
+          context,
+          title: "Delete Global Rules?",
+          content: "Do you want to delete all global firewall rules?",
+        )) {
+          if(await hostsRepository.clearGeneric() > 0){
+            SnackBarFactory.showPositiveSnackBar("Global firewall rules deleted!");
+          }else{
+            SnackBarFactory.showInfoSnackBar("No rules found to delete...");
+          }
+        }
+      },
+      icon: Icon(CustomIcons.delete, color: context.colors.negative),
+    );
+  }
+
   Widget _lastScanIndication() {
     return BlocBuilder<SettingsCubit, SettingsState>(
       buildWhen: (oldState, state) =>
@@ -81,6 +110,8 @@ class GlobalRulesSettings extends StatelessWidget {
                 style: style?.copyWith(color: context.colors.warning),
               )
             : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("${state.lastHostlistUpdate}\n", style: style),
                   FutureBuilder<int>(

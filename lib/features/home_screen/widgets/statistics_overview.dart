@@ -165,7 +165,7 @@ class StatisticsOverview extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Center(
-          child: SizedBox.square(dimension: 80, child: application?.wIcon),
+          child: SizedBox.square(dimension: 80, child: application.wIcon),
         ),
 
         Text(

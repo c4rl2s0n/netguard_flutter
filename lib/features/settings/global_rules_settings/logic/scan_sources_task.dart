@@ -54,11 +54,7 @@ class ScanSourcesTask extends ProgressTask {
         "Updating Database...\nFound ${result.scannedSources.length} new/changed sources\nUpdate hashes",
       ),
     );
-    int i=0;
-    for(var source in sources){
-      await globalRuleSourceRepository.update(source);
-      updateProgress((lc) => lc.setProgress((i++) / sources.length));
-    }
+    await globalRuleSourceRepository.updateAll(sources);
 
     updateProgress((lc) => lc.setProgress(null));
     updateProgress(
