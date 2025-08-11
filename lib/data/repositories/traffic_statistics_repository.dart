@@ -233,7 +233,6 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
                     hostsCount,
                   ])
                   ..groupBy([db.trafficStatisticsTable.packageName])
-                  ..where(totalSize.isBiggerThanValue(0))
                   ..orderBy([
                     OrderingTerm(
                       expression: totalCount,
@@ -252,7 +251,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
                   ),
                 )
                 .get())
-            .firstWhereOrNull((p) => availablePackages.contains(p));
+            .firstWhereOrNull((p) => p.packetSize > 0 && availablePackages.contains(p));
 
     // get package with most blocked traffic count
     statistics.mostBlockedPackage =
@@ -268,7 +267,6 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
                     hostsCount,
                   ])
                   ..groupBy([db.trafficStatisticsTable.packageName])
-                  ..where(totalCountBlocked.isBiggerThanValue(0))
                   ..orderBy([
                     OrderingTerm(
                       expression: totalCountBlocked,
@@ -287,7 +285,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
                   ),
                 )
                 .get())
-            .firstWhereOrNull((p) => availablePackages.contains(p));
+            .firstWhereOrNull((p) => p.packetCountBlocked > 0 && availablePackages.contains(p));
     return statistics;
   }
 }
