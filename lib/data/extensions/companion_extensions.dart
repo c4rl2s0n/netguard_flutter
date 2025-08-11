@@ -23,9 +23,12 @@ extension HostToCompanion on HostEntry {
 
 extension GlobalRuleSourceToCompanion on GlobalRuleSource {
   GlobalRuleSourceTableCompanion get companion =>
-      GlobalRuleSourceTableCompanion(source: Value(source), type: Value(type));
+      GlobalRuleSourceTableCompanion(
+        source: Value(source),
+        type: Value(type),
+        contentHash: Value(contentHash),
+      );
 }
-
 
 extension TrafficStatisticsToCompanion on TrafficStatistics {
   TrafficStatisticsTableCompanion get companion =>
@@ -53,6 +56,7 @@ extension TrafficLogToCompanion on TrafficLog {
     outgoing: Value(outgoing),
   );
 }
+
 extension ResourceRecordToCompanion on ResourceRecord {
   ResourceRecordTableCompanion get companion => ResourceRecordTableCompanion(
     time: Value(time),
@@ -96,4 +100,3 @@ extension SettingsToCompanion on Settings {
     chartSettingsSingleBar: chartSettingsSingleBar,
   );
 }
-

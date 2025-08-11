@@ -6,4 +6,5 @@ import 'package:netguard/netguard.dart';
 class GlobalRuleSourceTable extends Table with IdExtension {
   TextColumn get source => text()();
   TextColumn get type => textEnum<SourceType>()();
+  TextColumn get contentHash => text().nullable()();
 }

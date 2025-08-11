@@ -2,14 +2,21 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:netguard/common/extensions/extensions.dart';
+import 'package:netguard/data/data.dart';
 
 import '../../../data/models/rule.dart';
 
 class HostsParsingResult {
-  HostsParsingResult({required this.hosts, required this.ips});
-  HostsParsingResult.empty() : this(hosts: HashSet(), ips: HashSet());
+  HostsParsingResult({
+    required this.hosts,
+    required this.ips,
+    required this.scannedSources,
+  });
+  HostsParsingResult.empty()
+    : this(hosts: HashSet(), ips: HashSet(), scannedSources: []);
   Set<String> hosts;
   Set<String> ips;
+  List<GlobalRuleSource> scannedSources;
 }
 
 class ParsingTools {
@@ -61,7 +68,7 @@ class ParsingTools {
       // if first part is IP, we take the second part (if available) as host
       host = parts[1];
     }
-    if(host.startsWith("www.")) host = host.substring(4);
+    if (host.startsWith("www.")) host = host.substring(4);
     if (host.notEmpty) result.hosts.add(host);
   }
 
@@ -87,11 +94,12 @@ class ParsingTools {
     T Function(Map<String, dynamic>) jsonToModel,
   ) {
     List<T> results = [];
-    void parseToResults(Map<String, dynamic> json){
+    void parseToResults(Map<String, dynamic> json) {
       try {
         results.add(jsonToModel(json));
       } catch (_) {}
     }
+
     final decoded = json.decode(jsonString);
 
     if (decoded is List) {

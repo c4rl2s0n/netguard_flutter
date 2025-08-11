@@ -15,7 +15,7 @@ class RuleSourceEntry extends StatelessWidget {
       children: [
         Expanded(child: Text(source.source)),
         IconButton(
-          onPressed: () => _deleteSource(context),
+          onPressed: () => _deleteSource(context, confirm: true),
           icon: Icon(CustomIcons.remove, color: context.colors.negative),
         ),
       ],

@@ -2,12 +2,9 @@ import 'package:drift/drift.dart';
 import 'package:netguard/netguard.dart';
 
 @UseRowClass(TrafficLog)
-@TableIndex(name: "trafficLogSessionPackage", columns: {#session, #packageName})
-@TableIndex(name: "trafficLogPackageIp", columns: {#packageName, #ip})
-@TableIndex(name: "trafficLogPackageHost", columns: {#packageName, #host})
-@TableIndex(name: "trafficLogPackageAllowed", columns: {#packageName, #allowed})
-@TableIndex(name: "trafficLogAllowed", columns: {#allowed})
+@TableIndex(name: "trafficLogSession", columns: {#session})
 @TableIndex(name: "trafficLogSessionTime", columns: {#session, #time})
+@TableIndex(name: "trafficLogTime", columns: {#time})
 class TrafficLogTable extends Table with IdExtension {
   IntColumn get time => integer()();
   TextColumn get session => text()();

@@ -45,6 +45,21 @@ class ScanSourcesTask extends ProgressTask {
         SourceType.local => await _parseLocalSource(source, result: result),
       };
     }
+
+    // update hashes
+
+    updateProgress((lc) => lc.setProgress(null));
+    updateProgress(
+          (lc) => lc.setMessage(
+        "Updating Database...\nFound ${result.scannedSources.length} new/changed sources\nUpdate hashes",
+      ),
+    );
+    int i=0;
+    for(var source in sources){
+      await globalRuleSourceRepository.update(source);
+      updateProgress((lc) => lc.setProgress((i++) / sources.length));
+    }
+
     updateProgress((lc) => lc.setProgress(null));
     updateProgress(
       (lc) => lc.setMessage(
@@ -52,7 +67,8 @@ class ScanSourcesTask extends ProgressTask {
       ),
     );
     updateProgress((lc) => lc.setCanInterrupt(false));
-    await blacklistRepository.clearGeneric();
+    //await blacklistRepository.clearGeneric();
+
     List<HostEntry> entries = [...result.hosts.map(
           (s) =>
           HostEntry(target: s, type: HostType.host),
@@ -77,7 +93,12 @@ class ScanSourcesTask extends ProgressTask {
   }) async {
     String? hostsfile = await WebTools.getRawWebsite(source.source);
     if (hostsfile.empty) return result;
-    return ParsingTools.parseHosts(hostsfile!, result: result);
+    String contentHash = IdTools.generateMd5(hostsfile!);
+    if(contentHash == source.contentHash) return result;
+    source.contentHash = contentHash;
+    result = ParsingTools.parseHosts(hostsfile, result: result);
+    result.scannedSources.add(source);
+    return result;
   }
 
   Future<HostsParsingResult?> _parseLocalSource(
@@ -90,6 +111,11 @@ class ScanSourcesTask extends ProgressTask {
     }
     String hostsfile = await file.readAsString();
     if (hostsfile.empty) return result;
-    return ParsingTools.parseHosts(hostsfile);
+    String contentHash = IdTools.generateMd5(hostsfile);
+    if(contentHash == source.contentHash) return result;
+    source.contentHash = contentHash;
+    result = ParsingTools.parseHosts(hostsfile, result: result);
+    result.scannedSources.add(source);
+    return result;
   }
 }

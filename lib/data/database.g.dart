@@ -1950,8 +1950,19 @@ class $GlobalRuleSourceTableTable extends GlobalRuleSourceTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<SourceType>($GlobalRuleSourceTableTable.$convertertype);
+  static const VerificationMeta _contentHashMeta = const VerificationMeta(
+    'contentHash',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, source, type];
+  late final GeneratedColumn<String> contentHash = GeneratedColumn<String>(
+    'content_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, source, type, contentHash];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1975,6 +1986,15 @@ class $GlobalRuleSourceTableTable extends GlobalRuleSourceTable
     } else if (isInserting) {
       context.missing(_sourceMeta);
     }
+    if (data.containsKey('content_hash')) {
+      context.handle(
+        _contentHashMeta,
+        contentHash.isAcceptableOrUnknown(
+          data['content_hash']!,
+          _contentHashMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1994,6 +2014,10 @@ class $GlobalRuleSourceTableTable extends GlobalRuleSourceTable
           data['${effectivePrefix}type'],
         )!,
       ),
+      contentHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_hash'],
+      ),
     );
   }
 
@@ -2010,17 +2034,20 @@ class GlobalRuleSourceTableCompanion extends UpdateCompanion<GlobalRuleSource> {
   final Value<String> id;
   final Value<String> source;
   final Value<SourceType> type;
+  final Value<String?> contentHash;
   final Value<int> rowid;
   const GlobalRuleSourceTableCompanion({
     this.id = const Value.absent(),
     this.source = const Value.absent(),
     this.type = const Value.absent(),
+    this.contentHash = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GlobalRuleSourceTableCompanion.insert({
     this.id = const Value.absent(),
     required String source,
     required SourceType type,
+    this.contentHash = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : source = Value(source),
        type = Value(type);
@@ -2028,12 +2055,14 @@ class GlobalRuleSourceTableCompanion extends UpdateCompanion<GlobalRuleSource> {
     Expression<String>? id,
     Expression<String>? source,
     Expression<String>? type,
+    Expression<String>? contentHash,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (source != null) 'source': source,
       if (type != null) 'type': type,
+      if (contentHash != null) 'content_hash': contentHash,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2042,12 +2071,14 @@ class GlobalRuleSourceTableCompanion extends UpdateCompanion<GlobalRuleSource> {
     Value<String>? id,
     Value<String>? source,
     Value<SourceType>? type,
+    Value<String?>? contentHash,
     Value<int>? rowid,
   }) {
     return GlobalRuleSourceTableCompanion(
       id: id ?? this.id,
       source: source ?? this.source,
       type: type ?? this.type,
+      contentHash: contentHash ?? this.contentHash,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2066,6 +2097,9 @@ class GlobalRuleSourceTableCompanion extends UpdateCompanion<GlobalRuleSource> {
         $GlobalRuleSourceTableTable.$convertertype.toSql(type.value),
       );
     }
+    if (contentHash.present) {
+      map['content_hash'] = Variable<String>(contentHash.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2078,6 +2112,7 @@ class GlobalRuleSourceTableCompanion extends UpdateCompanion<GlobalRuleSource> {
           ..write('id: $id, ')
           ..write('source: $source, ')
           ..write('type: $type, ')
+          ..write('contentHash: $contentHash, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2885,29 +2920,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'globalRuleTypeIndex',
     'CREATE INDEX globalRuleTypeIndex ON global_rule_source_table (type)',
   );
-  late final Index trafficLogSessionPackage = Index(
-    'trafficLogSessionPackage',
-    'CREATE INDEX trafficLogSessionPackage ON traffic_log_table (session, package_name)',
-  );
-  late final Index trafficLogPackageIp = Index(
-    'trafficLogPackageIp',
-    'CREATE INDEX trafficLogPackageIp ON traffic_log_table (package_name, ip)',
-  );
-  late final Index trafficLogPackageHost = Index(
-    'trafficLogPackageHost',
-    'CREATE INDEX trafficLogPackageHost ON traffic_log_table (package_name, host)',
-  );
-  late final Index trafficLogPackageAllowed = Index(
-    'trafficLogPackageAllowed',
-    'CREATE INDEX trafficLogPackageAllowed ON traffic_log_table (package_name, allowed)',
-  );
-  late final Index trafficLogAllowed = Index(
-    'trafficLogAllowed',
-    'CREATE INDEX trafficLogAllowed ON traffic_log_table (allowed)',
+  late final Index trafficLogSession = Index(
+    'trafficLogSession',
+    'CREATE INDEX trafficLogSession ON traffic_log_table (session)',
   );
   late final Index trafficLogSessionTime = Index(
     'trafficLogSessionTime',
     'CREATE INDEX trafficLogSessionTime ON traffic_log_table (session, time)',
+  );
+  late final Index trafficLogTime = Index(
+    'trafficLogTime',
+    'CREATE INDEX trafficLogTime ON traffic_log_table (time)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -2928,12 +2951,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     indexDns,
     indexDnsResource,
     globalRuleTypeIndex,
-    trafficLogSessionPackage,
-    trafficLogPackageIp,
-    trafficLogPackageHost,
-    trafficLogPackageAllowed,
-    trafficLogAllowed,
+    trafficLogSession,
     trafficLogSessionTime,
+    trafficLogTime,
   ];
 }
 
@@ -4572,6 +4592,7 @@ typedef $$GlobalRuleSourceTableTableCreateCompanionBuilder =
       Value<String> id,
       required String source,
       required SourceType type,
+      Value<String?> contentHash,
       Value<int> rowid,
     });
 typedef $$GlobalRuleSourceTableTableUpdateCompanionBuilder =
@@ -4579,6 +4600,7 @@ typedef $$GlobalRuleSourceTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> source,
       Value<SourceType> type,
+      Value<String?> contentHash,
       Value<int> rowid,
     });
 
@@ -4606,6 +4628,11 @@ class $$GlobalRuleSourceTableTableFilterComposer
         column: $table.type,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  ColumnFilters<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$GlobalRuleSourceTableTableOrderingComposer
@@ -4631,6 +4658,11 @@ class $$GlobalRuleSourceTableTableOrderingComposer
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GlobalRuleSourceTableTableAnnotationComposer
@@ -4650,6 +4682,11 @@ class $$GlobalRuleSourceTableTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<SourceType, String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => column,
+  );
 }
 
 class $$GlobalRuleSourceTableTableTableManager
@@ -4701,11 +4738,13 @@ class $$GlobalRuleSourceTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<SourceType> type = const Value.absent(),
+                Value<String?> contentHash = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GlobalRuleSourceTableCompanion(
                 id: id,
                 source: source,
                 type: type,
+                contentHash: contentHash,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4713,11 +4752,13 @@ class $$GlobalRuleSourceTableTableTableManager
                 Value<String> id = const Value.absent(),
                 required String source,
                 required SourceType type,
+                Value<String?> contentHash = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GlobalRuleSourceTableCompanion.insert(
                 id: id,
                 source: source,
                 type: type,
+                contentHash: contentHash,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
