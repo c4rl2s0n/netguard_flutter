@@ -38,7 +38,7 @@ public class PersistenceCache {
         return sharedPrefs.getBoolean(PREF_SERVICE_RUNNING, false);
     }
 
-    public static void StoreVpnConfig(SharedPreferences sharedPrefs, NativeBridge.VpnConfig vpnConfig){
+    public static void SetVpnConfig(SharedPreferences sharedPrefs, NativeBridge.VpnConfig vpnConfig){
         sharedPrefs.edit()
             .putString(PREF_DB_PATH, vpnConfig.getDbPath())
             .putString(PREF_SESSION, vpnConfig.getSession())

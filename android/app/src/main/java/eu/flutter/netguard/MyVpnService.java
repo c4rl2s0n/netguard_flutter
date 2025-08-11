@@ -91,7 +91,12 @@ public class MyVpnService extends VpnService {
         return null;
     }
     private void SetIsRunning(boolean isRunning){
-        PersistenceCache.SetVpnServiceRunning(PreferenceManager.getDefaultSharedPreferences(this), isRunning);
+        var sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        PersistenceCache.SetVpnServiceRunning(sharedPrefs, isRunning);
+        if(!isRunning) {
+            vpnConfig.setFinished(true);
+            PersistenceCache.SetVpnConfig(sharedPrefs, vpnConfig);
+        }
     }
 
     public static void reload(Context context, String reason) {
@@ -180,7 +185,7 @@ public class MyVpnService extends VpnService {
         if(config == null) return;
 
         MyVpnService.vpnConfig = config;
-        PersistenceCache.StoreVpnConfig(PreferenceManager.getDefaultSharedPreferences(context), config);
+        PersistenceCache.SetVpnConfig(PreferenceManager.getDefaultSharedPreferences(context), config);
 
         if(false && isRunning(context)){
             reload(context, "Update Config");
