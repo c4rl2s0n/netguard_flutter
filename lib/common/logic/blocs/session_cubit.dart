@@ -16,7 +16,7 @@ class SessionCubit extends Cubit<SessionState> {
       );
 
   late final NotificationUpdateService _notificationService =
-      NotificationUpdateService(stream, vpnController);
+      NotificationUpdateService(this, vpnController);
 
   Future load() async {
     await loadApplications();
@@ -32,6 +32,7 @@ class SessionCubit extends Cubit<SessionState> {
     emit(
       state.copyWith(
         sessionConfig: session,
+        running: session.running,
         sessionStatistics: sessionStatistics,
       ),
     );
@@ -129,6 +130,7 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<LiveSessionStatistics> _attachToSession({VpnConfig? session})async {
+    await trafficLogListener?.cancel();
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
     _notificationService.run();
     state.sessionAnalysis.clear();

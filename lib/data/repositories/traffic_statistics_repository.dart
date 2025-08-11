@@ -203,6 +203,10 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
         (db.trafficStatisticsTable.packetCountAllowed +
                 db.trafficStatisticsTable.packetCountBlocked)
             .sum();
+    Expression<int> totalSize =
+        (db.trafficStatisticsTable.packetSizeAllowed +
+                db.trafficStatisticsTable.packetSizeBlocked)
+            .sum();
     Expression<int> ipsCount = db.trafficStatisticsTable.endpoint.count(
       distinct: true,
       filter: db.trafficStatisticsTable.endpointType.equalsValue(
@@ -224,10 +228,12 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
                     totalCount,
                     totalSizeAllowed,
                     totalSizeBlocked,
+                    totalSize,
                     ipsCount,
                     hostsCount,
                   ])
                   ..groupBy([db.trafficStatisticsTable.packageName])
+                  ..where(totalSize.isBiggerThanValue(0))
                   ..orderBy([
                     OrderingTerm(
                       expression: totalCount,
@@ -262,6 +268,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
                     hostsCount,
                   ])
                   ..groupBy([db.trafficStatisticsTable.packageName])
+                  ..where(totalCountBlocked.isBiggerThanValue(0))
                   ..orderBy([
                     OrderingTerm(
                       expression: totalCountBlocked,
