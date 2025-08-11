@@ -23,6 +23,7 @@ Future<DriftIsolate> get databaseConnection async => await database.serializable
 IApplicationSettingsRepository get applicationSettingsRepository => getIt<IApplicationSettingsRepository>();
 IHostsRepository get hostsRepository => getIt<IHostsRepository>();
 IGlobalRuleSourceRepository get globalRuleSourceRepository => getIt<IGlobalRuleSourceRepository>();
+ITrafficLogRepository get trafficLogRepository => getIt<ITrafficLogRepository>();
 ITrafficStatisticsRepository get trafficStatisticsRepository => getIt<ITrafficStatisticsRepository>();
 IResourceRecordRepository get resourceRecordRepository => getIt<IResourceRecordRepository>();
 IRulesRepository get rulesRepository => getIt<IRulesRepository>();

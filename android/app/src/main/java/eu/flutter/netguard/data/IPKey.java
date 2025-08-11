@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
-import eu.flutter.netguard.NativeBridge;
+import eu.flutter.netguard.flutter.NativeBridge;
 import eu.flutter.netguard.network.Protocols;
 
 public class IPKey {

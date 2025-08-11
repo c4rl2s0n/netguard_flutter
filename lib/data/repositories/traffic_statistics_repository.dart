@@ -15,8 +15,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
     await db.trafficStatisticsTable.insertOnConflictUpdate(entity.companion);
   }
 
-  @override
-  Future updateCount(
+  Future _updateCount(
     String? packageName,
     String endpoint,
     EndpointType type,
@@ -24,6 +23,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
     int addSizeAllowed,
     int addCountBlocked,
     int addSizeBlocked,
+    int timestamp,
   ) async {
     // insert entry if not exists
     if (await get(packageName, endpoint, type) == null) {
@@ -36,6 +36,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
           packetSizeAllowed: addSizeAllowed,
           packetCountBlocked: addCountBlocked,
           packetSizeBlocked: addSizeBlocked,
+          latest: timestamp,
         ),
       );
       return;
@@ -46,7 +47,8 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
           (t) =>
               t.packageName.equalsNullable(packageName) &
               t.endpoint.equals(endpoint) &
-              t.endpointType.equalsValue(type),
+              t.endpointType.equalsValue(type) &
+              t.latest.isBiggerThanValue(timestamp),
         ))
         .write(
           TrafficStatisticsTableCompanion.custom(
@@ -66,6 +68,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
               db.trafficStatisticsTable.packetSizeBlocked,
               addSizeBlocked,
             ),
+            latest: Variable(timestamp),
           ),
         );
   }
@@ -133,7 +136,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
 
   @override
   Future addLog(TrafficLog log) async {
-    await updateCount(
+    await _updateCount(
       log.packageName,
       log.ip,
       EndpointType.ip,
@@ -141,9 +144,10 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
       log.allowed ? log.size : 0,
       log.blocked ? 1 : 0,
       log.blocked ? log.size : 0,
+      log.time,
     );
     if (log.host.empty) return;
-    await updateCount(
+    await _updateCount(
       log.packageName,
       log.host!,
       EndpointType.host,
@@ -151,6 +155,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
       log.allowed ? log.size : 0,
       log.blocked ? 1 : 0,
       log.blocked ? log.size : 0,
+      log.time,
     );
   }
 

@@ -32,4 +32,12 @@ class VpnEventHandlerImpl extends VpnEventHandler {
   Future<void> logTraffic(TrafficLog log) async {
     _trafficLog.add(log);
   }
+
+
+  final StreamController<void> _closeEngineStreamController = StreamController.broadcast();
+  Stream<void> get closeEngineStream => _closeEngineStreamController.stream;
+  @override
+  void closeFlutterEngine() {
+    _closeEngineStreamController.add(null);
+  }
 }

@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import eu.flutter.netguard.utils.Log;
-import eu.flutter.netguard.NativeBridge.*;
+import eu.flutter.netguard.flutter.NativeBridge.*;
 
 public class DatabaseHelper {
     private static final String TAG = "NetGuard.Database";
@@ -58,7 +58,6 @@ public class DatabaseHelper {
 
         sql = "SELECT EXISTS(SELECT 1 FROM hosts_table WHERE rule_id IS NULL and type = 'ip' and target = ?)";
         genericBlacklistContainsIp = db.compileStatement(sql);
-
     }
 
 

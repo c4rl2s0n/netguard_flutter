@@ -53,11 +53,11 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         return -1;
     }
 
-    const char *packet = "eu/flutter/netguard/NativeBridge$Packet";
+    const char *packet = "eu/flutter/netguard/flutter/NativeBridge$Packet";
     clsPacket = jniGlobalRef(env, jniFindClass(env, packet));
     ng_add_alloc(clsPacket, "clsPacket");
 
-    const char *rr = "eu/flutter/netguard/NativeBridge$ResourceRecord";
+    const char *rr = "eu/flutter/netguard/flutter/NativeBridge$ResourceRecord";
     clsRR = jniGlobalRef(env, jniFindClass(env, rr));
     ng_add_alloc(clsRR, "clsRR");
 
@@ -531,11 +531,11 @@ void dns_resolved(const struct arguments *args,
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(Leu/flutter/netguard/NativeBridge$ResourceRecord;)V";
+    const char *signature = "(Leu/flutter/netguard/flutter/NativeBridge$ResourceRecord;)V";
     if (midDnsResolved == NULL)
         midDnsResolved = jniGetMethodID(args->env, clsService, "dnsResolved", signature);
 
-    const char *rr = "eu/flutter/netguard/NativeBridge$ResourceRecord";
+    const char *rr = "eu/flutter/netguard/flutter/NativeBridge$ResourceRecord";
     if (midInitRR == NULL)
         midInitRR = jniGetMethodID(args->env, clsRR, "<init>", "()V");
 

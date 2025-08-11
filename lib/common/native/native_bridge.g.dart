@@ -1074,6 +1074,8 @@ abstract class VpnEventHandler {
 
   Future<void> logTraffic(TrafficLog log);
 
+  void closeFlutterEngine();
+
   static void setUp(VpnEventHandler? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
@@ -1173,6 +1175,25 @@ abstract class VpnEventHandler {
               'Argument for dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.logTraffic was null, expected non-null TrafficLog.');
           try {
             await api.logTraffic(arg_log!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.pigeon_example_package.VpnEventHandler.closeFlutterEngine$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          try {
+            api.closeFlutterEngine();
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

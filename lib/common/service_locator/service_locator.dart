@@ -16,16 +16,16 @@ final getIt = GetIt.instance;
   //externalPackageModulesBefore: [ExternalModule(DataRepositoriesPackageModule)],
   //externalPackageModulesAfter: [ExternalModule(CoreLogicPackageModule)],
 )
-Future configureDependencies(
-  String applicationDocumentsDirectory,
-  String databaseFilename,
-) async {
+Future configureDependencies(AppFilepaths filepaths) async {
   // Path strings
   getIt.registerSingleton<String>(
-    applicationDocumentsDirectory,
+    filepaths.applicationDocumentsDirectory,
     instanceName: pkAppDirectory,
   );
-  getIt.registerSingleton<String>(databaseFilename, instanceName: pkDbFile);
+  getIt.registerSingleton<String>(
+    filepaths.databaseFilename,
+    instanceName: pkDbFile,
+  );
 
   // GlobalKeys
   getIt.registerSingleton<GlobalKey<ScaffoldMessengerState>>(messengerKey);
@@ -34,13 +34,26 @@ Future configureDependencies(
   // Database
   var db = AppDatabase();
   getIt.registerSingleton(db);
-  getIt.registerCachedFactory<IApplicationSettingsRepository>(() => ApplicationSettingsRepository(db));
+  getIt.registerCachedFactory<IApplicationSettingsRepository>(
+    () => ApplicationSettingsRepository(db),
+  );
   getIt.registerCachedFactory<IHostsRepository>(() => HostsRepository(db));
-  getIt.registerCachedFactory<IGlobalRuleSourceRepository>(() => GlobalRuleSourceRepository(db));
-  getIt.registerCachedFactory<ITrafficStatisticsRepository>(() => TrafficStatisticsRepository(db));
-  getIt.registerCachedFactory<IResourceRecordRepository>(() => ResourceRecordRepository(db));
+  getIt.registerCachedFactory<IGlobalRuleSourceRepository>(
+    () => GlobalRuleSourceRepository(db),
+  );
+  getIt.registerCachedFactory<ITrafficLogRepository>(
+    () => TrafficLogRepository(db),
+  );
+  getIt.registerCachedFactory<ITrafficStatisticsRepository>(
+    () => TrafficStatisticsRepository(db),
+  );
+  getIt.registerCachedFactory<IResourceRecordRepository>(
+    () => ResourceRecordRepository(db),
+  );
   getIt.registerCachedFactory<IRulesRepository>(() => RulesRepository(db));
-  getIt.registerCachedFactory<ISettingsRepository>(() => SettingsRepository(db));
+  getIt.registerCachedFactory<ISettingsRepository>(
+    () => SettingsRepository(db),
+  );
 
   // Global Cubits
   var settingsCubit = SettingsCubit(settingsRepository);
@@ -50,6 +63,48 @@ Future configureDependencies(
 
   // SnackBarService
   getIt.registerLazySingleton(() => SnackBarService(messengerKey));
+
+  // Platform Channels
+  getIt.registerSingleton(VpnController());
+  VpnEventHandlerImpl eventHandler = VpnEventHandlerImpl();
+  VpnEventHandler.setUp(eventHandler);
+  getIt.registerSingleton(eventHandler);
+
+  // Injectable / MicroPackages
+  getIt.init();
+}
+
+Future configureHeadlessDependencies(AppFilepaths filepaths) async {
+  // Path strings
+  getIt.registerSingleton<String>(
+    filepaths.applicationDocumentsDirectory,
+    instanceName: pkAppDirectory,
+  );
+  getIt.registerSingleton<String>(
+    filepaths.databaseFilename,
+    instanceName: pkDbFile,
+  );
+
+  // Database
+  var db = AppDatabase();
+  getIt.registerSingleton(db);
+  getIt.registerCachedFactory<IApplicationSettingsRepository>(
+    () => ApplicationSettingsRepository(db),
+  );
+  getIt.registerCachedFactory<IHostsRepository>(() => HostsRepository(db));
+  getIt.registerCachedFactory<IGlobalRuleSourceRepository>(
+    () => GlobalRuleSourceRepository(db),
+  );
+  getIt.registerCachedFactory<ITrafficStatisticsRepository>(
+    () => TrafficStatisticsRepository(db),
+  );
+  getIt.registerCachedFactory<IResourceRecordRepository>(
+    () => ResourceRecordRepository(db),
+  );
+  getIt.registerCachedFactory<IRulesRepository>(() => RulesRepository(db));
+  getIt.registerCachedFactory<ISettingsRepository>(
+    () => SettingsRepository(db),
+  );
 
   // Platform Channels
   getIt.registerSingleton(VpnController());

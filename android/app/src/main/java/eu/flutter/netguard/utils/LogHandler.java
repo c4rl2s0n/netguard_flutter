@@ -7,8 +7,9 @@ import android.os.Looper;
 import android.os.Message;
 
 
-import eu.flutter.netguard.NativeBridge.*;
-import eu.flutter.netguard.VpnEventChannel;
+import eu.flutter.netguard.flutter.FlutterEngineManager;
+import eu.flutter.netguard.flutter.NativeBridge.*;
+import eu.flutter.netguard.flutter.VpnEventChannel;
 
 public final class LogHandler extends Handler {
     private static final String TAG = "NetGuard.LogHandler";
@@ -69,6 +70,11 @@ public final class LogHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         try {
+            // if buffering, just re-append the message
+            if(FlutterEngineManager.getInstance(context).getIsBuffering()){
+                queue(msg);
+                return;
+            }
             switch (msg.what) {
                 case MSG_TRAFFIC:
                     VpnEventChannel.logTraffic((TrafficLog) msg.obj);

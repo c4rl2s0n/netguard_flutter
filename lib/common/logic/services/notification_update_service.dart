@@ -2,17 +2,20 @@ import 'package:netguard/netguard.dart';
 
 class NotificationUpdateService {
   NotificationUpdateService(
-    this.sessionCubit,
+    this.sessionStateStream,
     this.vpnController, {
     this.intervalMs = 500,
-  });
+  }){
+    sessionStateStream.listen(onSessionState);
+  }
 
   final int intervalMs;
 
-  final SessionCubit sessionCubit;
+  final Stream<SessionState> sessionStateStream;
   final VpnController vpnController;
 
   SessionLogAnalysisState? lastState;
+  SessionState? currentSessionState;
   bool active = false;
 
   void run() {
@@ -22,7 +25,7 @@ class NotificationUpdateService {
 
   void _run() {
     if (!active) return;
-    if (lastState != sessionCubit.state.sessionAnalysis.state) {
+    if (lastState != currentSessionState?.sessionAnalysis.state) {
       vpnController.updateStatsNotification(
         sessionCubit.state.sessionStatistics,
       );
@@ -33,5 +36,9 @@ class NotificationUpdateService {
 
   void stop() {
     active = false;
+  }
+
+  void onSessionState(SessionState event) {
+    currentSessionState = event;
   }
 }

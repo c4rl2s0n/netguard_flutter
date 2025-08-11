@@ -15,3 +15,5 @@ export 'interfaces/global_rule_source_repository.dart';
 export 'global_rule_source_repository.dart';
 export 'interfaces/traffic_statistics_repository.dart';
 export 'traffic_statistics_repository.dart';
+export 'interfaces/traffic_log_repository.dart';
+export 'traffic_log_repository.dart';

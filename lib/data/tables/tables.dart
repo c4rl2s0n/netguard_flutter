@@ -5,3 +5,4 @@ export 'settings_table.dart';
 export 'resource_record_table.dart';
 export 'global_rule_source_table.dart';
 export 'traffic_statistics_table.dart';
+export 'traffic_log_table.dart';

@@ -9,6 +9,7 @@ class TrafficStatistics {
     this.packetSizeAllowed = 0,
     this.packetCountBlocked = 0,
     this.packetSizeBlocked = 0,
+    this.latest = 0,
   });
   String? packageName;
   String endpoint;
@@ -17,6 +18,7 @@ class TrafficStatistics {
   int packetSizeAllowed;
   int packetCountBlocked;
   int packetSizeBlocked;
+  int latest;
 
 }
 
