@@ -89,6 +89,7 @@ class GlobalRulesSettings extends StatelessWidget {
         )) {
           await globalRuleSourceRepository.clearHashes();
           if(await hostsRepository.clearGeneric() > 0){
+            settingsCubit.resetLastHostlistUpdate();
             SnackBarFactory.showPositiveSnackBar("Global firewall rules deleted!");
           }else{
             SnackBarFactory.showInfoSnackBar("No rules found to delete...");

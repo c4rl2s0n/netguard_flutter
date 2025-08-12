@@ -86,6 +86,10 @@ class SettingsCubit extends Cubit<SettingsState> {
     emit(state.copyWith(lastHostlistUpdate: DateTime.now()));
     _settingsRepository.updateLastHostlistUpdate(state.lastHostlistUpdate);
   }
+  void resetLastHostlistUpdate() {
+    emit(state.copyWith(lastHostlistUpdate: null));
+    _settingsRepository.updateLastHostlistUpdate(state.lastHostlistUpdate);
+  }
 }
 
 @freezed
