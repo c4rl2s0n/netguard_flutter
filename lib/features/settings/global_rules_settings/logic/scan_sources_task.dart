@@ -33,6 +33,7 @@ class ScanSourcesTask extends ProgressTask {
     updateProgress((lc) => lc.setMessage("Scanning sources..."));
     HostsParsingResult result = HostsParsingResult.empty();
     HostsRepository blacklistRepository = HostsRepository(db);
+    GlobalRuleSourceRepository globalRuleSourceRepository = GlobalRuleSourceRepository(db);
 
     for (int i = 0; i < sources.length; i++) {
       if (loadingState.stopped) {

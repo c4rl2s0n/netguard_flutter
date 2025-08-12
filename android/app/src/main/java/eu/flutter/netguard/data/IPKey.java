@@ -4,34 +4,30 @@ import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
-import eu.flutter.netguard.flutter.NativeBridge;
 import eu.flutter.netguard.network.Protocols;
 
 public class IPKey {
         long version;
         long protocol;
+        String saddr;
+        long sport;
         String daddr;
         long dport;
         long uid;
 
-        public IPKey(long version, long protocol, String daddr, long dport, long uid) {
+        public IPKey(long version, long protocol, String saddr, long sport, String daddr, long dport, long uid) {
             this.version = version;
             this.protocol = protocol;
+            this.saddr = saddr;
+            this.sport = (protocol == Protocols.TCP || protocol == Protocols.UDP ? sport : 0);
             this.daddr = daddr;
             // Only TCP (6) and UDP (17) have port numbers
             this.dport = (protocol == Protocols.TCP || protocol == Protocols.UDP ? dport : 0);
             this.uid = uid;
         }
 
-        public IPKey(NativeBridge.Packet packet) {
-                this(packet.getVersion(),
-                     packet.getProtocol(),
-                     packet.getDaddr(),
-                     packet.getDport(),
-                     packet.getUid());
-        }
-
         public String getDaddr() { return daddr; }
+        public long getUid() { return uid; }
 
         @Override
         public boolean equals(Object obj) {

@@ -117,13 +117,18 @@ void check_udp_socket(const struct arguments *args, const struct epoll_event *ev
 
             } else {
                 // Socket read data
+                char source[INET6_ADDRSTRLEN + 1];
+                uint16_t sport = ntohs(s->udp.source);
                 char dest[INET6_ADDRSTRLEN + 1];
                 uint16_t dport = ntohs(s->udp.dest);
 
-                if (s->udp.version == 4)
+                if (s->udp.version == 4) {
+                    inet_ntop(AF_INET, &s->udp.saddr.ip4, source, sizeof(source));
                     inet_ntop(AF_INET, &s->udp.daddr.ip4, dest, sizeof(dest));
-                else
+                } else {
+                    inet_ntop(AF_INET6, &s->udp.saddr.ip6, source, sizeof(source));
                     inet_ntop(AF_INET6, &s->udp.daddr.ip6, dest, sizeof(dest));
+                }
                 log_android(ANDROID_LOG_INFO, "UDP recv bytes %d from %s/%u for tun",
                             bytes, dest, dport);
 
@@ -131,7 +136,7 @@ void check_udp_socket(const struct arguments *args, const struct epoll_event *ev
 
                 // Process DNS response
                 if (dport == 53)
-                    parse_dns_response(args, s, buffer, (size_t *) &bytes);
+                    parse_dns_response(args, s, buffer, (size_t *) &bytes, s->udp.uid);
 
                 // Forward to tun
                 if (write_udp(args, &s->udp, buffer, (size_t) bytes) < 0)
@@ -144,9 +149,14 @@ void check_udp_socket(const struct arguments *args, const struct epoll_event *ev
 
                 // log incomung UDP traffic
                 if(args->logTraffic){
-                    jint uid = get_uid_cached(args, s->udp.version, s->protocol, dest, dport);
-                    jboolean  allowed = is_address_allowed(args, s->udp.version, s->protocol, dest, dport, uid);
-                    log_traffic(args, s->udp.version, s->protocol, dest, dport, bytes, uid, allowed, false);
+                    jint uid = s->udp.uid;
+                    if(uid < 0) {
+                        uid = get_uid_cached(args, s->udp.version, s->protocol, source, sport, dest, dport);
+                        if(uid >= 0)
+                            log_android(ANDROID_LOG_ERROR, "[UDP] Had to lookup uid from cache!");
+                    }
+                    jboolean  allowed = is_address_allowed(args, s->udp.version, s->protocol, source, sport, dest, dport, uid);
+                    log_traffic(args, s->udp.version, s->protocol, source, sport, dest, dport, bytes, uid, allowed, false);
                 }
             }
             ng_free(buffer, __FILE__, __LINE__);
@@ -323,6 +333,9 @@ jboolean handle_udp(const struct arguments *args,
         args->ctx->ng_session = s;
 
         cur = s;
+    }else if(cur->udp.uid == -1 && uid > 0){
+        cur->udp.uid = uid;
+        log_android(ANDROID_LOG_INFO, "updated uid for UDP session");
     }
 
     // Check for DHCP (tethering)

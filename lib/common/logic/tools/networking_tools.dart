@@ -42,6 +42,10 @@ class NetworkingTools {
       Protocols.IPPROTO_TCP => "DNS/TCP",
       _ => toProtocol(protocol),
     },
+    853 => switch (protocol) {
+      Protocols.IPPROTO_TCP => "DoT/TCP",
+      _ => toProtocol(protocol),
+    },
     443 => switch (protocol) {
       Protocols.IPPROTO_UDP => "QUIC",
       Protocols.IPPROTO_TCP => "TLS",

@@ -283,20 +283,26 @@ void handle_ip(const struct arguments *args,
     }
 
     // Get uid
-    jint uid = -1;
-    if (args->ctx->sdk <= 28) // Android 9 Pie
-        uid = get_uid(version, protocol, saddr, sport, daddr, dport);
-    else
-        uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
-    // cache uid
-    if (uid == -1) {
-        jint cuid = get_uid_cached(args, version, protocol, dest, dport);
-        if(cuid != -1){
-            log_android(ANDROID_LOG_INFO, "get_uid_q failed but had it chached...");
+    jint uid = get_uid_from_session(args, pkt, payload);
+    if(uid < 0) {
+        if (args->ctx->sdk <= 28) // Android 9 Pie
+            uid = get_uid(version, protocol, saddr, sport, daddr, dport);
+        else
+            uid = get_uid_q(args, version, protocol, source, sport, dest, dport);
+
+        // cache uid
+        if (uid < 0) {
+            jint cuid = get_uid_cached(args, version, protocol, source, sport, dest, dport);
+            if(cuid != -1){
+                log_android(ANDROID_LOG_INFO, "get_uid_q failed but had it chached...");
+            }
+            uid = cuid;
+        } else {
+            cache_uid(args, version, protocol, source, sport, dest, dport, uid);
+            log_android(ANDROID_LOG_INFO, "get_uid_q successful :)");
         }
-        uid = cuid;
-    } else {
-        cache_uid(args, version, protocol, dest, dport, uid);
+    }else{
+        log_android(ANDROID_LOG_INFO, "got uid from existing session...");
     }
 
     // Get server name
@@ -310,12 +316,10 @@ void handle_ip(const struct arguments *args,
 
         if (parse_sni(data, datalen, server_name)) {
             log_android(ANDROID_LOG_INFO, "TLS server name: %s", server_name);
+            sni_resolved(args, server_name, version, protocol, source, sport, dest, dport, uid);
         }
     }
 
-    if (*server_name) {
-        sni_resolved(args, server_name, version, protocol, dest, dport, source, sport, uid);
-    }
 
     log_android(ANDROID_LOG_DEBUG,
                 "Packet v%d %s/%u > %s/%u proto %d flags %s uid %d sni %s",
@@ -328,13 +332,8 @@ void handle_ip(const struct arguments *args,
         // check if QUIC should be blocked for current application (UDP Port 443)
         allowed = 0;
         blockedQuic = 1;
-    } else if (false && protocol == IPPROTO_UDP && has_udp_session(args, pkt, payload)) {
-        allowed = 1; // could be a lingering/blocked session
-    } else if (false && protocol == IPPROTO_TCP && (!syn || (uid <= 0 && dport == 53)) &&
-               *server_name == 0) { // TODO: not sure if this still makes sense for me, maybe skip it
-        allowed = 1; // assume existing session
     } else {
-        allowed = is_address_allowed(args, version, protocol, dest, dport, uid);
+        allowed = is_address_allowed(args, version, protocol, source, sport, dest, dport, uid);
         if (allowed && *server_name && is_domain_blocked(args, uid, server_name)) {
             allowed = 0;
         }
@@ -362,7 +361,7 @@ void handle_ip(const struct arguments *args,
 
     // optionally, log traffic to database
     if(args->logTraffic)
-        log_traffic(args, version, protocol, dest, dport, length, uid, allowed, true);
+        log_traffic(args, version, protocol, source, sport, dest, dport, length, uid, allowed, true);
 
 }
 

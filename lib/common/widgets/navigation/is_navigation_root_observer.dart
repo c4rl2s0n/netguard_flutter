@@ -7,15 +7,11 @@ class IsNavigationRootObserver extends RouteObserver<PageRoute<dynamic>>{
   int _level = 0;
   void _setLevel(int l) {
     _level = l;
-    _logLevel();
   }
   void _incLevel() => _setLevel(_level+1);
   void _decLevel() => _setLevel(_level-1);
 
   bool get isRoot => _level <= 0;
-
-  // TODO: figure out when and why this fails...
-  void _logLevel() => print("NAVIGATION LEVEL: $_level");
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {

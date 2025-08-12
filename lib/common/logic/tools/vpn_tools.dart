@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:netguard/netguard.dart';
 
 class VpnTools {
@@ -27,7 +28,7 @@ class VpnTools {
       logTraffic: settings.logTraffic,
       dbPath: databaseFilepath,
       filteredPackages: filtered,
-      logLevel: 5,
+      logLevel: kDebugMode ? 1 : 5,
     );
     return config;
   }

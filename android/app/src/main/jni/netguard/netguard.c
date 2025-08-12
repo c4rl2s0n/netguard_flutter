@@ -471,7 +471,7 @@ int jniCheckException(JNIEnv *env) {
 
 static jmethodID midLogTraffic = NULL;
 
-void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed, jboolean outgoing) {
+void log_traffic(const struct arguments *args, jint version, jint protocol, const char* saddr, jint sport, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed, jboolean outgoing) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -481,7 +481,7 @@ void log_traffic(const struct arguments *args, jint version, jint protocol, cons
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(JIILjava/lang/String;IJJZZ)V";
+    const char *signature = "(JIILjava/lang/String;ILjava/lang/String;IJJZZ)V";
     if (midLogTraffic == NULL)
         midLogTraffic = jniGetMethodID(args->env, clsService, "logTraffic", signature);
 
@@ -490,13 +490,17 @@ void log_traffic(const struct arguments *args, jint version, jint protocol, cons
     jlong t = tv.tv_sec * 1000LL + tv.tv_usec / 1000;
 
     jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
+    jstring jsaddr = (*args->env)->NewStringUTF(args->env, saddr);
     ng_add_alloc(jdaddr, "jdaddr");
+    ng_add_alloc(jsaddr, "jsaddr");
 
-    (*args->env)->CallVoidMethod(args->env, args->instance, midLogTraffic, t, version, protocol, jdaddr, dport, length, (jlong) uid, allowed, outgoing);
+    (*args->env)->CallVoidMethod(args->env, args->instance, midLogTraffic, t, version, protocol, jsaddr, sport, jdaddr, dport, length, (jlong) uid, allowed, outgoing);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jdaddr);
+    (*args->env)->DeleteLocalRef(args->env, jsaddr);
     ng_delete_alloc(jdaddr, __FILE__, __LINE__);
+    ng_delete_alloc(jsaddr, __FILE__, __LINE__);
 
     (*args->env)->DeleteLocalRef(args->env, clsService);
     ng_delete_alloc(clsService, __FILE__, __LINE__);
@@ -610,7 +614,7 @@ void dns_resolved(const struct arguments *args,
 }
 
 static jmethodID midSniResolved = NULL;
-void sni_resolved(const struct arguments *args, const char *sni, jint version, jint protocol, const char* daddr, jint dport, const char* saddr, jint sport, jint uid) {
+void sni_resolved(const struct arguments *args, const char *sni, jint version, jint protocol, const char* saddr, jint sport, const char* daddr, jint dport, jint uid) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -631,7 +635,7 @@ void sni_resolved(const struct arguments *args, const char *sni, jint version, j
     ng_add_alloc(jdaddr, "jdaddr");
     ng_add_alloc(jsaddr, "jsaddr");
 
-    (*args->env)->CallVoidMethod(args->env, args->instance, midSniResolved, jsni, version, protocol, jdaddr, dport, jsaddr, sport, uid);
+    (*args->env)->CallVoidMethod(args->env, args->instance, midSniResolved, jsni, version, protocol, jsaddr, sport, jdaddr, dport, uid);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jsni);
@@ -772,10 +776,77 @@ jint get_uid_q(const struct arguments *args,
     return juid;
 }
 
+
+jint get_uid_from_session(const struct arguments *args, const uint8_t *pkt, const uint8_t *payload) {
+#ifdef PROFILE_JNI
+    float mselapsed;
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+#endif
+    const uint8_t version = (*pkt) >> 4;
+
+
+    const struct iphdr *ip4 = (struct iphdr *) pkt;
+    const struct ip6_hdr *ip6 = (struct ip6_hdr *) pkt;
+
+    const struct tcphdr *tcphdr = (struct tcphdr *) payload;
+    const struct udphdr *udphdr = (struct udphdr *) payload;
+
+    jint uid = -1;
+
+    struct ng_session *cur = args->ctx->ng_session;
+    while (cur != NULL){
+        if(cur->protocol == IPPROTO_ICMP || cur->protocol == IPPROTO_ICMPV6){
+            // ICMP
+            if(!cur->icmp.stop && cur->icmp.version == version &&
+            (version == 4 ? cur->icmp.saddr.ip4 == ip4->saddr &&
+                           cur->icmp.daddr.ip4 == ip4->daddr
+                         : memcmp(&cur->icmp.saddr.ip6, &ip6->ip6_src, 16) == 0 &&
+                           memcmp(&cur->icmp.daddr.ip6, &ip6->ip6_dst, 16) == 0)){
+                uid = cur->icmp.uid;
+                break;
+            }
+        } else if(cur->protocol == IPPROTO_TCP){
+            // TCP
+            if(cur->tcp.version == version &&
+                cur->tcp.source == tcphdr->source && cur->tcp.dest == tcphdr->dest &&
+                (version == 4 ? cur->tcp.saddr.ip4 == ip4->saddr &&
+                               cur->tcp.daddr.ip4 == ip4->daddr
+                             : memcmp(&cur->tcp.saddr.ip6, &ip6->ip6_src, 16) == 0 &&
+                               memcmp(&cur->tcp.daddr.ip6, &ip6->ip6_dst, 16) == 0)) {
+                uid = cur->tcp.uid;
+                break;
+            }
+        } else if(cur->protocol == IPPROTO_UDP){
+            // UDP
+            if(cur->udp.version == version &&
+                cur->udp.source == udphdr->source && cur->udp.dest == udphdr->dest &&
+                (version == 4 ? cur->udp.saddr.ip4 == ip4->saddr &&
+                            cur->udp.daddr.ip4 == ip4->daddr
+                          : memcmp(&cur->udp.saddr.ip6, &ip6->ip6_src, 16) == 0 &&
+                            memcmp(&cur->udp.daddr.ip6, &ip6->ip6_dst, 16) == 0)) {
+                uid = cur->udp.uid;
+                break;
+            }
+       }
+        cur = cur->next;
+    }
+#ifdef PROFILE_JNI
+    gettimeofday(&end, NULL);
+    mselapsed = (end.tv_sec - start.tv_sec) * 1000.0 +
+                (end.tv_usec - start.tv_usec) / 1000.0;
+    if (mselapsed > PROFILE_JNI)
+        log_android(ANDROID_LOG_WARN, "get_uid_from_session %f", mselapsed);
+#endif
+
+    return uid;
+}
+
 static jmethodID midGetUidCached = NULL;
 
 jint get_uid_cached(const struct arguments *args,
                jint version, jint protocol,
+               const char* source, jint sport,
                const char *dest, jint dport) {
 #ifdef PROFILE_JNI
     float mselapsed;
@@ -786,21 +857,25 @@ jint get_uid_cached(const struct arguments *args,
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(IILjava/lang/String;I)I";
+    const char *signature = "(IILjava/lang/String;ILjava/lang/String;I)I";
     if (midGetUidCached == NULL)
         midGetUidCached = jniGetMethodID(args->env, clsService, "getUidCached", signature);
 
     jstring jdest = (*args->env)->NewStringUTF(args->env, dest);
+    jstring jsource = (*args->env)->NewStringUTF(args->env, source);
     ng_add_alloc(jdest, "jdest");
+    ng_add_alloc(jsource, "jsource");
 
     jint juid = (*args->env)->CallIntMethod(
             args->env, args->instance, midGetUidCached,
-            version, protocol, jdest, dport);
+            version, protocol, jsource, sport, jdest, dport);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jdest);
+    (*args->env)->DeleteLocalRef(args->env, jsource);
     (*args->env)->DeleteLocalRef(args->env, clsService);
     ng_delete_alloc(jdest, __FILE__, __LINE__);
+    ng_delete_alloc(jsource, __FILE__, __LINE__);
     ng_delete_alloc(clsService, __FILE__, __LINE__);
 
 #ifdef PROFILE_JNI
@@ -816,8 +891,9 @@ jint get_uid_cached(const struct arguments *args,
 
 static jmethodID midCacheUid = NULL;
 
-jint cache_uid(const struct arguments *args,
+void cache_uid(const struct arguments *args,
                jint version, jint protocol,
+               const char* source, jint sport,
                const char *dest, jint dport, jint uid) {
 #ifdef PROFILE_JNI
     float mselapsed;
@@ -828,20 +904,24 @@ jint cache_uid(const struct arguments *args,
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(IILjava/lang/String;II)V";
+    const char *signature = "(IILjava/lang/String;ILjava/lang/String;II)V";
     if (midCacheUid == NULL)
         midCacheUid = jniGetMethodID(args->env, clsService, "cacheUid", signature);
 
     jstring jdest = (*args->env)->NewStringUTF(args->env, dest);
+    jstring jsource = (*args->env)->NewStringUTF(args->env, source);
     ng_add_alloc(jdest, "jdest");
+    ng_add_alloc(jsource, "jsource");
 
     (*args->env)->CallVoidMethod(args->env, args->instance, midCacheUid,
-            version, protocol, jdest, dport, uid);
+            version, protocol, jsource, sport, jdest, dport, uid);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jdest);
+    (*args->env)->DeleteLocalRef(args->env, jsource);
     (*args->env)->DeleteLocalRef(args->env, clsService);
     ng_delete_alloc(jdest, __FILE__, __LINE__);
+    ng_delete_alloc(jsource, __FILE__, __LINE__);
     ng_delete_alloc(clsService, __FILE__, __LINE__);
 
 #ifdef PROFILE_JNI
@@ -855,7 +935,7 @@ jint cache_uid(const struct arguments *args,
 
 static jmethodID midIsAddressAllowed = NULL;
 
-jboolean is_address_allowed(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jint uid) {
+jboolean is_address_allowed(const struct arguments *args, jint version, jint protocol, const char* saddr, jint sport, const char* daddr, jint dport, jint uid) {
 #ifdef PROFILE_JNI
     float mselapsed;
     struct timeval start, end;
@@ -865,20 +945,24 @@ jboolean is_address_allowed(const struct arguments *args, jint version, jint pro
     jclass clsService = (*args->env)->GetObjectClass(args->env, args->instance);
     ng_add_alloc(clsService, "clsService");
 
-    const char *signature = "(IILjava/lang/String;IJ)Z";
+    const char *signature = "(IILjava/lang/String;ILjava/lang/String;IJ)Z";
     if (midIsAddressAllowed == NULL)
         midIsAddressAllowed = jniGetMethodID(args->env, clsService, "isAddressAllowed", signature);
 
 
     jstring jdaddr = (*args->env)->NewStringUTF(args->env, daddr);
+    jstring jsaddr = (*args->env)->NewStringUTF(args->env, saddr);
     ng_add_alloc(jdaddr, "jdaddr");
+    ng_add_alloc(jsaddr, "jsaddr");
 
-    jboolean jallowed = (*args->env)->CallBooleanMethod(args->env, args->instance, midIsAddressAllowed, version, protocol, jdaddr, dport, (jlong) uid);
+    jboolean jallowed = (*args->env)->CallBooleanMethod(args->env, args->instance, midIsAddressAllowed, version, protocol, jsaddr, sport, jdaddr, dport, (jlong) uid);
     jniCheckException(args->env);
 
     (*args->env)->DeleteLocalRef(args->env, jdaddr);
+    (*args->env)->DeleteLocalRef(args->env, jsaddr);
     (*args->env)->DeleteLocalRef(args->env, clsService);
     ng_delete_alloc(jdaddr, __FILE__, __LINE__);
+    ng_delete_alloc(jsaddr, __FILE__, __LINE__);
     ng_delete_alloc(clsService, __FILE__, __LINE__);
 
 #ifdef PROFILE_JNI

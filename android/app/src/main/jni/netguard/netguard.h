@@ -390,7 +390,7 @@ void check_udp_socket(const struct arguments *args, const struct epoll_event *ev
 int32_t get_qname(const uint8_t *data, const size_t datalen, uint16_t off, char *qname);
 
 void parse_dns_response(const struct arguments *args, const struct ng_session *session,
-                        const uint8_t *data, size_t *datalen);
+                        const uint8_t *data, size_t *datalen, jint uid);
 
 uint32_t get_send_window(const struct tcp_session *cur);
 
@@ -513,14 +513,14 @@ void log_android(int prio, const char *fmt, ...);
 
 
 /// JAVA METHOD CALLS
-void log_traffic(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed, jboolean outgoing);
+void log_traffic(const struct arguments *args, jint version, jint protocol, const char* saddr, jint sport, const char* daddr, jint dport, jlong length, jint uid, jboolean allowed, jboolean outgoing);
 void dns_resolved(const struct arguments *args,
                   const char *qname, const char *aname, const char *resource, int ttl, jint uid);
 
 jboolean is_quic_blocked(const struct arguments *args, jint uid);
 jboolean is_domain_blocked(const struct arguments *args, jint uid, const char *name);
-jboolean is_address_allowed(const struct arguments *args, jint version, jint protocol, const char* daddr, jint dport, jint uid);
-void sni_resolved(const struct arguments *args, const char *sni, jint version, jint protocol, const char* daddr, jint dport, const char* saddr, jint sport, jint uid);
+jboolean is_address_allowed(const struct arguments *args, jint version, jint protocol, const char* saddr, jint sport, const char* daddr, jint dport, jint uid);
+void sni_resolved(const struct arguments *args, const char *sni, jint version, jint protocol, const char* saddr, jint sport, const char* daddr, jint dport, jint uid);
 
 
 jint get_uid_q(const struct arguments *args,
@@ -530,13 +530,15 @@ jint get_uid_q(const struct arguments *args,
                jint sport,
                const char *dest,
                jint dport);
-
+jint get_uid_from_session(const struct arguments *args, const uint8_t *pkt, const uint8_t *payload);
 jint get_uid_cached(const struct arguments *args,
                     jint version, jint protocol,
+                    const char* source, jint sport,
                     const char *dest, jint dport);
 
-jint cache_uid(const struct arguments *args,
+void cache_uid(const struct arguments *args,
                jint version, jint protocol,
+               const char* source, jint sport,
                const char *dest, jint dport, jint uid);
 
 

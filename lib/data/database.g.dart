@@ -2539,17 +2539,6 @@ class $TrafficLogTableTable extends TrafficLogTable
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _packageNameMeta = const VerificationMeta(
-    'packageName',
-  );
-  @override
-  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
-    'package_name',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _ipMeta = const VerificationMeta('ip');
   @override
   late final GeneratedColumn<String> ip = GeneratedColumn<String>(
@@ -2567,6 +2556,26 @@ class $TrafficLogTableTable extends TrafficLogTable
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+  );
+  static const VerificationMeta _packageNameMeta = const VerificationMeta(
+    'packageName',
+  );
+  @override
+  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
+    'package_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sizeMeta = const VerificationMeta('size');
+  @override
+  late final GeneratedColumn<int> size = GeneratedColumn<int>(
+    'size',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _allowedMeta = const VerificationMeta(
     'allowed',
@@ -2602,9 +2611,10 @@ class $TrafficLogTableTable extends TrafficLogTable
     time,
     session,
     protocol,
-    packageName,
     ip,
     host,
+    packageName,
+    size,
     allowed,
     outgoing,
   ];
@@ -2647,15 +2657,6 @@ class $TrafficLogTableTable extends TrafficLogTable
     } else if (isInserting) {
       context.missing(_protocolMeta);
     }
-    if (data.containsKey('package_name')) {
-      context.handle(
-        _packageNameMeta,
-        packageName.isAcceptableOrUnknown(
-          data['package_name']!,
-          _packageNameMeta,
-        ),
-      );
-    }
     if (data.containsKey('ip')) {
       context.handle(_ipMeta, ip.isAcceptableOrUnknown(data['ip']!, _ipMeta));
     } else if (isInserting) {
@@ -2666,6 +2667,23 @@ class $TrafficLogTableTable extends TrafficLogTable
         _hostMeta,
         host.isAcceptableOrUnknown(data['host']!, _hostMeta),
       );
+    }
+    if (data.containsKey('package_name')) {
+      context.handle(
+        _packageNameMeta,
+        packageName.isAcceptableOrUnknown(
+          data['package_name']!,
+          _packageNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('size')) {
+      context.handle(
+        _sizeMeta,
+        size.isAcceptableOrUnknown(data['size']!, _sizeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sizeMeta);
     }
     if (data.containsKey('allowed')) {
       context.handle(
@@ -2716,6 +2734,10 @@ class $TrafficLogTableTable extends TrafficLogTable
         DriftSqlType.string,
         data['${effectivePrefix}package_name'],
       ),
+      size: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}size'],
+      )!,
       allowed: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}allowed'],
@@ -2738,9 +2760,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
   final Value<int> time;
   final Value<String> session;
   final Value<int> protocol;
-  final Value<String?> packageName;
   final Value<String> ip;
   final Value<String?> host;
+  final Value<String?> packageName;
+  final Value<int> size;
   final Value<bool> allowed;
   final Value<bool> outgoing;
   final Value<int> rowid;
@@ -2749,9 +2772,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     this.time = const Value.absent(),
     this.session = const Value.absent(),
     this.protocol = const Value.absent(),
-    this.packageName = const Value.absent(),
     this.ip = const Value.absent(),
     this.host = const Value.absent(),
+    this.packageName = const Value.absent(),
+    this.size = const Value.absent(),
     this.allowed = const Value.absent(),
     this.outgoing = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2761,9 +2785,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     required int time,
     required String session,
     required int protocol,
-    this.packageName = const Value.absent(),
     required String ip,
     this.host = const Value.absent(),
+    this.packageName = const Value.absent(),
+    required int size,
     required bool allowed,
     required bool outgoing,
     this.rowid = const Value.absent(),
@@ -2771,6 +2796,7 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
        session = Value(session),
        protocol = Value(protocol),
        ip = Value(ip),
+       size = Value(size),
        allowed = Value(allowed),
        outgoing = Value(outgoing);
   static Insertable<TrafficLog> custom({
@@ -2778,9 +2804,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     Expression<int>? time,
     Expression<String>? session,
     Expression<int>? protocol,
-    Expression<String>? packageName,
     Expression<String>? ip,
     Expression<String>? host,
+    Expression<String>? packageName,
+    Expression<int>? size,
     Expression<bool>? allowed,
     Expression<bool>? outgoing,
     Expression<int>? rowid,
@@ -2790,9 +2817,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
       if (time != null) 'time': time,
       if (session != null) 'session': session,
       if (protocol != null) 'protocol': protocol,
-      if (packageName != null) 'package_name': packageName,
       if (ip != null) 'ip': ip,
       if (host != null) 'host': host,
+      if (packageName != null) 'package_name': packageName,
+      if (size != null) 'size': size,
       if (allowed != null) 'allowed': allowed,
       if (outgoing != null) 'outgoing': outgoing,
       if (rowid != null) 'rowid': rowid,
@@ -2804,9 +2832,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     Value<int>? time,
     Value<String>? session,
     Value<int>? protocol,
-    Value<String?>? packageName,
     Value<String>? ip,
     Value<String?>? host,
+    Value<String?>? packageName,
+    Value<int>? size,
     Value<bool>? allowed,
     Value<bool>? outgoing,
     Value<int>? rowid,
@@ -2816,9 +2845,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
       time: time ?? this.time,
       session: session ?? this.session,
       protocol: protocol ?? this.protocol,
-      packageName: packageName ?? this.packageName,
       ip: ip ?? this.ip,
       host: host ?? this.host,
+      packageName: packageName ?? this.packageName,
+      size: size ?? this.size,
       allowed: allowed ?? this.allowed,
       outgoing: outgoing ?? this.outgoing,
       rowid: rowid ?? this.rowid,
@@ -2840,14 +2870,17 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
     if (protocol.present) {
       map['protocol'] = Variable<int>(protocol.value);
     }
-    if (packageName.present) {
-      map['package_name'] = Variable<String>(packageName.value);
-    }
     if (ip.present) {
       map['ip'] = Variable<String>(ip.value);
     }
     if (host.present) {
       map['host'] = Variable<String>(host.value);
+    }
+    if (packageName.present) {
+      map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (size.present) {
+      map['size'] = Variable<int>(size.value);
     }
     if (allowed.present) {
       map['allowed'] = Variable<bool>(allowed.value);
@@ -2868,9 +2901,10 @@ class TrafficLogTableCompanion extends UpdateCompanion<TrafficLog> {
           ..write('time: $time, ')
           ..write('session: $session, ')
           ..write('protocol: $protocol, ')
-          ..write('packageName: $packageName, ')
           ..write('ip: $ip, ')
           ..write('host: $host, ')
+          ..write('packageName: $packageName, ')
+          ..write('size: $size, ')
           ..write('allowed: $allowed, ')
           ..write('outgoing: $outgoing, ')
           ..write('rowid: $rowid')
@@ -5086,9 +5120,10 @@ typedef $$TrafficLogTableTableCreateCompanionBuilder =
       required int time,
       required String session,
       required int protocol,
-      Value<String?> packageName,
       required String ip,
       Value<String?> host,
+      Value<String?> packageName,
+      required int size,
       required bool allowed,
       required bool outgoing,
       Value<int> rowid,
@@ -5099,9 +5134,10 @@ typedef $$TrafficLogTableTableUpdateCompanionBuilder =
       Value<int> time,
       Value<String> session,
       Value<int> protocol,
-      Value<String?> packageName,
       Value<String> ip,
       Value<String?> host,
+      Value<String?> packageName,
+      Value<int> size,
       Value<bool> allowed,
       Value<bool> outgoing,
       Value<int> rowid,
@@ -5136,11 +5172,6 @@ class $$TrafficLogTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get packageName => $composableBuilder(
-    column: $table.packageName,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get ip => $composableBuilder(
     column: $table.ip,
     builder: (column) => ColumnFilters(column),
@@ -5148,6 +5179,16 @@ class $$TrafficLogTableTableFilterComposer
 
   ColumnFilters<String> get host => $composableBuilder(
     column: $table.host,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get size => $composableBuilder(
+    column: $table.size,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5191,11 +5232,6 @@ class $$TrafficLogTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get packageName => $composableBuilder(
-    column: $table.packageName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get ip => $composableBuilder(
     column: $table.ip,
     builder: (column) => ColumnOrderings(column),
@@ -5203,6 +5239,16 @@ class $$TrafficLogTableTableOrderingComposer
 
   ColumnOrderings<String> get host => $composableBuilder(
     column: $table.host,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get size => $composableBuilder(
+    column: $table.size,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5238,16 +5284,19 @@ class $$TrafficLogTableTableAnnotationComposer
   GeneratedColumn<int> get protocol =>
       $composableBuilder(column: $table.protocol, builder: (column) => column);
 
-  GeneratedColumn<String> get packageName => $composableBuilder(
-    column: $table.packageName,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<String> get ip =>
       $composableBuilder(column: $table.ip, builder: (column) => column);
 
   GeneratedColumn<String> get host =>
       $composableBuilder(column: $table.host, builder: (column) => column);
+
+  GeneratedColumn<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get size =>
+      $composableBuilder(column: $table.size, builder: (column) => column);
 
   GeneratedColumn<bool> get allowed =>
       $composableBuilder(column: $table.allowed, builder: (column) => column);
@@ -5293,9 +5342,10 @@ class $$TrafficLogTableTableTableManager
                 Value<int> time = const Value.absent(),
                 Value<String> session = const Value.absent(),
                 Value<int> protocol = const Value.absent(),
-                Value<String?> packageName = const Value.absent(),
                 Value<String> ip = const Value.absent(),
                 Value<String?> host = const Value.absent(),
+                Value<String?> packageName = const Value.absent(),
+                Value<int> size = const Value.absent(),
                 Value<bool> allowed = const Value.absent(),
                 Value<bool> outgoing = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5304,9 +5354,10 @@ class $$TrafficLogTableTableTableManager
                 time: time,
                 session: session,
                 protocol: protocol,
-                packageName: packageName,
                 ip: ip,
                 host: host,
+                packageName: packageName,
+                size: size,
                 allowed: allowed,
                 outgoing: outgoing,
                 rowid: rowid,
@@ -5317,9 +5368,10 @@ class $$TrafficLogTableTableTableManager
                 required int time,
                 required String session,
                 required int protocol,
-                Value<String?> packageName = const Value.absent(),
                 required String ip,
                 Value<String?> host = const Value.absent(),
+                Value<String?> packageName = const Value.absent(),
+                required int size,
                 required bool allowed,
                 required bool outgoing,
                 Value<int> rowid = const Value.absent(),
@@ -5328,9 +5380,10 @@ class $$TrafficLogTableTableTableManager
                 time: time,
                 session: session,
                 protocol: protocol,
-                packageName: packageName,
                 ip: ip,
                 host: host,
+                packageName: packageName,
+                size: size,
                 allowed: allowed,
                 outgoing: outgoing,
                 rowid: rowid,

@@ -38,7 +38,7 @@ class LogEntrySingle extends StatelessWidget {
     DateTime time = DateTime.fromMillisecondsSinceEpoch(log.time);
     String timeStr = time.isToday ? time.hms : time.noMs;
     return Text(
-      "$timeStr: ${NetworkingTools.toPortAwareProtocol(log.protocol, log.dport)} ${log.destination}:${log.dport}",
+      "$timeStr: ${NetworkingTools.toPortAwareProtocol(log.protocol, log.dport)} ${log.destination}${log.dport.portToString(withColon: true)}",
     );
   }
 }

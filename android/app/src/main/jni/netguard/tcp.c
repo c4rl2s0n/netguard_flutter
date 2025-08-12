@@ -602,7 +602,7 @@ void check_tcp_socket(const struct arguments *args,
                         // Process DNS response
                         if (dport == 53 && bytes > 2) {
                             ssize_t dlen = bytes - 2;
-                            parse_dns_response(args, s, buffer + 2, (size_t *) &dlen);
+                            parse_dns_response(args, s, buffer + 2, (size_t *) &dlen, s->tcp.uid);
                         }
 
                         // Forward to tun
@@ -613,9 +613,14 @@ void check_tcp_socket(const struct arguments *args,
 
                         // log incoming TCP traffic
                         if(args->logTraffic){
-                            jint uid = get_uid_cached(args, s->tcp.version, s->protocol, dest, dport);
-                            jboolean  allowed = is_address_allowed(args, s->tcp.version, s->protocol, dest, dport, uid);
-                            log_traffic(args, s->tcp.version, s->protocol, dest, dport, bytes, uid, allowed, false);
+                            jint uid = s->tcp.uid;
+                            if(uid < 0) {
+                                uid = get_uid_cached(args, s->udp.version, s->protocol, source, sport, dest, dport);
+                                if(uid >= 0)
+                                    log_android(ANDROID_LOG_ERROR, "[TCP] Had to lookup uid from cache!");
+                            }
+                            jboolean  allowed = is_address_allowed(args, s->tcp.version, s->protocol, source, sport, dest, dport, uid);
+                            log_traffic(args, s->tcp.version, s->protocol, source, sport, dest, dport, bytes, uid, allowed, false);
                         }
                     }
                     ng_free(buffer, __FILE__, __LINE__);
@@ -842,6 +847,11 @@ jboolean handle_tcp(const struct arguments *args,
                 cur->tcp.local_seq - cur->tcp.local_start,
                 cur->tcp.remote_seq - cur->tcp.remote_start,
                 cur->tcp.acked - cur->tcp.local_start);
+
+        if(cur->tcp.uid == -1 && uid > 0){
+            cur->tcp.uid = uid;
+            log_android(ANDROID_LOG_INFO, "updated uid for TCP session");
+        }
 
         if (!allowed) {
             log_android(ANDROID_LOG_WARN, "%s resetting blocked session", packet);

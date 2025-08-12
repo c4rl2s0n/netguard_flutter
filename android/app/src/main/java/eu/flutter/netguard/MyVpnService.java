@@ -77,7 +77,7 @@ public class MyVpnService extends VpnService {
     private final Map<Long, String> mapUidPackageName = new HashMap<>();
     private final Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
     private final Map<IPKey, String> mapIPKeySni = new HashMap<>();
-    private final Map<String, String> mapIpDomain = new HashMap<>();
+    private final Map<String, String> mapIpUidDomain = new HashMap<>();
 
     private List<ApplicationSetting> applicationSettings;
 
@@ -93,8 +93,8 @@ public class MyVpnService extends VpnService {
     private void SetIsRunning(boolean isRunning){
         var sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         PersistenceCache.SetVpnServiceRunning(sharedPrefs, isRunning);
-        if(!isRunning) {
-            vpnConfig.setFinished(true);
+        if(vpnConfig != null) {
+            vpnConfig.setFinished(!isRunning);
             PersistenceCache.SetVpnConfig(sharedPrefs, vpnConfig);
         }
     }
@@ -187,6 +187,7 @@ public class MyVpnService extends VpnService {
         MyVpnService.vpnConfig = config;
         PersistenceCache.SetVpnConfig(PreferenceManager.getDefaultSharedPreferences(context), config);
 
+        // TODO: check if this should be done here...
         if(false && isRunning(context)){
             reload(context, "Update Config");
         }
@@ -409,7 +410,7 @@ public class MyVpnService extends VpnService {
     private void prepareCacheMaps() {
         mapIPKeyUid.clear();
         mapIPKeySni.clear();
-        mapIpDomain.clear();
+        mapIpUidDomain.clear();
     }
     private void preparePackageRules() {
         lock.writeLock().lock();
@@ -467,13 +468,13 @@ public class MyVpnService extends VpnService {
 
     ///  TRAFFIC LOGGING
     // Called from native code
-    private void logTraffic(long time, int version, int protocol, String daddr, int dport, long length, long uid, boolean allowed, boolean outgoing) {
+    private void logTraffic(long time, int version, int protocol, String saddr, int sport, String daddr, int dport, long length, long uid, boolean allowed, boolean outgoing) {
         // try to lookup uid from logged IPKeys
-        if(uid <= 0) uid = getUidCached(version, protocol, daddr, dport);
+        if(uid <= 0) uid = getUidCached(version, protocol, saddr, sport, daddr, dport);
 
         // log the traffic if it does not come from firewall itself (should not happen though...)
         if (uid != Process.myUid()) {
-            IPKey key = new IPKey(version, protocol, daddr, dport, uid);
+            IPKey key = new IPKey(version, protocol, saddr, sport, daddr, dport, uid);
             String packageName = mapUidPackageName.get(uid);
             String domain = getDomainName(key);
 
@@ -485,10 +486,20 @@ public class MyVpnService extends VpnService {
     ///  CACHE DOMAIN NAMES
     // Called from native code
     private void dnsResolved(ResourceRecord rr) {
-        mapIpDomain.put(rr.getResource(), NetworkUtils.cleanDomain(rr.getQName()));
+        Log.wtf(TAG, "DnsResolved uid="+rr.getUid());
+        Long uid = rr.getUid();
+        if(uid == null){
+            uid = (long) -1;
+        }
+        String key = getMapIpUidDomainKey(rr.getResource(), uid);
+        mapIpUidDomain.put(key, NetworkUtils.cleanDomain(rr.getQName()));
+
+        // also log the domain for the unknown uid as a fallback
+        key = getMapIpUidDomainKey(rr.getResource(), -1);
+        mapIpUidDomain.put(key, NetworkUtils.cleanDomain(rr.getQName()));
     }
-    private void sniResolved(String sni, int version, int protocol, String daddr, int dport, String saddr, int sport, int uid) {
-        IPKey key = new IPKey(version, protocol, daddr, dport, uid);
+    private void sniResolved(String sni, int version, int protocol, String saddr, int sport, String daddr, int dport, int uid) {
+        IPKey key = new IPKey(version, protocol, saddr, sport, daddr, dport, uid);
         sni = NetworkUtils.cleanDomain(sni);
         mapIPKeySni.put(key, sni);
     }
@@ -513,18 +524,19 @@ public class MyVpnService extends VpnService {
         return uid;
     }
 
-    private int getUidCached(int version, int protocol, String daddr, int dport) {
+    private int getUidCached(int version, int protocol, String saddr, int sport, String daddr, int dport) {
         int uid = -1;
-        var key = new IPKey(version, protocol, daddr, dport, -1);
+        var key = new IPKey(version, protocol, saddr, sport, daddr, dport, -1);
         if(mapIPKeyUid.containsKey(key)){
             Long lUid = mapIPKeyUid.get(key);
             assert lUid != null;
             uid = lUid.intValue();
+            Log.i(TAG, "Get uid cached: local=" + saddr + " sport=" + sport + " remote=" + daddr + " dport=" + dport + " uid="+uid);
         }
         return uid;
     }
-    private void cacheUid(int version, int protocol, String daddr, int dport, int uid) {
-        var key = new IPKey(version, protocol, daddr, dport, -1);
+    private void cacheUid(int version, int protocol, String saddr, int sport, String daddr, int dport, int uid) {
+        var key = new IPKey(version, protocol, saddr, sport, daddr, dport, -1);
         mapIPKeyUid.put(key, (long) uid);
     }
 
@@ -560,9 +572,9 @@ public class MyVpnService extends VpnService {
         lock.readLock().unlock();
         return blocked;
     }
-    private boolean isAddressAllowed(int version, int protocol, String daddr, int dport, long uid) {
+    private boolean isAddressAllowed(int version, int protocol, String saddr, int sport, String daddr, int dport, long uid) {
         lock.readLock().lock();
-        boolean allowed = true;
+        boolean allowed;
 
         if(setUidBlockAll.contains(uid)) {
             // check if the uid is fully blocked
@@ -582,7 +594,7 @@ public class MyVpnService extends VpnService {
 
             // lookup domain and check if that might be blocked
             String domain = null;
-            if(!blocked) domain = getDomainName(new IPKey(version, protocol, daddr, dport, uid));
+            if(!blocked) domain = getDomainName(new IPKey(version, protocol, saddr, sport, daddr, dport, uid));
             if(domain != null && !domain.isBlank()){
                 blocked = isDomainBlocked((int)uid, domain);
             }
@@ -604,7 +616,7 @@ public class MyVpnService extends VpnService {
         // host is already cached?
         if(mapGlobalBlockedIPs.containsKey(host)){
             // check if host is globally blocked
-            return mapGlobalBlockedHosts.get(host);
+            return Boolean.TRUE.equals(mapGlobalBlockedHosts.get(host));
         } else {
             // otherwise, lookup the host in the database; store it in the lookup table for future lookups
             if (database.genericBlacklistContainsHost(host)) {
@@ -620,7 +632,7 @@ public class MyVpnService extends VpnService {
         // IP is already cached?
         if(mapGlobalBlockedIPs.containsKey(ip)){
             // check if IP is globally blocked
-            return mapGlobalBlockedIPs.get(ip);
+            return Boolean.TRUE.equals(mapGlobalBlockedIPs.get(ip));
         } else {
             // otherwise, lookup the ip in the database; store it in the lookup table for future lookups
             if (database.genericBlacklistContainsIp(ip)) {
@@ -688,7 +700,15 @@ public class MyVpnService extends VpnService {
         if(mapIPKeySni.containsKey(key)){
             return mapIPKeySni.get(key);
         }
-        return mapIpDomain.get(key.getDaddr());
+        String domain = mapIpUidDomain.get(getMapIpUidDomainKey(key.getDaddr(),key.getUid()));
+        if(domain == null || domain.isBlank()){
+            domain = mapIpUidDomain.get(getMapIpUidDomainKey(key.getDaddr(),-1));
+        }
+        return domain;
+    }
+
+    private String getMapIpUidDomainKey(String ip, long uid){
+        return ip+"_"+uid;
     }
 
 }

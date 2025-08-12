@@ -98,11 +98,15 @@ void check_icmp_socket(const struct arguments *args, const struct epoll_event *e
 
             } else {
                 // Socket read data
+                char source[INET6_ADDRSTRLEN + 1];
                 char dest[INET6_ADDRSTRLEN + 1];
-                if (s->icmp.version == 4)
+                if (s->icmp.version == 4) {
+                    inet_ntop(AF_INET, &s->icmp.saddr.ip4, source, sizeof(source));
                     inet_ntop(AF_INET, &s->icmp.daddr.ip4, dest, sizeof(dest));
-                else
+                } else {
+                    inet_ntop(AF_INET6, &s->icmp.saddr.ip6, source, sizeof(source));
                     inet_ntop(AF_INET6, &s->icmp.daddr.ip6, dest, sizeof(dest));
+                }
 
                 // cur->id should be equal to icmp->icmp_id
                 // but for some unexplained reason this is not the case
@@ -138,9 +142,16 @@ void check_icmp_socket(const struct arguments *args, const struct epoll_event *e
 
                 // log incoming ICMP traffic
                 if(args->logTraffic){
-                    jint uid = get_uid_cached(args, s->icmp.version, s->protocol, dest, 0);
-                    jboolean  allowed = is_address_allowed(args, s->icmp.version, s->protocol, dest, 0, uid);
-                    log_traffic(args, s->icmp.version, s->protocol, dest, 0, bytes, uid, allowed, false);
+
+                    jint uid = s->icmp.uid;
+                    if(uid < 0) {
+                        uid = get_uid_cached(args, s->udp.version, s->protocol, source, 0, dest, 0);
+                        if(uid >= 0)
+                            log_android(ANDROID_LOG_ERROR, "[ICMP] Had to lookup uid from cache!");
+                    }
+
+                    jboolean  allowed = is_address_allowed(args, s->icmp.version, s->protocol, source, 0, dest, 0, uid);
+                    log_traffic(args, s->icmp.version, s->protocol, source, 0, dest, 0, bytes, uid, allowed, false);
                 }
             }
             ng_free(buffer, __FILE__, __LINE__);
@@ -232,6 +243,9 @@ jboolean handle_icmp(const struct arguments *args,
         args->ctx->ng_session = s;
 
         cur = s;
+    }else if(cur->icmp.uid == -1 && uid > 0){
+        cur->icmp.uid = uid;
+        log_android(ANDROID_LOG_INFO, "updated uid for ICMP session");
     }
 
     // Modify ID

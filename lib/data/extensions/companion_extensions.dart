@@ -52,6 +52,7 @@ extension TrafficLogToCompanion on TrafficLog {
     packageName: Value(packageName),
     ip: Value(ip),
     host: Value(host),
+    size: Value(size),
     allowed: Value(allowed),
     outgoing: Value(outgoing),
   );

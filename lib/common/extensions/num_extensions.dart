@@ -20,6 +20,11 @@ extension FileFormatter on num {
     return "${NumberFormat("#,##0.#").format(this / pow(base, digitGroups))} ${units[digitGroups]}";
   }
 
+  String portToString({bool withColon=false}){
+    if(this <= 0) return "";
+    String portString = withColon ? ":" : "";
+    return "$portString$this";
+  }
 }
 extension IntExtension on int{
   String nDigit(int n) => toString().padLeft(n, '0');

@@ -76,7 +76,7 @@ int32_t get_qname(const uint8_t *data, const size_t datalen, uint16_t off, char 
 }
 
 void parse_dns_response(const struct arguments *args, const struct ng_session *s,
-                        const uint8_t *data, size_t *datalen) {
+                        const uint8_t *data, size_t *datalen, jint uid) {
     if (*datalen < sizeof(struct dns_header) + 1) {
         log_android(ANDROID_LOG_WARN, "DNS response length %d", *datalen);
         return;
@@ -148,7 +148,7 @@ void parse_dns_response(const struct arguments *args, const struct ng_session *s
                                 return;
                         }
 
-                        dns_resolved(args, qname, name, rd, ttl, -1);
+                        dns_resolved(args, qname, name, rd, ttl, uid);
                         log_android(ANDROID_LOG_DEBUG,
                                     "DNS answer %d qname %s qtype %d ttl %d data %s",
                                     a, name, qtype, ttl, rd);

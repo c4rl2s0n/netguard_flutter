@@ -23,7 +23,7 @@ int parse_sni(
         const uint16_t datalen,
         char *server_name) {
     if (datalen < 6) {
-        log_android(ANDROID_LOG_DEBUG, "TLS header too short");
+        log_android(ANDROID_LOG_DEBUG, "TLS header too short to parse SNI");
         return 0;
     }
 

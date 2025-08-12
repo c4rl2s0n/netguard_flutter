@@ -58,7 +58,7 @@ class LogEntryGrouped extends StatelessWidget {
 
   Widget _text() {
     String text =
-        "${NetworkingTools.toPortAwareProtocol(log.protocol, log.dport)} ${log.destination}";
+        "${NetworkingTools.toPortAwareProtocol(log.protocol, log.dport)} ${log.destination}${log.dport.portToString(withColon: true)}";
     return Text(text);
   }
 }
