@@ -87,6 +87,7 @@ class GlobalRulesSettings extends StatelessWidget {
           title: "Delete Global Rules?",
           content: "Do you want to delete all global firewall rules?",
         )) {
+          await globalRuleSourceRepository.clearHashes();
           if(await hostsRepository.clearGeneric() > 0){
             SnackBarFactory.showPositiveSnackBar("Global firewall rules deleted!");
           }else{

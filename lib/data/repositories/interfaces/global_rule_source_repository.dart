@@ -9,4 +9,5 @@ abstract class IGlobalRuleSourceRepository extends RepositoryBase {
   Future<List<GlobalRuleSource>> getAll();
   Future update(GlobalRuleSource entity);
   Future updateAll(List<GlobalRuleSource> entities);
+  Future<void> clearHashes();
 }

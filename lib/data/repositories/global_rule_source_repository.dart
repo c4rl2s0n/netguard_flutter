@@ -35,4 +35,9 @@ class GlobalRuleSourceRepository extends IGlobalRuleSourceRepository {
 
   @override
   Future<List<GlobalRuleSource>> getOnline() => _getForType(SourceType.online);
+
+  @override
+  Future<void> clearHashes() async {
+    await db.globalRuleSourceTable.update().write(GlobalRuleSourceTableCompanion(contentHash: Value(null)));
+  }
 }
