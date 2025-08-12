@@ -7,19 +7,29 @@ class ApplicationSelectionDropdownMenu extends StatelessWidget {
     this.initialSelection = const [],
     this.onSelectionChanged,
     this.onToggleSelection,
+    this.onlyObserved = false,
     super.key,
   });
 
   final List<Application?> initialSelection;
   final Function(Application? app, bool selected)? onToggleSelection;
   final Function(List<Application?>)? onSelectionChanged;
+  final bool onlyObserved;
 
   @override
   Widget build(BuildContext context) {
     return SelectionDropdownMenu(
       options: <Application?>[
         null,
-        ...sessionCubit.state.applications,
+        ...onlyObserved
+            ? sessionCubit
+                  .state
+                  .sessionAnalysis
+                  .state
+                  .analysisByApplication
+                  .values
+                  .map((a) => a.application)
+            : sessionCubit.state.applications,
       ].where((a) => a == null || (a.setting?.filter ?? false)).toList(),
       initialSelection: initialSelection,
       onSelectionChanged: onSelectionChanged,

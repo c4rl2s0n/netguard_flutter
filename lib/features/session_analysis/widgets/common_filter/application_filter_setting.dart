@@ -19,6 +19,7 @@ class ApplicationFilterSetting extends StatelessWidget {
         action: ApplicationSelectionDropdownMenu(
           initialSelection: initialSelection,
           onSelectionChanged: onSelectionChanged,
+          onlyObserved: true,
         )
     );
   }
