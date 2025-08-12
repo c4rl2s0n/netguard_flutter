@@ -45,33 +45,31 @@ class GlobalRulesSettings extends StatelessWidget {
       buildWhen: (oldState, state) => oldState.loading != state.loading,
       builder: (context, state) => state.loading
           ? Center(child: CircularProgressIndicator())
-          : OnLeaveUpdater(
-              update: (context) => context.read<GlobalRulesCubit>().store(),
-              child: BlocBuilder<SessionCubit, SessionState>(
-                buildWhen: (oldState, state) =>
-                    oldState.running != state.running,
-                builder: (context, session) => SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _head(context),
-                      if (session.running) ...[
-                        TWarning(
-                          "These settings will only be effective after restarting the VPN.",
-                        ),
-                      ],
-                      _online(context),
-                      _offline(context),
-                    ],
-                  ),
-                ),
+          : BlocBuilder<SessionCubit, SessionState>(
+            buildWhen: (oldState, state) =>
+                oldState.running != state.running,
+            builder: (context, session) => SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _head(context),
+                  if (session.running) ...[
+                    TWarning(
+                      "These settings will only be effective after restarting the VPN.",
+                    ),
+                  ],
+                  _online(context),
+                  _offline(context),
+                ],
               ),
             ),
+          ),
     );
   }
 
   Widget _head(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: _lastScanIndication()),
         _clearSourcesBtn(context),
@@ -86,14 +84,19 @@ class GlobalRulesSettings extends StatelessWidget {
           context,
           title: "Delete Global Rules?",
           content: "Do you want to delete all global firewall rules?",
-        )) {
-          await globalRuleSourceRepository.clearHashes();
-          if(await hostsRepository.clearGeneric() > 0){
-            settingsCubit.resetLastHostlistUpdate();
-            SnackBarFactory.showPositiveSnackBar("Global firewall rules deleted!");
-          }else{
-            SnackBarFactory.showInfoSnackBar("No rules found to delete...");
-          }
+        ) && context.mounted) {
+          await LoadingDialog.show(context, (context, lc) async {
+            lc.setTitle("Deleting Global Rules");
+            lc.setMessage("Clearing rules from database...");
+            await globalRuleSourceRepository.clearHashes();
+            if(await hostsRepository.clearGeneric() > 0){
+              settingsCubit.resetLastHostlistUpdate();
+              SnackBarFactory.showPositiveSnackBar("Global firewall rules deleted!");
+            }else{
+              SnackBarFactory.showInfoSnackBar("No rules found to delete...");
+            }
+            lc.finish();
+          });
         }
       },
       icon: Icon(CustomIcons.delete, color: context.colors.negative),
@@ -113,13 +116,15 @@ class GlobalRulesSettings extends StatelessWidget {
               )
             : Column(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("${state.lastHostlistUpdate}\n", style: style),
                   FutureBuilder<int>(
                     future: hostsRepository.getGenericCount(),
+                    initialData: 0,
                     builder: (context, state) => state.hasData
-                        ? Text("${state.data} records")
+                        ? Text("${state.requireData.longNum} records")
                         : SizedBox.shrink(),
                   ),
                 ],
@@ -136,7 +141,7 @@ class GlobalRulesSettings extends StatelessWidget {
           SourceType.online => await _getOnlineSources(ruleCubit.state),
           SourceType.local => await _getLocalSources(ruleCubit.state),
         };
-        ruleCubit.addSources(newSources);
+        await ruleCubit.addSources(newSources);
       },
       icon: Icon(CustomIcons.add, color: context.colors.positive),
     );
@@ -164,7 +169,7 @@ class GlobalRulesSettings extends StatelessWidget {
     }
     SnackBarFactory.showPositiveSnackBar("Added $dataNew new URLs!");
     return data
-        .map((l) => GlobalRuleSource(source: l, type: SourceType.online))
+        .map((l) => GlobalRuleSource.create(source: l, type: SourceType.online))
         .toList();
   }
 
@@ -194,7 +199,7 @@ class GlobalRulesSettings extends StatelessWidget {
     }
     SnackBarFactory.showPositiveSnackBar("Added $filesNew new files!");
     return files
-        .map((l) => GlobalRuleSource(source: l, type: SourceType.local))
+        .map((l) => GlobalRuleSource.create(source: l, type: SourceType.local))
         .toList();
   }
 
@@ -203,7 +208,7 @@ class GlobalRulesSettings extends StatelessWidget {
       buildWhen: (oldState, state) =>
           oldState.onlineSources != state.onlineSources,
       builder: (context, state) => SettingsGroup(
-        title: "Online Sources",
+        title: "Online Sources (${state.onlineSources.length})",
         action: _addSourceButton(context, SourceType.online),
         info: Text(
           "Specify a list of URLs to websites that contain hosts or ips to be blocked",
@@ -218,7 +223,7 @@ class GlobalRulesSettings extends StatelessWidget {
       buildWhen: (oldState, state) =>
           oldState.localSources != state.localSources,
       builder: (context, state) => SettingsGroup(
-        title: "Local Sources",
+        title: "Local Sources (${state.localSources.length})",
         action: _addSourceButton(context, SourceType.local),
         info: Text(
           "Specify a list of files that contain hosts or ips to be blocked",

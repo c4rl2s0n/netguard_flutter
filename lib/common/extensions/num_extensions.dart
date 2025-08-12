@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:intl/intl.dart';
+import 'package:netguard/common/common.dart';
 
 extension FileFormatter on num {
   // Converts x to a double and returns the common logarithm of the value.
@@ -28,4 +29,16 @@ extension FileFormatter on num {
 }
 extension IntExtension on int{
   String nDigit(int n) => toString().padLeft(n, '0');
+  String get longNum {
+    String long = "";
+    var chars = toString().codeUnits;
+    for(int i = 1; i<=chars.length; i++){
+      String char = String.fromCharCode(chars[chars.length-i]);
+      if(i%3==0 && i < chars.length){
+        char = ".$char";
+      }
+      long = "$char$long";
+    }
+    return long;
+  }
 }

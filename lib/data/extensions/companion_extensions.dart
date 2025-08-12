@@ -24,6 +24,7 @@ extension HostToCompanion on HostEntry {
 extension GlobalRuleSourceToCompanion on GlobalRuleSource {
   GlobalRuleSourceTableCompanion get companion =>
       GlobalRuleSourceTableCompanion(
+        id: Value(id),
         source: Value(source),
         type: Value(type),
         contentHash: Value(contentHash),

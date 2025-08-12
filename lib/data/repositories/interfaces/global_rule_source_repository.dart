@@ -7,6 +7,7 @@ abstract class IGlobalRuleSourceRepository extends RepositoryBase {
   Future<List<GlobalRuleSource>> getOnline();
   Future<List<GlobalRuleSource>> getLocal();
   Future<List<GlobalRuleSource>> getAll();
+  Future delete(String id);
   Future update(GlobalRuleSource entity);
   Future updateAll(List<GlobalRuleSource> entities);
   Future<void> clearHashes();

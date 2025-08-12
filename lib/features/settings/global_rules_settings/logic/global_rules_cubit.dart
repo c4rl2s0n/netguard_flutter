@@ -25,6 +25,7 @@ class GlobalRulesCubit extends Cubit<GlobalRulesState> {
   }
 
   Future removeSource(GlobalRuleSource source) async {
+    await globalRuleSourceRepository.delete(source.id);
     var sources = state.sources.toList();
     if (sources.remove(source)) {
       emit(state.copyWith(sources: sources));
@@ -40,18 +41,9 @@ class GlobalRulesCubit extends Cubit<GlobalRulesState> {
     );
   }
 
-  void createSource(SourceType type) {
-    emit(
-      state.copyWith(
-        sources: [
-          ...state.sources,
-          GlobalRuleSource(type: type),
-        ],
-      ),
-    );
-  }
-
-  void addSources(List<GlobalRuleSource> sources) {
+  Future addSources(List<GlobalRuleSource> sources) async {
+    if(sources.isEmpty) return;
+    await globalRuleSourceRepository.updateAll(sources);
     emit(state.copyWith(sources: [...state.sources, ...sources]));
   }
 }

@@ -60,7 +60,7 @@ class ScanSourcesTask extends ProgressTask {
     updateProgress((lc) => lc.setProgress(null));
     updateProgress(
       (lc) => lc.setMessage(
-        "Updating Database...\nFound:\n- ${result.hosts.length} domains\n- ${result.ips.length} IPs",
+        "Updating Database...\nFound:\n- ${result.hosts.length.longNum} domains\n- ${result.ips.length.longNum} IPs",
       ),
     );
     updateProgress((lc) => lc.setCanInterrupt(false));

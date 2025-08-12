@@ -14,10 +14,13 @@ class GlobalRuleSourceRepository extends IGlobalRuleSourceRepository {
   Future update(GlobalRuleSource entity) async {
     await db.globalRuleSourceTable.insertOnConflictUpdate(entity.companion);
   }
+  @override
+  Future delete(String id) async {
+    await db.globalRuleSourceTable.deleteWhere((t) => t.id.equals(id));
+  }
 
   @override
   Future updateAll(List<GlobalRuleSource> entities) async {
-    await db.globalRuleSourceTable.deleteAll();
     await db.batch(
       (batch) => batch.insertAllOnConflictUpdate(
         db.globalRuleSourceTable,

@@ -90,7 +90,7 @@ class AppDatabase extends _$AppDatabase {
             (b) => b.insertAllOnConflictUpdate(
               globalRuleSourceTable,
               defaultBlacklistOnlineSources.map(
-                (s) => GlobalRuleSource(
+                (s) => GlobalRuleSource.create(
                   source: s,
                   type: SourceType.online,
                 ).companion,

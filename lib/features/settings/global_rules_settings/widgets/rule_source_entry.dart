@@ -15,16 +15,15 @@ class RuleSourceEntry extends StatelessWidget {
       children: [
         Expanded(child: Text(source.source)),
         IconButton(
-          onPressed: () => _deleteSource(context, confirm: true),
+          onPressed: () => _deleteSource(context),
           icon: Icon(CustomIcons.remove, color: context.colors.negative),
         ),
       ],
     );
   }
 
-  Future _deleteSource(BuildContext context, {bool confirm = false}) async {
-    if (!confirm ||
-        await DeleteConfirmationDialog.ask(
+  Future _deleteSource(BuildContext context) async {
+    if (await DeleteConfirmationDialog.ask(
               context,
               title: "Delete source?",
               content:
