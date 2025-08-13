@@ -9,7 +9,6 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
-import eu.flutter.netguard.flutter.FlutterEngineManager;
 import eu.flutter.netguard.flutter.NativeBridge.*;
 import eu.flutter.netguard.flutter.VpnEventChannel;
 
@@ -19,7 +18,7 @@ public final class LogHandler extends Handler {
     private static final int MSG_TRAFFIC = 1;
     public int queue = 0;
 
-    private static final int MAX_QUEUE = 500;
+    private static final int MAX_QUEUE = 250;
 
     Context context;
 
@@ -49,15 +48,7 @@ public final class LogHandler extends Handler {
     @Override
     public void handleMessage(@NonNull Message msg) {
         try {
-            synchronized (this) {
-                queue--;
-            }
 
-            // if buffering, just re-append the message
-            if(FlutterEngineManager.getInstance(context).getIsBuffering()){
-                queue(msg);
-                return;
-            }
             switch (msg.what) {
                 case MSG_TRAFFIC:
                     VpnEventChannel.logTraffic((TrafficLog) msg.obj);
@@ -65,6 +56,9 @@ public final class LogHandler extends Handler {
 
                 default:
                     Log.e(TAG, "Unknown log message=" + msg.what);
+            }
+            synchronized (this) {
+                queue--;
             }
 
 

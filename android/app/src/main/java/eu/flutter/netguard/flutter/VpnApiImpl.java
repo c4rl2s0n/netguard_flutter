@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.VpnService;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,8 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import eu.flutter.netguard.MainActivity;
 import eu.flutter.netguard.MyVpnService;
+import eu.flutter.netguard.activities.VpnStartupActivity;
 import eu.flutter.netguard.data.ModelBuilder;
 import eu.flutter.netguard.utils.Util;
 import eu.flutter.netguard.utils.Values;
@@ -28,22 +27,13 @@ public class VpnApiImpl implements VpnController {
     private final Context context;
 
     public VpnApiImpl(Context context) {
-        this.context = context;
+        this.context = context; //.getApplicationContext();
     }
     @Override
     public void startVpn(@NonNull VpnConfig config) {
-        MyVpnService.updateVpnConfig(context, config);
-        Intent prepareIntent = VpnService.prepare(context);
-        if(context instanceof MainActivity) {
-            MainActivity mainActivity = (MainActivity) context;
-            if (prepareIntent != null) {
-                // Need user consent — ask MainActivity to launch permission
-                mainActivity.requestVpnPermission(prepareIntent);
-            } else {
-                // Permission already granted — start VPN directly
-                mainActivity.startVpnService();
-            }
-        }
+        Intent intent = new Intent(context, VpnStartupActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     @Override

@@ -14,7 +14,7 @@ import androidx.core.app.PendingIntentCompat;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.flutter.netguard.MainActivity;
+import eu.flutter.netguard.activities.MainActivity;
 import eu.flutter.netguard.flutter.NativeBridge;
 import eu.flutter.netguard.R;
 import eu.flutter.netguard.data.StatusNotificationData;

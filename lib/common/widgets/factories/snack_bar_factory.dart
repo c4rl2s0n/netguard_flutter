@@ -70,6 +70,7 @@ class SnackBarFactory {
       ),
       padding: const EdgeInsets.all(ThemeConstants.spacing),
       showCloseIcon: true,
+      closeIconColor: textColor,
       backgroundColor: snackBarColor,
     );
   }

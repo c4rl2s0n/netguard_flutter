@@ -21,7 +21,7 @@
             android:textAlignment="gravity"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textColor="@color/white"
-            android:typeface="monospace" />
+            android:typeface="normal" />
 
         <TextView
             android:visibility="gone"
@@ -31,7 +31,7 @@
             android:textAlignment="gravity"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:textColor="@color/white"
-            android:typeface="monospace" />
+            android:typeface="normal" />
         <TextView
             android:id="@+id/tvPacketsBlocked"
             android:layout_width="wrap_content"
@@ -39,7 +39,7 @@
             android:textAlignment="gravity"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:textColor="@color/red"
-            android:typeface="monospace" />
+            android:typeface="normal" />
 
     </LinearLayout>
 
