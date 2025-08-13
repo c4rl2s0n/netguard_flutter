@@ -72,7 +72,6 @@ public class NotificationTools {
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                    .setOngoing(true)
                     .setAutoCancel(false);
             mBuilder.put(notificationId, builder);
         }
@@ -83,6 +82,7 @@ public class NotificationTools {
         return _builderBase(RUNNING)
             .setContentText("Firewall is active")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOngoing(true)
             .build();
     }
 
@@ -91,20 +91,16 @@ public class NotificationTools {
     }
     public void updateStatsNotification(NativeBridge.SessionStatistics sessionStatistics) {
         StatusNotificationData notificationData = new StatusNotificationData(context, context.getString(R.string.app_name), sessionStatistics);
-
-        RemoteViews smallView = new RemoteViews(context.getPackageName(), R.layout.status_small);
-        RemoteViews largeView = new RemoteViews(context.getPackageName(), R.layout.status_large);
-        prepareStatusNotificationView(smallView, notificationData);
-        prepareStatusNotificationView(largeView, notificationData);
-
         var builder = _builderBase(STATS);
         builder.setOnlyAlertOnce(true)
-            .setContentTitle(notificationData.getTitle())
-            .setContentText(notificationData.getPacketCountBlocked())
-            .setCustomContentView(smallView)
-            .setCustomBigContentView(largeView)
-            .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-            .setPriority(NotificationCompat.PRIORITY_HIGH);
+               .setOngoing(false)
+               .setContentTitle(notificationData.getTitle())
+               .setContentText("Packets blocked: " + notificationData.getPacketCountBlocked() + " / " + notificationData.getPacketCountTotal())
+               .setCustomContentView(prepareStatusNotificationViewSmall(notificationData))
+               .setCustomBigContentView(prepareStatusNotificationViewLarge(notificationData))
+               .setNumber((int)notificationData.getPacketCountBlocked())
+               .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+               .setPriority(NotificationCompat.PRIORITY_HIGH);
         updateNotification(STATS, builder);
     }
 
@@ -116,11 +112,20 @@ public class NotificationTools {
     }
 
 
-    private void prepareStatusNotificationView(RemoteViews view, StatusNotificationData notificationData){
-        view.setTextViewText(R.id.tvTitle, notificationData.getTitle());
-        view.setTextViewText(R.id.tvPacketCount, notificationData.getPacketCountTotal());
-        view.setTextViewText(R.id.tvPacketsBlocked, notificationData.getPacketCountBlocked());
+    private RemoteViews prepareStatusNotificationViewSmall(StatusNotificationData notificationData){
+        RemoteViews view = new RemoteViews(context.getPackageName(), R.layout.status_small);
+        view.setTextViewText(R.id.tvPacketCount, Long.toString(notificationData.getPacketCountTotal()));
+        view.setTextViewText(R.id.tvPacketsBlocked, Long.toString(notificationData.getPacketCountBlocked()));
         view.setImageViewBitmap(R.id.ivChart, notificationData.getChart());
+        return view;
+    }
+    private RemoteViews prepareStatusNotificationViewLarge(StatusNotificationData notificationData){
+        RemoteViews view = new RemoteViews(context.getPackageName(), R.layout.status_large);
+        view.setTextViewText(R.id.tvTitle, notificationData.getTitle());
+        view.setTextViewText(R.id.tvPacketCount, "Packets (total): " + notificationData.getPacketCountTotal());
+        view.setTextViewText(R.id.tvPacketsBlocked, "Packets (blocked): " + notificationData.getPacketCountBlocked());
+        view.setImageViewBitmap(R.id.ivChart, notificationData.getChart());
+        return view;
     }
 
 }

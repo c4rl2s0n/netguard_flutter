@@ -13,33 +13,53 @@
         android:gravity="start"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvTitle"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="start"
             android:gravity="start"
-            android:textAlignment="gravity"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:textColor="@color/white"
-            android:typeface="normal" />
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:text="Packets (total): "
+                android:textColor="@color/white"
+                android:typeface="normal" />
+            <TextView
+                android:id="@+id/tvPacketCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="@color/white"
+                android:typeface="normal" />
+        </LinearLayout>
 
-        <TextView
-            android:visibility="gone"
-            android:id="@+id/tvPacketCount"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAlignment="gravity"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-            android:textColor="@color/white"
-            android:typeface="normal" />
-        <TextView
-            android:id="@+id/tvPacketsBlocked"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="gravity"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-            android:textColor="@color/red"
-            android:typeface="normal" />
+            android:layout_gravity="start"
+            android:gravity="start"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:text="Packets (blocked): "
+                android:textColor="@color/white"
+                android:typeface="normal" />
+            <TextView
+                android:id="@+id/tvPacketsBlocked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="@color/red"
+                android:typeface="normal" />
+        </LinearLayout>
 
     </LinearLayout>
 

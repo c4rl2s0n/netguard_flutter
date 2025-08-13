@@ -34,11 +34,11 @@ public class StatusNotificationData {
     public String getTitle(){
         return title;
     }
-    public String getPacketCountTotal(){
-        return "Packets (total): " + packetCountTotal;
+    public long getPacketCountTotal(){
+        return packetCountTotal;
     }
-    public String getPacketCountBlocked(){
-        return "Packets (blocked): " + packetCountBlocked;
+    public long getPacketCountBlocked(){
+        return packetCountBlocked;
     }
     public Bitmap getChart(){
         return chart;

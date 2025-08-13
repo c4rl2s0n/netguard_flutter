@@ -194,6 +194,11 @@ public class MyVpnService extends VpnService {
     }
 
     void updateStatsNotification(SessionStatistics sessionStatistics){
+        // Do not update statistic notification if VPN is not running
+        if(vpnConfig == null || vpnConfig.getFinished()){
+            notification.hideStatsNotification();
+            return;
+        }
         notification.updateStatsNotification(sessionStatistics);
     }
     private void startVpn(){
