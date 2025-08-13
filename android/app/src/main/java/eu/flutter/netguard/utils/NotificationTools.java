@@ -72,6 +72,7 @@ public class NotificationTools {
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                    .setOngoing(true)
                     .setAutoCancel(false);
             mBuilder.put(notificationId, builder);
         }
@@ -82,7 +83,6 @@ public class NotificationTools {
         return _builderBase(RUNNING)
             .setContentText("Firewall is active")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOngoing(true)
             .build();
     }
 
