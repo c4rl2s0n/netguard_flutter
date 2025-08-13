@@ -23,7 +23,6 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
     int addSizeAllowed,
     int addCountBlocked,
     int addSizeBlocked,
-    int timestamp,
   ) async {
     // insert entry if not exists
     if (await get(packageName, endpoint, type) == null) {
@@ -36,7 +35,6 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
           packetSizeAllowed: addSizeAllowed,
           packetCountBlocked: addCountBlocked,
           packetSizeBlocked: addSizeBlocked,
-          latest: timestamp,
         ),
       );
       return;
@@ -47,8 +45,7 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
           (t) =>
               t.packageName.equalsNullable(packageName) &
               t.endpoint.equals(endpoint) &
-              t.endpointType.equalsValue(type) &
-              t.latest.isBiggerThanValue(timestamp),
+              t.endpointType.equalsValue(type),
         ))
         .write(
           TrafficStatisticsTableCompanion.custom(
@@ -68,7 +65,6 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
               db.trafficStatisticsTable.packetSizeBlocked,
               addSizeBlocked,
             ),
-            latest: Variable(timestamp),
           ),
         );
   }
@@ -144,7 +140,6 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
       log.allowed ? log.size : 0,
       log.blocked ? 1 : 0,
       log.blocked ? log.size : 0,
-      log.time,
     );
     if (log.host.empty) return;
     await _updateCount(
@@ -155,7 +150,6 @@ class TrafficStatisticsRepository extends ITrafficStatisticsRepository {
       log.allowed ? log.size : 0,
       log.blocked ? 1 : 0,
       log.blocked ? log.size : 0,
-      log.time,
     );
   }
 

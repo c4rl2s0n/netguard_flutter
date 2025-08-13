@@ -10,7 +10,6 @@ class TrafficStatisticsTable extends Table {
   IntColumn get packetSizeAllowed => integer().clientDefault(() => 0)();
   IntColumn get packetCountBlocked => integer().clientDefault(() => 0)();
   IntColumn get packetSizeBlocked => integer().clientDefault(() => 0)();
-  IntColumn get latest => integer().clientDefault(() => 0)();
 
   @override
   Set<Column<Object>> get primaryKey => {packageName, endpoint};

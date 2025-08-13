@@ -19,7 +19,6 @@ part 'database.g.dart';
     ResourceRecordTable,
     GlobalRuleSourceTable,
     TrafficStatisticsTable,
-    TrafficLogTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {

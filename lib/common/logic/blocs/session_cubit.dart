@@ -20,15 +20,11 @@ class SessionCubit extends Cubit<SessionState> {
 
   Future load() async {
     await loadApplications();
+
     VpnConfig? session = await vpnController.getSession();
-    SessionStatistics sessionStatistics;
-    if(session != null && !session.finished){
-      // load statistics of active session
-      sessionStatistics = await _attachToSession(session: session);
-    } else {
-      // load all-time statistics
-      sessionStatistics = await loadGlobalStatistics();
-    }
+
+    // load all-time statistics
+    SessionStatistics sessionStatistics = await loadGlobalStatistics();
     emit(
       state.copyWith(
         sessionConfig: session,
@@ -105,11 +101,9 @@ class SessionCubit extends Cubit<SessionState> {
     if (state.running) return;
     Settings settings = settingsCubit.state.settings;
 
+    // TODO: add Dialog that explains for what purpose permissions are required
     await PermissionTools.requestNotificationPermission();
     await PermissionTools.requestBatteryOptimizationPermission();
-
-    // clear the trafficLogRepository as it is only used for caching during a session
-    await trafficLogRepository.clear();
 
     VpnConfig vpnConfig = await VpnTools.getConfig(settings)
       ..observeOnly = observeOnly;
@@ -120,30 +114,19 @@ class SessionCubit extends Cubit<SessionState> {
       return;
     }
     await vpnController.startVpn(vpnConfig);
-    emit(
-      state.copyWith(
-        sessionConfig: vpnConfig,
-        sessionStatistics: await _attachToSession(),
-        running: true,
-      ),
-    );
-  }
 
-  Future<LiveSessionStatistics> _attachToSession({VpnConfig? session})async {
     await trafficLogListener?.cancel();
     trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
     _notificationService.run();
     state.sessionAnalysis.clear();
-    var statistics = LiveSessionStatistics.empty();
-    if(session != null){
-      // load logs for existing session
-      List<TrafficLog> logs = await trafficLogRepository.getForSession(session.session);
-      for(var log in logs) {
-        state.sessionAnalysis.insert(log, state.applicationsMap);
-        statistics.addLog(log);
-      }
-    }
-    return statistics;
+
+    emit(
+      state.copyWith(
+        sessionConfig: vpnConfig,
+        sessionStatistics: LiveSessionStatistics.empty(),
+        running: true,
+      ),
+    );
   }
 
   Future stopVpn() async {
@@ -166,7 +149,6 @@ class SessionCubit extends Cubit<SessionState> {
       state.sessionStatistics.addLog(event);
     }
     state.sessionAnalysis.insert(event, state.applicationsMap);
-    trafficLogRepository.insert(event);
     trafficStatisticsRepository.addLog(event);
   }
 }

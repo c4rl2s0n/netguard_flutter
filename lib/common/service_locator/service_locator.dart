@@ -73,9 +73,6 @@ void _registerDatabase(){
   getIt.registerCachedFactory<IGlobalRuleSourceRepository>(
         () => GlobalRuleSourceRepository(db),
   );
-  getIt.registerCachedFactory<ITrafficLogRepository>(
-        () => TrafficLogRepository(db),
-  );
   getIt.registerCachedFactory<ITrafficStatisticsRepository>(
         () => TrafficStatisticsRepository(db),
   );

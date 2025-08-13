@@ -44,21 +44,6 @@ extension TrafficStatisticsToCompanion on TrafficStatistics {
       );
 }
 
-extension TrafficLogToCompanion on TrafficLog {
-  TrafficLogTableCompanion get companion => TrafficLogTableCompanion(
-    id: Value(IdTools.generateUuid()),
-    time: Value(time),
-    session: Value(session),
-    protocol: Value(protocol),
-    packageName: Value(packageName),
-    ip: Value(ip),
-    host: Value(host),
-    size: Value(size),
-    allowed: Value(allowed),
-    outgoing: Value(outgoing),
-  );
-}
-
 extension ResourceRecordToCompanion on ResourceRecord {
   ResourceRecordTableCompanion get companion => ResourceRecordTableCompanion(
     time: Value(time),
