@@ -27,10 +27,11 @@ public class VpnApiImpl implements VpnController {
     private final Context context;
 
     public VpnApiImpl(Context context) {
-        this.context = context; //.getApplicationContext();
+        this.context = context.getApplicationContext();
     }
     @Override
     public void startVpn(@NonNull VpnConfig config) {
+        MyVpnService.updateVpnConfig(context, config);
         Intent intent = new Intent(context, VpnStartupActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
