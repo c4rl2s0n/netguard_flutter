@@ -12,12 +12,13 @@ class FirewallControlButton extends StatelessWidget {
     return BlocBuilder<SessionCubit, SessionState>(
       buildWhen: (oldState, state) => oldState.running != state.running,
       builder: (context, state) =>
-      state.running ? _stop(context) : _start(context),
+          state.running ? _stop(context) : _start(context),
     );
   }
 
   Widget _start(BuildContext context) => VpnLauncher(
-        (launchVpn) => IconButton(
+    navigateOnStart: false,
+    (launchVpn) => IconButton(
       onPressed: () => launchVpn(context),
       style: IconButton.styleFrom(
         backgroundColor: context.colors.onBackground,
