@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import eu.flutter.netguard.data.ModelBuilder;
 import eu.flutter.netguard.flutter.NativeBridge;
 import eu.flutter.netguard.interfaces.VpnCommandExecutor;
+import eu.flutter.netguard.utils.Util;
 import eu.flutter.netguard.utils.Values;
 import eu.flutter.netguard.utils.WakeLock;
 
@@ -95,7 +96,7 @@ public class CommandHandler extends android.os.Handler {
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
                     NativeBridge.SessionStatistics sessionStatistics = ModelBuilder.SessionStatisticsFromBundle(bundle);
-                    commandExecutor.updateStatsNotification(sessionStatistics);
+                    Util.runOnUiThread(() -> commandExecutor.updateStatsNotification(sessionStatistics));
                 }
                 break;
         }

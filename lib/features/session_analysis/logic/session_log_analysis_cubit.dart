@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:netguard/common/common.dart';
@@ -9,6 +11,8 @@ import 'package:netguard/data/data.dart';
 import '../session_analysis.dart';
 
 part 'session_log_analysis_cubit.freezed.dart';
+
+const int logBufferLength = 10;
 
 class SessionLogAnalysisCubit extends Cubit<SessionLogAnalysisState> {
   SessionLogAnalysisCubit(this._settingsCubit)
@@ -57,8 +61,20 @@ class SessionLogAnalysisCubit extends Cubit<SessionLogAnalysisState> {
     IList<TrafficLog> destLog =
         logByDest.get(log.destination) ?? IList<TrafficLog>();
 
+    IList<TrafficLog> logs = state.logs.add(log);
+    // TODO: think about limiting logs...
+    // int removeCount = max(0, logs.length - logBufferLength);
+    // logs = logs.removeRange(0, removeCount);
+    // for(int i=0; i<removeCount;i++){
+    //   TrafficLog toRemove = state.logs[i];
+    //   logByApp = logByApp.add(toRemove.packageName, logByApp[toRemove.packageName]!.remove(toRemove));
+    //   logByDest = logByDest.add(toRemove.destination, logByDest[toRemove.destination]!.remove(toRemove));
+    // }
+    // if(kDebugMode){
+    //   print("LogsBuffer: ${logs.length}");
+    // }
     SessionLogAnalysisState newState = state.copyWith(
-      logs: state.logs.add(log),
+      logs: logs,
       logByApplication: logByApp.add(log.packageName, appLog.add(log)),
       logByDestination: logByDest.add(log.destination, destLog.add(log)),
       analysisByApplication: _insertByApplication(log, possibleApplications),
@@ -237,9 +253,13 @@ class SessionLogAnalysisState with _$SessionLogAnalysisState {
   @override
   final IList<String> destinationsSortedFiltered;
 
+  @override
   final VolumeType volumeType;
 
   bool get hasLogs => logs.notEmpty;
+
+  IList<TrafficLog> getLogByApplication(String? packageName) => logs.where((l) => l.packageName == packageName).toIList();
+  IList<TrafficLog> getLogByDestination(String destination) => logs.where((l) => l.destination == destination).toIList();
 
   Iterable<TrafficLogByApplication> listAnalysisByApplication() {
     return applicationsSortedFiltered

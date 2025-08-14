@@ -22,14 +22,14 @@ package eu.flutter.netguard.data;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.os.Handler;
-import android.os.Looper;
-
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import eu.flutter.netguard.utils.Log;
 import eu.flutter.netguard.flutter.NativeBridge.*;
@@ -39,13 +39,12 @@ public class DatabaseHelper {
 
     // TODO: seems to crash sometimes...
 
-    private final Handler queryHandler;
+    private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
     private final SQLiteDatabase db;
 
     public DatabaseHelper(String dbPath){
         assert(new File(dbPath).canWrite());
 
-        queryHandler = new Handler(Looper.getMainLooper());
         db = SQLiteDatabase.openDatabase(
                 dbPath,
                 null,
@@ -69,23 +68,36 @@ public class DatabaseHelper {
     private final SQLiteStatement genericBlacklistContainsIp;
 
     public boolean genericBlacklistContainsHost(String domain){
-        Log.i(TAG, "Check BlacklistHost for "+domain);
-        return runBlocking(() -> {
+        return queryBoolean(() -> {
             synchronized (genericBlacklistContainsHost) {
                 genericBlacklistContainsHost.clearBindings();
                 genericBlacklistContainsHost.bindString(1, domain);
                 return genericBlacklistContainsHost.simpleQueryForLong() != 0;
             }
         });
+//        return runBlocking(() -> {
+//            synchronized (genericBlacklistContainsHost) {
+//                genericBlacklistContainsHost.clearBindings();
+//                genericBlacklistContainsHost.bindString(1, domain);
+//                return genericBlacklistContainsHost.simpleQueryForLong() != 0;
+//            }
+//        });
     }
     public boolean genericBlacklistContainsIp(String ip){
-        return runBlocking(() ->{
+        return queryBoolean(() ->{
             synchronized (genericBlacklistContainsIp) {
                 genericBlacklistContainsIp.clearBindings();
                 genericBlacklistContainsIp.bindString(1, ip);
                 return genericBlacklistContainsIp.simpleQueryForLong() != 0;
             }
         });
+//        return runBlocking(() ->{
+//            synchronized (genericBlacklistContainsIp) {
+//                genericBlacklistContainsIp.clearBindings();
+//                genericBlacklistContainsIp.bindString(1, ip);
+//                return genericBlacklistContainsIp.simpleQueryForLong() != 0;
+//            }
+//        });
     }
 
     public List<ApplicationSetting> getApplicationSettings(List<String> packageNames){
@@ -167,26 +179,13 @@ public class DatabaseHelper {
         return rules;
     }
 
-    private interface QueryTask<T> {
-        T run();
-    }
-
-    private <T> T runBlocking(QueryTask<T> task) {
-        final Object[] result = new Object[1];
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        queryHandler.post(() -> {
-            result[0] = task.run();
-            latch.countDown();
-        });
-
+    private boolean queryBoolean(Callable<Boolean> query){
+        Future<Boolean> value = dbExecutor.submit(query);
         try {
-            latch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Blocking task was interrupted", e);
+            return value.get(); // Blocks here, but off the main thread
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+            return false;
         }
-
-        return (T) result[0];
     }
-
 }

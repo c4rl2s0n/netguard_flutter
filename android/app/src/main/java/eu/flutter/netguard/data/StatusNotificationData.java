@@ -45,10 +45,13 @@ public class StatusNotificationData {
     }
 
     private Bitmap getStatusChart(Context context, NativeBridge.SessionStatistics sessionStatistics){
-        int size = Util.dips2pixels(300, context);
+        Context uiContext = context.getApplicationContext()
+                .createConfigurationContext(context.getResources().getConfiguration());
+
+        int size = Util.dips2pixels(300, uiContext);
 
         // Create a LineChart (or PieChart, BarChart, etc.)
-        PieChart chart = new PieChart(context);
+        PieChart chart = new PieChart(uiContext);
 
         // Create entries
         List<PieEntry> entries = new ArrayList<>();
@@ -58,8 +61,8 @@ public class StatusNotificationData {
         // Create data set
         PieDataSet dataSet = new PieDataSet(entries, "Usage");
         dataSet.setColors(
-                Util.getColor(context, R.color.green),
-                Util.getColor(context, R.color.red)
+                Util.getColor(uiContext, R.color.green),
+                Util.getColor(uiContext, R.color.red)
         );
 
         // Optional styling

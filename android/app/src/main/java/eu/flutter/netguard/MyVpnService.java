@@ -13,6 +13,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.StrictMode;
 
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
@@ -131,8 +132,18 @@ public class MyVpnService extends VpnService implements VpnCommandExecutor{
         notification = new NotificationTools(this);
         startForeground(STATUS_NOTIFICATION_ID, notification.getWaitingNotification());
 
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectAll()  // detect disk/network/slow calls on main thread
+                .penaltyLog() // log to Logcat
+                .build());
+
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectAll()  // detect leaked closable objects, etc.
+                .penaltyLog()
+                .build());
+
+
         networkMonitor = new NetworkMonitor(this);
-        database = new DatabaseHelper(Values.Paths.database(this));
 
         // Setup Handler
         HandlerThread commandThread = new HandlerThread(getString(R.string.app_name) + " command", Process.THREAD_PRIORITY_FOREGROUND);
@@ -197,6 +208,7 @@ public class MyVpnService extends VpnService implements VpnCommandExecutor{
 
         Log.setLogLevel(vpnConfig.getLogLevel().intValue());
 
+        database = new DatabaseHelper(Values.Paths.database(this));
         applicationSettings = database.getApplicationSettings(vpnConfig.getFilteredPackages());
         // Keep awake
         WakeLock.getLock(this).acquire();
@@ -242,6 +254,8 @@ public class MyVpnService extends VpnService implements VpnCommandExecutor{
         notification.hideStatsNotification();
         logHandler.vpnStopped();
 
+        if(database != null) database.close();
+
         // release WakeLock
         WakeLock.releaseLock(this);
 
@@ -257,8 +271,6 @@ public class MyVpnService extends VpnService implements VpnCommandExecutor{
 
         commandHandler.quit();
         logHandler.quit();
-
-        if(database != null) database.close();
         super.onDestroy();
     }
 
