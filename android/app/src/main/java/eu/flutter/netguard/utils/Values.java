@@ -6,9 +6,6 @@ public class Values {
     public static class Paths{
         public static final String flutter_base = "app_flutter/netguard/";
         public static final String database = flutter_base + "/netguard.db";
-        public static String statsImage(Context context) {
-            return context.getCacheDir()+"/"+ "stats.png";
-        }
         public static String database(Context context) {
             return context.getApplicationInfo().dataDir+"/"+ database;
         }

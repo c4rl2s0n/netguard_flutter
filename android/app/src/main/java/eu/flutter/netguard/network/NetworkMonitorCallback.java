@@ -8,6 +8,8 @@ import android.net.NetworkInfo;
 import android.os.Build;
 
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -19,7 +21,7 @@ import eu.flutter.netguard.utils.Log;
 
 public  class NetworkMonitorCallback extends ConnectivityManager.NetworkCallback {
     private static final String TAG = "NetGuard.NetworkMonitor";
-    private Map<Network, Long> validated = new HashMap<>();
+    private final Map<Network, Long> validated = new HashMap<>();
 
     Context context;
     public NetworkMonitorCallback(Context context){
@@ -29,7 +31,7 @@ public  class NetworkMonitorCallback extends ConnectivityManager.NetworkCallback
     // https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java
 
     @Override
-    public void onAvailable(Network network) {
+    public void onAvailable(@NonNull Network network) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getNetworkInfo(network);
         NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
@@ -39,7 +41,7 @@ public  class NetworkMonitorCallback extends ConnectivityManager.NetworkCallback
     }
 
     @Override
-    public void onCapabilitiesChanged(Network network, NetworkCapabilities capabilities) {
+    public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities capabilities) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getNetworkInfo(network);
         Log.i(TAG, "New capabilities network " + network + " " + ni);
@@ -48,14 +50,14 @@ public  class NetworkMonitorCallback extends ConnectivityManager.NetworkCallback
     }
 
     @Override
-    public void onLosing(Network network, int maxMsToLive) {
+    public void onLosing(@NonNull Network network, int maxMsToLive) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getNetworkInfo(network);
         Log.i(TAG, "Losing network " + network + " within " + maxMsToLive + " ms " + ni);
     }
 
     @Override
-    public void onLost(Network network) {
+    public void onLost(@NonNull Network network) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getNetworkInfo(network);
         Log.i(TAG, "Lost network " + network + " " + ni);

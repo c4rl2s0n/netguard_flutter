@@ -28,6 +28,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.ColorRes;
 
@@ -36,9 +38,6 @@ import java.text.DecimalFormat;
 
 public class Util {
     private static final String TAG = "NetGuard.Util";
-
-
-
 
     private static native void dump_memory_profile();
 
@@ -60,6 +59,10 @@ public class Util {
         }
     }
 
+
+    public static void runOnUiThread(Runnable runnable){
+        new Handler(Looper.getMainLooper()).post(runnable);
+    }
 
     public static int getColor(Context context, @ColorRes int id){
         return context.getResources().getColor(id);

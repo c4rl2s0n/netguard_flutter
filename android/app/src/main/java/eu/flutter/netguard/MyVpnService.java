@@ -9,7 +9,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.VpnService;
 import android.os.Build;
-import android.os.Bundle;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -30,13 +30,16 @@ import eu.flutter.netguard.data.DatabaseHelper;
 import eu.flutter.netguard.data.IPKey;
 import eu.flutter.netguard.data.ModelBuilder;
 import eu.flutter.netguard.data.PersistenceCache;
+import eu.flutter.netguard.handler.CommandHandler;
+import eu.flutter.netguard.handler.LogHandler;
+import eu.flutter.netguard.interfaces.VpnCommandExecutor;
 import eu.flutter.netguard.network.NetworkMonitor;
 import eu.flutter.netguard.network.NetworkUtils;
 import eu.flutter.netguard.network.Protocols;
 import eu.flutter.netguard.utils.*;
 import eu.flutter.netguard.flutter.NativeBridge.*;
 
-public class MyVpnService extends VpnService {
+public class MyVpnService extends VpnService implements VpnCommandExecutor{
     static final String TAG = "NetGuard.VPNService";
 
     static {
@@ -66,6 +69,7 @@ public class MyVpnService extends VpnService {
     private static VpnConfig vpnConfig;
 
     NetworkMonitor networkMonitor;
+    private CommandHandler commandHandler;
     private LogHandler logHandler;
     private NotificationTools notification;
 
@@ -78,6 +82,8 @@ public class MyVpnService extends VpnService {
     private final Map<IPKey, Long> mapIPKeyUid = new HashMap<>();
     private final Map<IPKey, String> mapIPKeySni = new HashMap<>();
     private final Map<String, String> mapIpUidDomain = new HashMap<>();
+
+    private final int STATUS_NOTIFICATION_ID = 1;
 
     private List<ApplicationSetting> applicationSettings;
 
@@ -123,9 +129,15 @@ public class MyVpnService extends VpnService {
         Log.i(TAG, "Create version=" + Util.getSelfVersionName(this) + "/" + Util.getSelfVersionCode(this));
 
         notification = new NotificationTools(this);
-        startForeground(NotificationTools.WAITING, notification.getWaitingNotification());
+        startForeground(STATUS_NOTIFICATION_ID, notification.getWaitingNotification());
 
         networkMonitor = new NetworkMonitor(this);
+        database = new DatabaseHelper(Values.Paths.database(this));
+
+        // Setup Handler
+        HandlerThread commandThread = new HandlerThread(getString(R.string.app_name) + " command", Process.THREAD_PRIORITY_FOREGROUND);
+        commandThread.start();
+        commandHandler = new CommandHandler(MyVpnService.this, commandThread.getLooper(), this);
         logHandler = new LogHandler(this, Looper.getMainLooper());
 
         if (jni_context != 0) {
@@ -149,35 +161,7 @@ public class MyVpnService extends VpnService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) return START_STICKY;
-        Log.i(TAG, "onStartCommand...");
-
-        String action = intent.getAction();
-        if(action == null) action = "";
-
-        Log.i(TAG, "onStartCommand: "+action);
-
-        switch (action) {
-            case Values.Intent.Actions.START:
-                if(isRunning(this))
-                    reloadVpn();
-                else
-                    startVpn();
-                break;
-            case Values.Intent.Actions.RELOAD:
-                reloadVpn();
-                break;
-            case Values.Intent.Actions.STOP:
-                stopVpn();
-                break;
-            case Values.Intent.Actions.PUSH_STATS:
-                Bundle bundle = intent.getExtras();
-                if(bundle != null) {
-                    SessionStatistics sessionStatistics = ModelBuilder.SessionStatisticsFromBundle(bundle);
-                    updateStatsNotification(sessionStatistics);
-                }
-                break;
-        }
-
+        commandHandler.queue(intent);
         return START_STICKY;
     }
 
@@ -193,7 +177,7 @@ public class MyVpnService extends VpnService {
         }
     }
 
-    void updateStatsNotification(SessionStatistics sessionStatistics){
+    public void updateStatsNotification(SessionStatistics sessionStatistics){
         // Do not update statistic notification if VPN is not running
         if(vpnConfig == null || vpnConfig.getFinished()){
             notification.hideStatsNotification();
@@ -201,18 +185,17 @@ public class MyVpnService extends VpnService {
         }
         notification.updateStatsNotification(sessionStatistics);
     }
-    private void startVpn(){
+    public void startVpn(){
         if (vpnInterface != null) return;
 
-        startForeground(NotificationTools.WAITING, notification.getRunningNotification());
+        startForeground(STATUS_NOTIFICATION_ID, notification.getRunningNotification());
+
         Log.i(TAG, "Starting the VPN!");
 
         // load config from shared preferences
         vpnConfig = PersistenceCache.VpnConfig(PreferenceManager.getDefaultSharedPreferences(this));
 
         Log.setLogLevel(vpnConfig.getLogLevel().intValue());
-
-        database = new DatabaseHelper(Values.Paths.database(this));
 
         applicationSettings = database.getApplicationSettings(vpnConfig.getFilteredPackages());
         // Keep awake
@@ -238,14 +221,13 @@ public class MyVpnService extends VpnService {
         }
         SetIsRunning(false);
     }
-    private void reloadVpn(){
+    public void reloadVpn(){
         Log.i(TAG, "Restarting VPN");
         if(isRunning(this)) stopVpn();
         startVpn();
     }
-    private void stopVpn(){
+    public void stopVpn(){
         stopNative();
-        if(database != null) database.close();
         if (vpnInterface != null) {
             try {
                 vpnInterface.close();
@@ -258,11 +240,11 @@ public class MyVpnService extends VpnService {
 
         stopForeground(true);
         notification.hideStatsNotification();
+        logHandler.vpnStopped();
 
         // release WakeLock
         WakeLock.releaseLock(this);
 
-        logHandler.vpnStopped();
         Log.i(TAG, "VPN stopped");
         SetIsRunning(false);
     }
@@ -273,6 +255,10 @@ public class MyVpnService extends VpnService {
 
         stopVpn();
 
+        commandHandler.quit();
+        logHandler.quit();
+
+        if(database != null) database.close();
         super.onDestroy();
     }
 
@@ -390,14 +376,13 @@ public class MyVpnService extends VpnService {
             jni_stop(jni_context);
 
             Thread thread = tunnelThread;
-            while (thread != null && thread.isAlive()) {
+            if (thread != null && thread.isAlive()) {
                 try {
                     Log.i(TAG, "Joining tunnel thread context=" + jni_context);
                     thread.join();
                 } catch (InterruptedException ignored) {
                     Log.i(TAG, "Joined tunnel interrupted");
                 }
-                thread = tunnelThread;
             }
             tunnelThread = null;
 
@@ -461,14 +446,14 @@ public class MyVpnService extends VpnService {
         Log.w(TAG, "Native exit reason=" + reason);
         if (reason != null) {
             // TODO: showErrorNotification(reason);
-            logHandler.logError("[NATIVE EXIT]", reason, null);
+            logHandler.error("[NATIVE EXIT]", reason, null);
         }
     }
 
     // Called from native code
     private void nativeError(int error, String message) {
         Log.w(TAG, "Native error " + error + ": " + message);
-
+        logHandler.error("[NATIVE ERROR]", error+": "+message, null);
     }
 
     ///  TRAFFIC LOGGING

@@ -116,8 +116,10 @@ class SessionCubit extends Cubit<SessionState> {
     await vpnController.startVpn(vpnConfig);
 
     await trafficLogListener?.cancel();
-    trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
-    _notificationService.run();
+    if (vpnConfig.logTraffic || vpnConfig.observeOnly) {
+      trafficLogListener = vpnEventHandler.trafficLog.listen(_onTrafficLog);
+      _notificationService.run();
+    }
     state.sessionAnalysis.clear();
 
     emit(
@@ -137,15 +139,22 @@ class SessionCubit extends Cubit<SessionState> {
     await trafficLogListener?.cancel();
     trafficLogListener = null;
 
-    emit(state.copyWith(running: false, sessionStatistics: await loadGlobalStatistics()));
+    emit(
+      state.copyWith(
+        running: false,
+        sessionStatistics: await loadGlobalStatistics(),
+      ),
+    );
   }
 
   void setVpnState(bool running) => emit(state.copyWith(running: running));
 
   void _onTrafficLog(TrafficLog event) {
-    if(state.sessionStatistics is LiveSessionStatistics){
-      LiveSessionStatisticsExtension(state.sessionStatistics as LiveSessionStatistics).addLog(event);
-    }else{
+    if (state.sessionStatistics is LiveSessionStatistics) {
+      LiveSessionStatisticsExtension(
+        state.sessionStatistics as LiveSessionStatistics,
+      ).addLog(event);
+    } else {
       state.sessionStatistics.addLog(event);
     }
     state.sessionAnalysis.insert(event, state.applicationsMap);
